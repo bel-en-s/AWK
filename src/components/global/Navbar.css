@@ -1,0 +1,32 @@
+.nav {
+  position: absolute;
+  top: clamp(10px, 2.2vh, 22px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-6px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(14px, 2vw, 30px);
+  z-index: 4;
+  opacity: 0;
+  /* pointer-events: auto; */
+  will-change: transform, opacity;
+}
+
+.nav-item {
+  font-family: "WorkSansExtraBold", sans-serif;
+  font-size: clamp(12px, 1.1vw, 14px);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #000;
+  text-decoration: none;
+  padding: 10px 6px;
+  line-height: 1;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform, opacity, filter;
+}
+
+.nav-item:hover {
+  opacity: 0.72;
+}

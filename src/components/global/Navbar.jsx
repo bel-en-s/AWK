@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
-import "./NavBar.css";
+import "./Navbar.css";
 
 export default function NavBar({ show = true }) {
   const rootRef = useRef(null);

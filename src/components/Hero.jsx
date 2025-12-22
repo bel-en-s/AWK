@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import CursorLanding from "./global/CursorLanding";
-import NavBar from "./global/NavBar";
+import NavBar from "./global/Navbar";
 import "./Hero.css";
 
 export default function Hero() {

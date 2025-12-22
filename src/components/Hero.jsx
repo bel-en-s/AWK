@@ -8,9 +8,11 @@ export default function Hero() {
   const [showCursor, setShowCursor] = useState(false);
   const [showNav, setShowNav] = useState(false);
 
+  const heroRef = useRef(null);
   const cursorWrapRef = useRef(null);
   const titleRef = useRef(null);
   const copyRef = useRef(null);
+  const talkRef = useRef(null);
 
   useEffect(() => {
     const already = !!window.__AWK_LOADED__;
@@ -76,7 +78,14 @@ export default function Hero() {
       tl.fromTo(
         wrap,
         { autoAlpha: 0, scale: 0.9, y: 10, filter: "blur(10px)" },
-        { autoAlpha: 1, scale: 1, y: 0, filter: "blur(0px)", duration: 0.8, ease: "power3.out" },
+        {
+          autoAlpha: 1,
+          scale: 1,
+          y: 0,
+          filter: "blur(0px)",
+          duration: 0.8,
+          ease: "power3.out",
+        },
         0
       )
         .to(
@@ -100,18 +109,112 @@ export default function Hero() {
     return () => ctx.revert();
   }, [showCursor]);
 
+  useLayoutEffect(() => {
+    if (!showNav) return;
+
+    const heroEl = heroRef.current;
+    if (!heroEl) return;
+
+    const navCenter = document.querySelector(".nav .nav-center");
+    if (!navCenter) return;
+
+    const apply = () => {
+      const r = navCenter.getBoundingClientRect();
+      const cx = r.left + r.width / 2;
+      heroEl.style.setProperty("--hero-center-x", `${cx}px`);
+    };
+
+    apply();
+    const ro = new ResizeObserver(apply);
+    ro.observe(navCenter);
+
+    window.addEventListener("resize", apply);
+    const raf = requestAnimationFrame(apply);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("resize", apply);
+      ro.disconnect();
+    };
+  }, [showNav]);
+
+  useLayoutEffect(() => {
+    const el = talkRef.current;
+    if (!el) return;
+
+    const prefersReduced =
+      window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+
+    const ctx = gsap.context(() => {
+      gsap.set(el, {
+        rotateZ: -8,
+        transformOrigin: "50% 50%",
+        willChange: "transform",
+        force3D: true,
+      });
+
+      let wiggle = null;
+
+      const enter = () => {
+        if (prefersReduced) return;
+
+        gsap.to(el, {
+          rotateZ: 6,
+          duration: 0.32,
+          ease: "expo.out",
+          overwrite: "auto",
+        });
+
+        wiggle?.kill();
+        wiggle = gsap.to(el, {
+          rotateZ: -6,
+          duration: 0.75,
+          ease: "sine.inOut",
+          yoyo: true,
+          repeat: -1,
+          overwrite: "auto",
+        });
+      };
+
+      const leave = () => {
+        if (prefersReduced) return;
+
+        wiggle?.kill();
+        wiggle = null;
+
+        gsap.to(el, {
+          rotateZ: -8,
+          duration: 0.55,
+          ease: "expo.out",
+          overwrite: "auto",
+        });
+      };
+
+      el.addEventListener("pointerenter", enter);
+      el.addEventListener("pointerleave", leave);
+
+      return () => {
+        el.removeEventListener("pointerenter", enter);
+        el.removeEventListener("pointerleave", leave);
+        wiggle?.kill();
+      };
+    });
+
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <section className="hero">
+    <section ref={heroRef} className="hero">
       {showNav && <NavBar show={showNav} />}
 
-      {showCursor && (
-        <div ref={cursorWrapRef} className="cursor-landing-wrap">
-          <CursorLanding />
-        </div>
-      )}
+   {showCursor && (
+    <div ref={cursorWrapRef} className="cursor-landing-wrap">
+      <CursorLanding activeAreaRef={heroRef} eyesOnlyInside />
+    </div>
+  )}
 
       <div className="hero-content">
-        <h1 ref={titleRef} className="hero-title" aria-label="AWAKE">
+        <h1 ref={titleRef}  data-cursor="invert" className="hero-title" aria-label="AWAKE">
           {"AWAKE".split("").map((ch, i) => (
             <span key={i} className="hero-title-letter" aria-hidden="true">
               {ch}
@@ -127,17 +230,16 @@ export default function Hero() {
         aria-label="Awake intro"
         tabIndex={0}
       >
-        <div className="hero-copy-title">AWAKE</div>
         <p className="hero-copy-text">
-          Awake™ is a digital product studio crafting memorable customer experiences.
+          Awake™ is a digital product studio crafting memorable customer
+          experiences.
         </p>
       </div>
 
-      <a className="hero-talk" href="#contact" aria-label="Let's talk">
-        LET&apos;S
-        <br />
-        TALK
-      </a>
+     <a ref={talkRef} className="hero-talk" href="#contact" aria-label="Let's talk">
+  LET&apos;S TALK
+</a>
+
     </section>
   );
 }

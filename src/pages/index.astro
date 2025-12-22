@@ -1,10 +1,12 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import Hero from "../components/Hero.jsx";
 import Loader from "../components/global/Loader.jsx";
+import Hero from "../components/Hero.jsx";
+import Services from "../components/Services.jsx";
 ---
 
 <Layout title="Landing AWK" desc="Landing animada con Astro + React + GSAP">
- <Loader client:load />
+  <Loader client:load />
   <Hero client:load />
+  <Services client:load />
 </Layout>

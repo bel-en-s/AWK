@@ -1,3 +1,5 @@
+
+
 @font-face {
   font-family: "VinaSans";
   src: url("../assets/fonts/VinaSans-Regular.ttf") format("truetype");
@@ -6,44 +8,136 @@
   font-display: swap;
 }
 
+.awk-cursor-contrast{
+  opacity: 1;
+  filter:
+    drop-shadow(0 0 8px rgba(255,255,255,0.25))
+    drop-shadow(0 0 1px rgba(0,0,0,0.35));
+  transform: translateZ(0);
+}
+
+.awk-cursor-invert{
+  filter:
+    invert(1)
+    drop-shadow(0 0 8px rgba(255,255,255,0.25))
+    drop-shadow(0 0 1px rgba(0,0,0,0.35));
+}
+
+
+@font-face {
+  font-family: "WorkSans";
+  src: url("../assets/fonts/WorkSans-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* (Optional) Google font */
+@import url("https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap");
+
+/* ============================================================
+   ROOT TOKENS
+============================================================ */
 :root {
-  --blue: #0000FF;
+  --blue: #0000ff;
   --secondary-color: #4b5563;
-  --background: #EBE8E3;
+  --background: #ebe8e3;
   --text-color: #000000;
 
   --font-stretch: 140%;
   --font-scale-x: 1.35;
 
   --font-main: "VinaSans", sans-serif;
+  --font-alt: "WorkSans", system-ui, sans-serif;
+
+  --cursor-normal: url("/AWK/images/cursor.svg") 0 0;
+  --cursor-small: url("/AWK/images/cursor-small.svg") 0 0;
+  --cursor-blue: url("/AWK/images/cursor-blue.svg") 0 0;
+}
+
+/* ============================================================
+   BASE
+============================================================ */
+html {
+  scroll-behavior: auto;
 }
 
 html,
 body {
   margin: 0;
   padding: 0;
-  background: var(--background);
   width: 100%;
   height: 100%;
+
+  background: var(--background);
   font-family: var(--font-main);
   font-weight: 400;
   font-style: normal;
+
   font-kerning: normal;
   text-rendering: geometricPrecision;
   -webkit-font-smoothing: antialiased;
 
-  cursor: url("/AWK/images/cursor.svg") 0 0, auto;
+  overflow-x: hidden;
+  cursor: var(--cursor-normal), auto;
 }
 
+/* ============================================================
+   CURSOR OVERRIDES
+============================================================ */
+html.awk-cursor-none,
+html.awk-cursor-none body,
+html.awk-cursor-none * {
+  cursor: none !important;
+}
+
+html.cursor-small,
+html.cursor-small body {
+  cursor: var(--cursor-small), auto;
+}
+
+html.cursor-blue,
+html.cursor-blue body {
+  cursor: var(--cursor-blue), auto;
+}
+
+/* Hereda cursor del body (evita jumps en hover/active/focus) */
 a,
 button,
 input,
 textarea,
 select,
-[role="button"] {
-  cursor: url("/AWK/images/cursor.svg") 0 0, pointer;
+[role="button"],
+a:hover,
+button:hover,
+input:hover,
+textarea:hover,
+select:hover,
+[role="button"]:hover,
+a:active,
+button:active,
+input:active,
+textarea:active,
+select:active,
+[role="button"]:active,
+a:focus,
+button:focus,
+input:focus,
+textarea:focus,
+select:focus,
+[role="button"]:focus,
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[role="button"]:focus-visible {
+  cursor: inherit;
 }
 
+/* ============================================================
+   HELPERS / OVERLAY
+============================================================ */
 .stretch {
   display: inline-block;
   transform: scaleX(var(--font-scale-x));
@@ -55,33 +149,7 @@ select,
   inset: 0;
   pointer-events: none;
   overflow: visible;
-  isolation: isolate;
+  /* isolation: isolate; */
   z-index: 2147483647;
 }
 
-
-:root{
-  --cursor-normal: url("/AWK/images/cursor.svg") 0 0;
-  --cursor-small:  url("/AWK/images/cursor-small.svg") 0 0;
-  --cursor-blue:   url("/AWK/images/cursor-blue.svg") 0 0;
-}
-
-html, body {
-  cursor: var(--cursor-normal), auto;
-}
-
-html.cursor-small, html.cursor-small body {
-  cursor: var(--cursor-small), auto;
-}
-
-html.cursor-blue, html.cursor-blue body {
-  cursor: var(--cursor-blue), auto;
-}
-
-a, button, input, textarea, select, [role="button"],
-a:hover, button:hover, input:hover, textarea:hover, select:hover, [role="button"]:hover,
-a:active, button:active, input:active, textarea:active, select:active, [role="button"]:active,
-a:focus, button:focus, input:focus, textarea:focus, select:focus, [role="button"]:focus,
-a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, [role="button"]:focus-visible {
-  cursor: inherit;
-}

@@ -1,12 +1,22 @@
+---
+const { title, desc } = Astro.props;
+---
+
 <html lang="es">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="/src/styles/global.css" />
-    <title>{Astro.props.title || "AWAKE Landing"}</title>
+    <title>{title || "AWAKE Landing"}</title>
+    {desc ? <meta name="description" content={desc} /> : null}
   </head>
 
   <body>
     <slot />
+
+    <script type="module">
+      import { initLenis } from "/src/scripts/initLenis.js";
+      initLenis();
+    </script>
   </body>
 </html>

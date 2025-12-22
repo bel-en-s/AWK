@@ -4,39 +4,41 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
+let _lenis = null;
+
 export function initLenis() {
+  if (_lenis) return _lenis;
+
   const lenis = new Lenis({
-    duration: 1.3,
-    smooth: true,
-    easing: (t) => 1 - Math.pow(1 - t, 3),
+    // más suave = más duración
+    duration: 1.9,
+
+    // wheel
+    smoothWheel: true,
+    wheelMultiplier: 0.85,
+
+    // touch
+    smoothTouch: false,
+    touchMultiplier: 1.0,
+
+    // easing más “cremosa”
+    easing: (t) => 1 - Math.pow(1 - t, 4),
   });
 
-  // Sync Lenis with GSAP
-  function raf(time) {
-    lenis.raf(time);
-    requestAnimationFrame(raf);
-  }
+  // RAF con GSAP ticker (más estable con GSAP + ScrollTrigger)
+  gsap.ticker.add((time) => {
+    lenis.raf(time * 1000);
+  });
+  gsap.ticker.lagSmoothing(0);
 
-  requestAnimationFrame(raf);
-
-  // 🔥 CRUCIAL: conectar Lenis con ScrollTrigger
+  // sync con ScrollTrigger
   lenis.on("scroll", ScrollTrigger.update);
 
-  ScrollTrigger.scrollerProxy(document.body, {
-    scrollTop(value) {
-      if (value !== undefined) {
-        lenis.scrollTo(value, { immediate: true });
-      }
-      return lenis.scroll;
-    },
-    getBoundingClientRect() {
-      return { top: 0, left: 0, width: window.innerWidth, height: window.innerHeight };
-    },
-  });
+  // refresh al cargar (y cuando pinnea cosas)
+  ScrollTrigger.addEventListener("refresh", () => lenis.resize());
+  ScrollTrigger.refresh();
 
-  ScrollTrigger.defaults({
-    scroller: document.body,
-  });
-
+  _lenis = lenis;
+  window.lenis = lenis; // debug opcional
   return lenis;
 }

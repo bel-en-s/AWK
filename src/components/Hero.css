@@ -6,29 +6,23 @@
 .hero-content {
   position: absolute;
   top: clamp(18px, 3.2vh, 42px);
+
   left: 50%;
   transform: translateX(-50%);
+
   z-index: 3;
-  width: 100%;
+  width: min(1120px, calc(100vw - 2 * clamp(16px, 3.6vw, 48px)));
   display: flex;
   justify-content: center;
   pointer-events: none;
 }
 
 .hero-title {
-  opacity: 0;
-  display: inline-flex;
-  gap: 0.02em;
-  font-family: var(--font-main, "VinaSans", sans-serif);
-  font-size: clamp(70px, 11vw, 180px);
-  line-height: 0.86;
-  letter-spacing: -0.02em;
-  color: #000;
-  transform: translateZ(0);
-  backface-visibility: hidden;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: geometricPrecision;
+ font-weight: 200;
 }
+
+
+
 
 .hero-title-letter {
   display: inline-block;
@@ -48,7 +42,7 @@
   background: #000;
   color: #fff;
 
-  
+  width: 300px;
   padding: 18px 18px 16px;
   box-shadow: 0 18px 60px rgba(0, 0, 0, 0.18);
   z-index: 3;
@@ -56,19 +50,22 @@
 }
 
 
-.hero-copy-text {
+.hero-copy-text{
   margin: 0;
-  font-family: var(--font-main, "VinaSans", sans-serif);
-  font-size: 14px;
+  font-family: var(--font-alt);
+  font-weight: 500;
+  font-size: 25px;
   line-height: 1.35;
   letter-spacing: 0.01em;
   opacity: 0.9;
+  text-decoration: underline;
 }
+
 
 .hero-talk {
   position: absolute;
   right: clamp(16px, 3vw, 36px);
-  bottom: clamp(16px, 3vh, 36px);
+  bottom: clamp(506px, 3vh, 36px);
   width: clamp(78px, 8vw, 110px);
   height: clamp(78px, 8vw, 110px);
   display: grid;
@@ -76,10 +73,13 @@
   background: var(--blue);
   color: #fff;
   text-decoration: none;
-  border-radius: 14px;
+
+      width: 200px;
+    height: 80px;
+
   box-shadow: 0 18px 60px rgba(0, 0, 0, 0.22);
   font-family: var(--font-main, "VinaSans", sans-serif);
-  font-size: 12px;
+  font-size: 22px;
   letter-spacing: 0.16em;
   line-height: 1.05;
   text-transform: uppercase;
@@ -91,16 +91,19 @@
   transition: transform 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.hero-talk:hover {
+/* .hero-talk:hover {
   transform: translateZ(0) rotateZ(8deg);
   animation: heroTalkWobble 0.85s cubic-bezier(0.2, 0.8, 0.2, 1) infinite alternate;
 }
 
 .hero-talk:active {
   transform: translateZ(0) rotateZ(4deg) scale(0.98);
-}
+} */
 
-@keyframes heroTalkWobble {
+/* @keyframes heroTalkWobble {
   0% { transform: translateZ(0) rotateZ(8deg); }
   100% { transform: translateZ(0) rotateZ(-8deg); }
-}
+} */
+
+/* .hero-talk { transition: none !important; animation: none !important; }
+.hero-talk:hover { transform: translateZ(0) rotateZ(-8deg) !important; animation: none !important; } */

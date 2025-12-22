@@ -1,10 +1,6 @@
 import { useLayoutEffect, useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import ServiceCard from "./ServiceCard";
 import "./Services.css";
-
-gsap.registerPlugin(ScrollTrigger);
 
 export default function Services() {
   const rootRef = useRef(null);
@@ -13,61 +9,85 @@ export default function Services() {
     const root = rootRef.current;
     if (!root) return;
 
-    const prefersReduced =
-      window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    if (typeof window === "undefined") return;
 
-    const ctx = gsap.context(() => {
-      const track = root.querySelector(".svc-track");
-      const row = root.querySelector(".svc-row");
-      if (!track || !row) return;
+    let ctx;
+    let ro;
+    let refreshInitHandler;
 
-      const getDistance = () => Math.max(0, row.scrollWidth - track.clientWidth);
+    (async () => {
+      const gsapMod = await import("gsap");
+      const stMod = await import("gsap/ScrollTrigger");
 
-      const build = () => {
-        ScrollTrigger.getAll()
-          .filter((st) => st?.vars?.id === "services-pin")
-          .forEach((st) => st.kill());
+      const gsap = gsapMod.gsap || gsapMod.default || gsapMod;
+      const ScrollTrigger =
+        stMod.ScrollTrigger || stMod.default || stMod;
 
-        gsap.set(row, { x: 0 });
+      gsap.registerPlugin(ScrollTrigger);
 
-        const dist = getDistance();
-        if (prefersReduced || dist <= 0) return;
+      const prefersReduced =
+        window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
 
-        const tween = gsap.to(row, { x: -dist, ease: "none" });
+      ctx = gsap.context(() => {
+        const track = root.querySelector(".svc-track");
+        const row = root.querySelector(".svc-row");
+        if (!track || !row) return;
 
-        ScrollTrigger.create({
-          id: "services-pin",
-          trigger: root,
-          start: "top top",
-          end: () => `+=${dist}`,
-          pin: true,
-          scrub: 1,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-          animation: tween,
-        });
-      };
+        const getDistance = () => Math.max(0, row.scrollWidth - track.clientWidth);
 
-      build();
-      ScrollTrigger.addEventListener("refreshInit", () => gsap.set(row, { x: 0 }));
-      ScrollTrigger.refresh();
+        const killPin = () => {
+          ScrollTrigger.getAll()
+            .filter((st) => st?.vars?.id === "services-pin")
+            .forEach((st) => st.kill());
+        };
 
-      const ro = new ResizeObserver(() => {
+        const build = () => {
+          killPin();
+          gsap.set(row, { x: 0 });
+
+          const dist = getDistance();
+          if (prefersReduced || dist <= 0) return;
+
+          const tween = gsap.to(row, { x: -dist, ease: "none" });
+
+          ScrollTrigger.create({
+            id: "services-pin",
+            trigger: root,
+            start: "top top",
+            end: () => `+=${dist}`,
+            pin: true,
+            scrub: 1,
+            anticipatePin: 1,
+            invalidateOnRefresh: true,
+            animation: tween,
+          });
+        };
+
         build();
+
+        refreshInitHandler = () => gsap.set(row, { x: 0 });
+        ScrollTrigger.addEventListener("refreshInit", refreshInitHandler);
         ScrollTrigger.refresh();
-      });
-      ro.observe(track);
-      ro.observe(row);
 
-      return () => {
-        ro.disconnect();
-        ScrollTrigger.getAll()
-          .filter((st) => st?.vars?.id === "services-pin")
-          .forEach((st) => st.kill());
-      };
-    }, root);
+        ro = new ResizeObserver(() => {
+          build();
+          ScrollTrigger.refresh();
+        });
+        ro.observe(track);
+        ro.observe(row);
 
-    return () => ctx.revert();
+        return () => {
+          ro?.disconnect();
+          ScrollTrigger.removeEventListener("refreshInit", refreshInitHandler);
+          killPin();
+        };
+      }, root);
+    })();
+
+    return () => {
+      ro?.disconnect();
+      ctx?.revert();
+    };
   }, []);
 
   const cards = [
@@ -96,7 +116,6 @@ export default function Services() {
   return (
     <section ref={rootRef} className="svc" id="service" aria-label="Services">
       <div className="svc-inner">
-        {/* Columna fija (NO scrollea) */}
         <div className="svc-fixed" aria-label="Intro card">
           <div className="svc-fixedCard">
             <p className="svc-fixedText">
@@ -113,16 +132,10 @@ export default function Services() {
           </div>
         </div>
 
-        {/* Track scrolleable horizontal */}
         <div className="svc-track" aria-label="Services horizontal track">
           <div className="svc-row">
             {cards.map((c) => (
-              <ServiceCard
-                key={c.title}
-                title={c.title}
-                items={c.items}
-                href={c.href}
-              />
+              <ServiceCard key={c.title} title={c.title} items={c.items} href={c.href} />
             ))}
           </div>
         </div>

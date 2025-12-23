@@ -1,4 +1,7 @@
 ---
+import "../styles/global.css";
+import { initLenis } from "../scripts/initLenis.js";
+
 const { title, desc } = Astro.props;
 ---
 
@@ -6,7 +9,6 @@ const { title, desc } = Astro.props;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="/src/styles/global.css" />
     <title>{title || "AWAKE Landing"}</title>
     {desc ? <meta name="description" content={desc} /> : null}
   </head>
@@ -14,9 +16,9 @@ const { title, desc } = Astro.props;
   <body>
     <slot />
 
-    <script type="module">
-      import { initLenis } from "/src/scripts/initLenis.js";
-      initLenis();
+    <script type="module" is:inline>
+      // initLenis importado por Astro arriba, queda disponible acá:
+      ({ initLenis }).initLenis();
     </script>
   </body>
 </html>

@@ -1,71 +1,41 @@
+import { useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
 import "./Loader.css";
-import { useLayoutEffect, useRef } from "react";
 
 export default function Loader() {
   const rootRef = useRef(null);
-  const lockRef = useRef({ sbw: 0 });
 
   useLayoutEffect(() => {
     const root = rootRef.current;
     if (!root) return;
 
     const title = root.querySelector(".loader-title");
-    const letters = Array.from(root.querySelectorAll(".letter"));
+    const letters = Array.from(root.querySelectorAll(".loader-letter"));
     const removed = letters.filter((el) => el.dataset.remove === "1");
     const keep = letters.filter((el) => el.dataset.remove !== "1");
 
     const prefersReduced =
-      typeof window !== "undefined" &&
-      window.matchMedia &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
 
     const rects = (els) => els.map((el) => el.getBoundingClientRect());
-
-    const lockScroll = () => {
-      const sbw = window.innerWidth - document.documentElement.clientWidth;
-      lockRef.current.sbw = sbw;
-
-      document.documentElement.style.overflow = "hidden";
-      document.body.style.overflow = "hidden";
-      if (sbw > 0) document.body.style.paddingRight = `${sbw}px`;
-
-      const l = window.lenis || window.__lenis;
-      if (l && typeof l.stop === "function") l.stop();
-    };
-
-    const unlockScroll = () => {
-      document.documentElement.style.overflow = "";
-      document.body.style.overflow = "";
-      document.body.style.paddingRight = "";
-
-      const l = window.lenis || window.__lenis;
-      if (l && typeof l.start === "function") l.start();
-    };
-
-    lockScroll();
 
     const done = () => {
       window.__AWK_LOADED__ = true;
       window.dispatchEvent(new Event("awk:loaded"));
-      gsap.set(root, { pointerEvents: "none" });
-      unlockScroll();
+      // ocultar sin tocar scroll
+      gsap.set(root, { autoAlpha: 0, pointerEvents: "none" });
     };
 
     const run = () => {
-      gsap.set(root, {
-        autoAlpha: 1,
-        pointerEvents: "auto",
-        scaleY: 1,
-        transformOrigin: "50% 0%",
-        force3D: true,
-      });
+      gsap.set(root, { autoAlpha: 1, pointerEvents: "auto" });
 
       gsap.set(title, {
         "--gap": "0.16em",
         rotateX: -18,
         y: 8,
         filter: "blur(10px)",
+        transformPerspective: 900,
+        transformOrigin: "50% 50%",
         force3D: true,
       });
 
@@ -83,16 +53,9 @@ export default function Loader() {
       gsap.set(letters, { backfaceVisibility: "hidden" });
 
       if (prefersReduced) {
-        gsap.set(letters, {
-          autoAlpha: 1,
-          y: 0,
-          x: 0,
-          rotateX: 0,
-          rotateY: 0,
-          filter: "blur(0px)",
-        });
         removed.forEach((el) => (el.style.display = "none"));
-        gsap.set(root, { autoAlpha: 0, pointerEvents: "none" });
+        gsap.set(title, { rotateX: 0, y: 0, filter: "blur(0px)" });
+        gsap.set(keep, { autoAlpha: 1, x: 0, y: 0, rotateX: 0, filter: "blur(0px)" });
         done();
         return { kill: () => {} };
       }
@@ -120,7 +83,7 @@ export default function Loader() {
         .to(title, { "--gap": "0.095em", duration: 0.9, ease: "expo.inOut" }, 0.15)
         .to(title, { scale: 1.02, duration: 0.35, ease: "power2.out" }, 0.6)
         .to(title, { scale: 1, duration: 0.7, ease: "expo.out" }, 0.85)
-        .to({}, { duration: 0.45 })
+        .to({}, { duration: 0.35 })
         .to(removed, {
           autoAlpha: 0,
           x: 70,
@@ -167,9 +130,9 @@ export default function Loader() {
           },
           "+=0.02"
         )
-        .to({}, { duration: 0.26 })
+        .to({}, { duration: 0.18 })
         .to(title, { y: -22, filter: "blur(6px)", duration: 0.55, ease: "power3.inOut" }, "+=0.02")
-        .to(root, { scaleY: 0, duration: 1.05, ease: "power4.inOut" }, "<+=0.08")
+        .to(root, { scaleY: 0, duration: 1.05, ease: "power4.inOut", transformOrigin: "50% 0%" }, "<+=0.08")
         .to(root, { autoAlpha: 0, duration: 0.18, ease: "none" }, "<+=0.86");
 
       return tl;
@@ -178,10 +141,11 @@ export default function Loader() {
     let killed = false;
     let tl = null;
 
+    // Espera fuentes si existe (no bloquea scroll)
     const fontsReady = (() => {
       const f = document.fonts;
-      if (!f || !f.load) return Promise.resolve();
-      return Promise.allSettled([f.load('400 1em "VinaSans"'), f.ready]);
+      if (!f?.ready) return Promise.resolve();
+      return f.ready.catch(() => {});
     })();
 
     fontsReady.then(() => {
@@ -191,23 +155,19 @@ export default function Loader() {
 
     return () => {
       killed = true;
-      if (tl && typeof tl.kill === "function") tl.kill();
-      unlockScroll();
+      if (tl?.kill) tl.kill();
+      gsap.set(root, { autoAlpha: 0, pointerEvents: "none" });
     };
   }, []);
 
   return (
-    <div ref={rootRef} className="loader">
-      <div className="loader-title" aria-label="AWK">
-        <span className="letter">A</span>
-        <span className="letter">W</span>
-        <span className="letter" data-remove="1">
-          A
-        </span>
-        <span className="letter">K</span>
-        <span className="letter" data-remove="1">
-          E
-        </span>
+    <div ref={rootRef} className="loader" aria-hidden="true">
+      <div className="loader-title" aria-label="AWAKE">
+        <span className="loader-letter">A</span>
+        <span className="loader-letter">W</span>
+        <span className="loader-letter" data-remove="1">A</span>
+        <span className="loader-letter">K</span>
+        <span className="loader-letter" data-remove="1">E</span>
       </div>
     </div>
   );

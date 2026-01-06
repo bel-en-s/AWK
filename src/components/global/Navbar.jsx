@@ -1,3 +1,4 @@
+// NavBar.jsx
 import { useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
 import "./Navbar.css";
@@ -6,16 +7,24 @@ export default function NavBar({ show = true }) {
   const rootRef = useRef(null);
 
   useLayoutEffect(() => {
+
+    
     if (!show) return;
 
     const root = rootRef.current;
     if (!root) return;
 
     const animItems = Array.from(root.querySelectorAll(".nav-anim"));
+    const tiltEls = Array.from(root.querySelectorAll(".nav-chip, .nav-cta"));
 
     const prefersReduced =
       window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
 
+    const cleanups = [];
+
+    // =========================
+    // Intro animation
+    // =========================
     const ctx = gsap.context(() => {
       gsap.set(root, { autoAlpha: 1 });
 
@@ -40,10 +49,43 @@ export default function NavBar({ show = true }) {
             duration: 0.62,
             ease: "expo.out",
             keyframes: [
-              { y: -26, x: -6, rotateZ: -2, autoAlpha: 0, filter: "blur(14px)", duration: 0 },
-              { y: 6, x: 1, rotateZ: 0.6, autoAlpha: 1, filter: "blur(3px)", duration: 0.22, ease: "power2.out" },
-              { y: -2, x: 0, rotateZ: -0.25, filter: "blur(1px)", duration: 0.16, ease: "sine.inOut" },
-              { y: 0, x: 0, rotateZ: 0, filter: "blur(0px)", duration: 0.24, ease: "expo.out" },
+              {
+                y: -26,
+                x: -6,
+                rotateZ: -2,
+                rotateX: -35,
+                autoAlpha: 0,
+                filter: "blur(14px)",
+                duration: 0,
+              },
+              {
+                y: 6,
+                x: 1,
+                rotateZ: 0.6,
+                rotateX: -10,
+                autoAlpha: 1,
+                filter: "blur(3px)",
+                duration: 0.22,
+                ease: "power2.out",
+              },
+              {
+                y: -2,
+                x: 0,
+                rotateZ: -0.25,
+                rotateX: -4,
+                filter: "blur(1px)",
+                duration: 0.16,
+                ease: "sine.inOut",
+              },
+              {
+                y: 0,
+                x: 0,
+                rotateZ: 0,
+                rotateX: 0,
+                filter: "blur(0px)",
+                duration: 0.24,
+                ease: "expo.out",
+              },
             ],
           },
           i * 0.18
@@ -53,11 +95,13 @@ export default function NavBar({ show = true }) {
       return () => tl.kill();
     }, root);
 
-    const tiltEls = Array.from(root.querySelectorAll(".nav-chip, .nav-cta"));
-    const cleanups = [];
-
-    const addHoverClass = () => document.documentElement.classList.add("nav-hover");
-    const removeHoverClass = () => document.documentElement.classList.remove("nav-hover");
+    // =========================
+    // html hover class
+    // =========================
+    const addHoverClass = () =>
+      document.documentElement.classList.add("nav-hover");
+    const removeHoverClass = () =>
+      document.documentElement.classList.remove("nav-hover");
 
     root.addEventListener("pointerenter", addHoverClass);
     root.addEventListener("pointerleave", removeHoverClass);
@@ -67,84 +111,81 @@ export default function NavBar({ show = true }) {
       root.removeEventListener("pointerleave", removeHoverClass);
     });
 
-    tiltEls.forEach((el) => {
+    // =========================
+    // Tilt hover (tipo talkRef: enter / leave)
+    // =========================
+    tiltEls.forEach((el, idx) => {
+      const dir = idx % 2 === 0 ? -1 : 1; // alterna izq/der
+      const BASE = 8; // grados base del tilt
+      const baseRot = dir * BASE;
+
+      let wiggle = null;
+
+      // base estable
       gsap.set(el, {
-        transformPerspective: 900,
-        transformStyle: "preserve-3d",
-        transformOrigin: "50% 50%",
+        rotateZ: 0,
         rotateX: 0,
         rotateY: 0,
         scale: 1,
+        transformOrigin: "50% 50%",
         willChange: "transform",
         force3D: true,
       });
 
-      const rotX = gsap.quickTo(el, "rotateX", {
-        duration: 0.22,
-        ease: "expo.out",
-        overwrite: "auto",
-      });
-      const rotY = gsap.quickTo(el, "rotateY", {
-        duration: 0.22,
-        ease: "expo.out",
-        overwrite: "auto",
-      });
-      const scl = gsap.quickTo(el, "scale", {
-        duration: 0.18,
-        ease: "power3.out",
-        overwrite: "auto",
-      });
-
-      let active = false;
-
-      const onEnter = () => {
-        active = true;
+      const enter = () => {
         if (prefersReduced) return;
-        scl(1.02);
+
+        // tilt inmediato suave
+        gsap.to(el, {
+          rotateZ: baseRot,
+          scale: 1.03,
+          y: -1,
+          duration: 0.32,
+          ease: "expo.out",
+          overwrite: "auto",
+        });
+
+        // micro “respiración” opcional (muy sutil)
+        wiggle?.kill();
+        wiggle = gsap.to(el, {
+          rotateZ: baseRot + dir * 2,
+          duration: 0.85,
+          ease: "sine.inOut",
+          yoyo: true,
+          repeat: -1,
+          overwrite: "auto",
+        });
       };
 
-      const onMove = (e) => {
-        if (!active || prefersReduced) return;
-
-        const r = el.getBoundingClientRect();
-        const px = (e.clientX - r.left) / r.width;
-        const py = (e.clientY - r.top) / r.height;
-        const dx = px - 0.5;
-        const dy = py - 0.5;
-
-        const MAX_Y = 10;
-        const MAX_X = 8;
-
-        rotY(dx * MAX_Y);
-        rotX(-dy * MAX_X);
-      };
-
-      const onLeave = () => {
-        active = false;
+      const leave = () => {
         if (prefersReduced) return;
+
+        wiggle?.kill();
+        wiggle = null;
 
         gsap.to(el, {
+          rotateZ: 0,
           rotateX: 0,
           rotateY: 0,
           scale: 1,
+          y: 0,
           duration: 0.55,
           ease: "expo.out",
           overwrite: "auto",
         });
       };
 
-      el.addEventListener("pointerenter", onEnter);
-      el.addEventListener("pointermove", onMove);
-      el.addEventListener("pointerleave", onLeave);
-      el.addEventListener("focus", onEnter);
-      el.addEventListener("blur", onLeave);
+      el.addEventListener("pointerenter", enter);
+      el.addEventListener("pointerleave", leave);
+      el.addEventListener("focus", enter);
+      el.addEventListener("blur", leave);
 
       cleanups.push(() => {
-        el.removeEventListener("pointerenter", onEnter);
-        el.removeEventListener("pointermove", onMove);
-        el.removeEventListener("pointerleave", onLeave);
-        el.removeEventListener("focus", onEnter);
-        el.removeEventListener("blur", onLeave);
+        el.removeEventListener("pointerenter", enter);
+        el.removeEventListener("pointerleave", leave);
+        el.removeEventListener("focus", enter);
+        el.removeEventListener("blur", leave);
+        wiggle?.kill();
       });
     });
 

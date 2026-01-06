@@ -8,7 +8,7 @@
 
 .hero {
   position: relative;
-  height: 100vh;
+  height: 500vh;
 }
 
 
@@ -34,11 +34,11 @@
   line-height: 0.86;
   letter-spacing: -0.035em;
 
-  /* ✅ evita salto de línea */
+
   white-space: nowrap;
 }
 
-/* Individual letters (animated by GSAP) */
+
 .hero-title-letter {
   display: inline-block;
 

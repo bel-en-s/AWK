@@ -132,13 +132,13 @@ export default function Services() {
           </div>
         </div>
 
-        <div className="svc-track" aria-label="Services horizontal track">
+        {/* <div className="svc-track" aria-label="Services horizontal track">
           <div className="svc-row">
             {cards.map((c) => (
               <ServiceCard key={c.title} title={c.title} items={c.items} href={c.href} />
             ))}
           </div>
-        </div>
+        </div> */}
       </div>
     </section>
   );

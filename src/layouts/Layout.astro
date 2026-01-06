@@ -1,7 +1,5 @@
 ---
 import "../styles/global.css";
-import { initLenis } from "../scripts/initLenis.js";
-
 const { title, desc } = Astro.props;
 ---
 
@@ -16,9 +14,6 @@ const { title, desc } = Astro.props;
   <body>
     <slot />
 
-    <script type="module" is:inline>
-      // initLenis importado por Astro arriba, queda disponible acá:
-      ({ initLenis }).initLenis();
-    </script>
+  
   </body>
 </html>

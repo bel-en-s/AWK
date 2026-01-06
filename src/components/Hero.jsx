@@ -1,8 +1,11 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import CursorLanding from "./global/CursorLanding";
 import NavBar from "./global/Navbar";
 import "./Hero.css";
+
+gsap.registerPlugin(ScrollTrigger);
 
 export default function Hero() {
   const [showCursor, setShowCursor] = useState(false);
@@ -203,18 +206,82 @@ export default function Hero() {
     return () => ctx.revert();
   }, []);
 
+  // ✅ PIN HERO + SCROLL GROW COPY (mientras está pineado)
+  useLayoutEffect(() => {
+    if (!showCursor) return;
+
+    const hero = heroRef.current;
+    const copy = copyRef.current;
+    if (!hero || !copy) return;
+
+    const prefersReduced =
+      window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+
+    const ctx = gsap.context(() => {
+      // estado base (importante para que el scale no te “salte”)
+      gsap.set(copy, {
+        scale: 1,
+        transformOrigin: "50% 50%",
+        willChange: "transform, filter",
+        force3D: true,
+      });
+
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: hero,
+          start: "top top",
+          end: () => `+=${Math.max(window.innerHeight * 1.25, 900)}`,
+          pin: true,
+          pinSpacing: true,
+          scrub: prefersReduced ? false : 1,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+        },
+      });
+
+      // crece el “cuadrado” (y opcionalmente le saco blur/lo hago más nítido)
+      tl.to(
+        copy,
+        {
+          scale: 1.35,
+          filter: "blur(0px)",
+          ease: "none",
+          duration: 1,
+        },
+        0
+      );
+
+      // si querés que también “respire” el texto un poco
+      tl.to(
+        copy.querySelector(".hero-copy-text"),
+        { y: -6, ease: "none", duration: 1 },
+        0
+      );
+
+      // cuando aparece el Nav y cambia el layout, refresco el pin
+      requestAnimationFrame(() => ScrollTrigger.refresh());
+    }, hero);
+
+    return () => ctx.revert();
+  }, [showCursor, showNav]);
+
   return (
     <section ref={heroRef} className="hero">
       {showNav && <NavBar show={showNav} />}
 
-   {showCursor && (
-    <div ref={cursorWrapRef} className="cursor-landing-wrap">
-      <CursorLanding activeAreaRef={heroRef} eyesOnlyInside />
-    </div>
-  )}
+      {showCursor && (
+        <div ref={cursorWrapRef} className="cursor-landing-wrap">
+          <CursorLanding activeAreaRef={heroRef} eyesOnlyInside />
+        </div>
+      )}
 
       <div className="hero-content">
-        <h1 ref={titleRef}  data-cursor="invert" className="hero-title" aria-label="AWAKE">
+        <h1
+          ref={titleRef}
+          data-cursor="invert"
+          className="hero-title"
+          aria-label="AWAKE"
+        >
           {"AWAKE".split("").map((ch, i) => (
             <span key={i} className="hero-title-letter" aria-hidden="true">
               {ch}
@@ -236,10 +303,9 @@ export default function Hero() {
         </p>
       </div>
 
-     <a ref={talkRef} className="hero-talk" href="#contact" aria-label="Let's talk">
-  LET&apos;S TALK
-</a>
-
+      <a ref={talkRef} className="hero-talk" href="#contact" aria-label="Let's talk">
+        LET&apos;S TALK
+      </a>
     </section>
   );
 }

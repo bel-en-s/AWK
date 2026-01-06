@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+
 import CursorLanding from "./global/CursorLanding";
 import NavBar from "./global/Navbar";
 import "./Hero.css";
@@ -15,8 +16,10 @@ export default function Hero() {
   const cursorWrapRef = useRef(null);
   const titleRef = useRef(null);
   const copyRef = useRef(null);
+  const copyInnerRef = useRef(null);
   const talkRef = useRef(null);
 
+  // ====== Espera a que termine Loader (awk:loaded) ======
   useEffect(() => {
     const already = !!window.__AWK_LOADED__;
     if (already) {
@@ -29,6 +32,7 @@ export default function Hero() {
     return () => window.removeEventListener("awk:loaded", onLoaded);
   }, []);
 
+  // ====== Hover class para invertir cursor al pasar por el copy ======
   useEffect(() => {
     if (!showCursor) return;
 
@@ -53,6 +57,7 @@ export default function Hero() {
     };
   }, [showCursor]);
 
+  // ====== Intro: cursor + letras ======
   useLayoutEffect(() => {
     if (!showCursor) return;
 
@@ -112,6 +117,7 @@ export default function Hero() {
     return () => ctx.revert();
   }, [showCursor]);
 
+  // ====== Centrar hero según nav ======
   useLayoutEffect(() => {
     if (!showNav) return;
 
@@ -141,6 +147,7 @@ export default function Hero() {
     };
   }, [showNav]);
 
+  // ====== Wiggle CTA ======
   useLayoutEffect(() => {
     const el = talkRef.current;
     if (!el) return;
@@ -206,64 +213,84 @@ export default function Hero() {
     return () => ctx.revert();
   }, []);
 
-  // ✅ PIN HERO + SCROLL GROW COPY (mientras está pineado)
+  // ====== PIN HERO + EXPANSIÓN DEL CUADRADO NEGRO ======
   useLayoutEffect(() => {
     if (!showCursor) return;
 
-    const hero = heroRef.current;
-    const copy = copyRef.current;
-    if (!hero || !copy) return;
-
-    const prefersReduced =
-      window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    const heroEl = heroRef.current;
+    const copyEl = copyRef.current;
+    const copyInner = copyInnerRef.current;
+    if (!heroEl || !copyEl) return;
 
     const ctx = gsap.context(() => {
-      // estado base (importante para que el scale no te “salte”)
-      gsap.set(copy, {
-        scale: 1,
-        transformOrigin: "50% 50%",
-        willChange: "transform, filter",
-        force3D: true,
+      // estado base (por si venís de refresh)
+      gsap.set(copyEl, {
+        clearProps: "top,right",
       });
 
       const tl = gsap.timeline({
         scrollTrigger: {
-          trigger: hero,
+          trigger: heroEl,
           start: "top top",
-          end: () => `+=${Math.max(window.innerHeight * 1.25, 900)}`,
+          end: "+=140%", // cantidad de “scroll” mientras está pinneado
+          scrub: 1,
           pin: true,
-          pinSpacing: true,
-          scrub: prefersReduced ? false : 1,
           anticipatePin: 1,
           invalidateOnRefresh: true,
         },
       });
 
-      // crece el “cuadrado” (y opcionalmente le saco blur/lo hago más nítido)
+      // Expansión a fullscreen
       tl.to(
-        copy,
+        copyEl,
         {
-          scale: 1.35,
-          filter: "blur(0px)",
+          left: 0,
+          bottom: 0,
+          top: 0,
+          right: 0,
+          width: "100%",
+          height: "100%",
+          borderRadius: 0,
+          padding: "clamp(18px, 3vw, 44px)",
+          boxShadow: "none",
           ease: "none",
-          duration: 1,
         },
         0
       );
 
-      // si querés que también “respire” el texto un poco
-      tl.to(
-        copy.querySelector(".hero-copy-text"),
-        { y: -6, ease: "none", duration: 1 },
-        0
-      );
+      // El texto se acomoda suave (opcional, pero suma “premium”)
+      if (copyInner) {
+        tl.to(
+          copyInner,
+          {
+            y: 0,
+            ease: "none",
+          },
+          0
+        );
+      }
 
-      // cuando aparece el Nav y cambia el layout, refresco el pin
-      requestAnimationFrame(() => ScrollTrigger.refresh());
-    }, hero);
+      // opcional: CTA se esfuma un toque mientras crece el panel
+      if (talkRef.current) {
+        tl.to(
+          talkRef.current,
+          { autoAlpha: 0.0, ease: "none" },
+          0
+        );
+      }
+
+      // refresco por si cambian fonts/medidas post-load
+      const onLoad = () => ScrollTrigger.refresh();
+      window.addEventListener("load", onLoad);
+
+      return () => {
+        window.removeEventListener("load", onLoad);
+        tl.kill();
+      };
+    }, heroEl);
 
     return () => ctx.revert();
-  }, [showCursor, showNav]);
+  }, [showCursor]);
 
   return (
     <section ref={heroRef} className="hero">
@@ -278,7 +305,7 @@ export default function Hero() {
       <div className="hero-content">
         <h1
           ref={titleRef}
-          data-cursor="invert"
+          data-cursor="blue"
           className="hero-title"
           aria-label="AWAKE"
         >
@@ -292,18 +319,26 @@ export default function Hero() {
 
       <div
         ref={copyRef}
+        data-cursor="blue"
         className="hero-copy"
         role="note"
         aria-label="Awake intro"
         tabIndex={0}
       >
-        <p className="hero-copy-text">
-          Awake™ is a digital product studio crafting memorable customer
-          experiences.
-        </p>
+        <div ref={copyInnerRef} className="hero-copy-inner">
+          <p className="hero-copy-text">
+            Awake™ is a digital product studio crafting memorable customer
+            experiences.
+          </p>
+        </div>
       </div>
 
-      <a ref={talkRef} className="hero-talk" href="#contact" aria-label="Let's talk">
+      <a
+        ref={talkRef}
+        className="hero-talk"
+        href="#contact"
+        aria-label="Let's talk"
+      >
         LET&apos;S TALK
       </a>
     </section>

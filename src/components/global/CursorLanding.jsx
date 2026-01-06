@@ -1,8 +1,8 @@
-
 import { useEffect, useRef } from "react";
 
 export default function CursorLanding({
   cursorSrc = `${import.meta.env.BASE_URL}images/cursor.svg`,
+  blueCursorSrc = `${import.meta.env.BASE_URL}images/cursor-blue.svg`, // ✅
   eyesSrc = `${import.meta.env.BASE_URL}images/ojos.svg`,
   trailSrc = `${import.meta.env.BASE_URL}images/trail.svg`,
 
@@ -44,7 +44,7 @@ export default function CursorLanding({
 
   // ✅ MOBILE
   mobileMode = "auto", // "auto" | "touch" | "gyro"
-  idleMs = 700,        // tiempo sin input para autopilot
+  idleMs = 700, // tiempo sin input para autopilot
   autoEnabled = true,
   autoSpeed = 0.35,
   autoRadiusX = 90,
@@ -54,6 +54,9 @@ export default function CursorLanding({
 
   // ✅ “primer trail pegado a ojos” al entrar al área
   enterTrail = true,
+
+  // ✅ cursor modes por data-attribute
+  cursorAttr = "data-cursor", // por si querés custom
 }) {
   const rafRef = useRef(null);
   const overlayRef = useRef(null);
@@ -94,8 +97,66 @@ export default function CursorLanding({
     let enteredInside = false;
 
     let lastInputAt = performance.now();
-    let hasInput = false;
 
+    // -------------------------
+    // Cursor MODE (data-cursor)
+    // -------------------------
+    let cursorMode = "normal"; // normal | blue | invert
+
+    const applyCursorMode = (mode) => {
+      if (!cursorEl) return;
+      if (mode === cursorMode) return;
+      cursorMode = mode;
+
+      // ✅ NORMAL: "difference" (destaca sobre fondos claros)
+      if (mode === "normal") {
+        cursorEl.src = cursorSrc;
+        cursorEl.style.mixBlendMode = "difference";
+        cursorEl.style.filter =
+          "drop-shadow(0 0 8px rgba(255,255,255,0.25)) drop-shadow(0 0 1px rgba(0,0,0,0.35))";
+        cursorEl.style.opacity = String(cursorOpacity);
+        return;
+      }
+
+      // ✅ BLUE: fijo y legible sobre negro (sin blend)
+      if (mode === "blue") {
+        cursorEl.src = blueCursorSrc;
+        cursorEl.style.mixBlendMode = "normal";
+        cursorEl.style.filter =
+          "drop-shadow(0 0 10px rgba(0,0,0,0.25)) drop-shadow(0 0 1px rgba(255,255,255,0.20))";
+        cursorEl.style.opacity = String(cursorOpacity);
+        return;
+      }
+
+      // ✅ INVERT: fuerza blanco + difference (por si lo querés)
+      if (mode === "invert") {
+        cursorEl.src = cursorSrc;
+        cursorEl.style.mixBlendMode = "difference";
+        cursorEl.style.filter =
+          "brightness(0) invert(1) drop-shadow(0 0 8px rgba(255,255,255,0.25)) drop-shadow(0 0 1px rgba(0,0,0,0.35))";
+        cursorEl.style.opacity = String(cursorOpacity);
+        return;
+      }
+    };
+
+    const pickModeFromTarget = (target) => {
+      const el = target?.closest?.(`[${cursorAttr}]`);
+      if (!el) return "normal";
+      const v = el.getAttribute(cursorAttr);
+      if (v === "blue") return "blue";
+      if (v === "invert") return "invert";
+      return "normal";
+    };
+
+    const onOver = (e) => applyCursorMode(pickModeFromTarget(e.target));
+    const onOut = (e) => {
+      const to = pickModeFromTarget(e.relatedTarget);
+      applyCursorMode(to);
+    };
+
+    // -------------------------
+    // Active area logic (eyes)
+    // -------------------------
     const computeInside = (x, y) => {
       if (!eyesOnlyInside) return true;
       const el = activeAreaRef?.current;
@@ -129,7 +190,6 @@ export default function CursorLanding({
       setEyesVisible(inside);
 
       if (inside) {
-        // re-enganchar ojos para evitar “saltos” al re-entrar
         eyes.x = mouse.x;
         eyes.y = mouse.y;
         prevEyes.x = eyes.x;
@@ -142,7 +202,6 @@ export default function CursorLanding({
     const setInput = (x, y) => {
       mouse.x = x;
       mouse.y = y;
-      hasInput = true;
       lastInputAt = performance.now();
       updateInside();
     };
@@ -161,10 +220,11 @@ export default function CursorLanding({
       setInput(t.clientX, t.clientY);
     };
 
-    const onTouchEnd = () => {
-      // no-op: autopilot entra solo por idleMs
-    };
+    const onTouchEnd = () => {};
 
+    // -------------------------
+    // DOM creation
+    // -------------------------
     const createOverlay = () => {
       overlay = document.createElement("div");
       overlay.className = "cursor-landing-overlay";
@@ -174,8 +234,12 @@ export default function CursorLanding({
         pointerEvents: "none",
         overflow: "visible",
         zIndex: String(zIndex),
+        background: "transparent",
+        isolation: "auto",
       });
-      document.documentElement.appendChild(overlay);
+
+      // ✅ mejor para blend (y más standard)
+      document.body.appendChild(overlay);
       overlayRef.current = overlay;
     };
 
@@ -195,14 +259,20 @@ export default function CursorLanding({
         height: `${cursorSize}px`,
         userSelect: "none",
         pointerEvents: "none",
-        willChange: "transform, opacity",
+        willChange: "transform, opacity, filter",
         opacity: String(cursorOpacity),
         zIndex: "3",
         transform: "translate3d(0,0,0)",
         backfaceVisibility: "hidden",
+
+        // ✅ default mode
+        mixBlendMode: "difference",
+        filter:
+          "drop-shadow(0 0 8px rgba(255,255,255,0.25)) drop-shadow(0 0 1px rgba(0,0,0,0.35))",
       });
 
       overlay.appendChild(cursorEl);
+      applyCursorMode("normal");
     };
 
     const createEyes = () => {
@@ -268,20 +338,22 @@ export default function CursorLanding({
       });
     };
 
+    // -------------------------
+    // Autopilot
+    // -------------------------
     const applyAutopilot = (t) => {
       if (!autoEnabled) return;
       const cx = window.innerWidth * autoCenter.x;
       const cy = window.innerHeight * autoCenter.y;
 
-      const tt = (t * 0.001) * autoSpeed;
+      const tt = t * 0.001 * autoSpeed;
       mouse.x = cx + Math.cos(tt * 1.2) * autoRadiusX;
       mouse.y = cy + Math.sin(tt * 0.9) * autoRadiusY;
     };
 
-    // Optional gyro (sin pedir permiso — si iOS no da valores, queda en 0 y no rompe)
+    // Gyro
     let gyroOn = false;
     const onDeviceOrientation = (e) => {
-      // gamma: left/right (-90..90), beta: front/back (-180..180)
       const g = typeof e.gamma === "number" ? e.gamma : 0;
       const b = typeof e.beta === "number" ? e.beta : 0;
 
@@ -290,28 +362,32 @@ export default function CursorLanding({
       const cx = window.innerWidth * autoCenter.x;
       const cy = window.innerHeight * autoCenter.y;
 
-      // map suave
-      const nx = clamp(g / 30, -1, 1);   // ~30° = full
-      const ny = clamp(b / 45, -1, 1);   // ~45° = full
+      const nx = clamp(g / 30, -1, 1);
+      const ny = clamp(b / 45, -1, 1);
 
       setInput(cx + nx * autoRadiusX, cy + ny * autoRadiusY);
     };
 
+    // -------------------------
+    // Start
+    // -------------------------
     const start = async () => {
       const mod = await import("gsap");
       gsap = mod.gsap;
 
-      // esconder cursor nativo mientras exista este overlay
       document.documentElement.classList.add("awk-cursor-none");
 
       createOverlay();
       createEyes();
       createCursor();
 
+      // ✅ escucha data-cursor global (sirve aunque haya pointer-events none arriba)
+      document.addEventListener("pointerover", onOver, true);
+      document.addEventListener("pointerout", onOut, true);
+
       lastInside = computeInside(mouse.x, mouse.y);
       setEyesVisible(lastInside);
 
-      // eventos input
       const wantTouch =
         isTouchDevice && (mobileMode === "auto" || mobileMode === "touch");
       const wantGyro = isTouchDevice && mobileMode === "gyro";
@@ -336,13 +412,12 @@ export default function CursorLanding({
       const animate = (t = performance.now()) => {
         if (stopped) return;
 
-        // autopilot si no hay input reciente (mobile), o si gyro no está entregando datos
         const idle = t - lastInputAt;
         const allowAutoNow =
           isTouchDevice &&
           autoEnabled &&
-          (mobileMode !== "touch") &&
-          (idle > idleMs) &&
+          mobileMode !== "touch" &&
+          idle > idleMs &&
           (!wantGyro || !gyroOn);
 
         if (allowAutoNow) {
@@ -350,7 +425,6 @@ export default function CursorLanding({
           updateInside();
         }
 
-        // cursor 1:1
         cursor.x = mouse.x;
         cursor.y = mouse.y;
 
@@ -393,19 +467,16 @@ export default function CursorLanding({
           const ey = eyes.y - eyesSize * eyesAnchor.y;
           if (eyesEl) eyesEl.style.transform = `translate3d(${ex}px, ${ey}px, 0)`;
 
-          // ✅ primer trail pegado a ojos al entrar
           if (enteredInside && enterTrail) {
             enteredInside = false;
-            lastStamp = t; // evita doble spawn instantáneo
-            makeTrail(eyes.x, eyes.y); // EXACTO donde están los ojos
+            lastStamp = t;
+            makeTrail(eyes.x, eyes.y);
           }
 
           const localEvery = allowAutoNow ? autoTrailEveryMs : trailEveryMs;
 
           if (t - lastStamp > localEvery) {
             lastStamp = t;
-
-            // resto del trail sigue “como ahora”
             const px = eyes.x - dir.x * trailGapPx;
             const py = eyes.y - dir.y * trailGapPx;
             makeTrail(px, py);
@@ -426,6 +497,9 @@ export default function CursorLanding({
     return () => {
       stopped = true;
 
+      document.removeEventListener("pointerover", onOver, true);
+      document.removeEventListener("pointerout", onOut, true);
+
       window.removeEventListener("pointermove", handlePointerMove);
       window.removeEventListener("touchstart", onTouchStart);
       window.removeEventListener("touchmove", onTouchMove);
@@ -444,6 +518,7 @@ export default function CursorLanding({
   }, [
     enabled,
     cursorSrc,
+    blueCursorSrc,
     eyesSrc,
     trailSrc,
     cursorSize,
@@ -478,8 +553,8 @@ export default function CursorLanding({
     autoCenter,
     autoTrailEveryMs,
     enterTrail,
+    cursorAttr,
   ]);
 
   return null;
 }
-

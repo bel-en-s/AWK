@@ -5,21 +5,25 @@
   place-items: center;
   background: #000;
   z-index: 2147483647;
-  opacity: 0;
-  pointer-events: none;
-  transform-origin: 50% 0%;
-  will-change: transform, opacity;
+
+  /* arranca visible (React monta y GSAP controla) */
+  opacity: 1;
+  pointer-events: auto;
+
   transform: translateZ(0);
+  will-change: opacity, transform;
 }
 
 .loader-title {
   display: inline-flex;
   align-items: center;
   gap: var(--gap, 0.16em);
+
   font-size: clamp(72px, 12vw, 180px);
   line-height: 0.92;
   letter-spacing: -0.02em;
   color: #fff;
+
   transform: translateZ(0);
   will-change: transform, filter;
   backface-visibility: hidden;
@@ -30,15 +34,15 @@
 .loader-title-inner {
   display: inline-flex;
   align-items: center;
+
   transform: translateZ(0) scaleX(var(--font-scale-x, 1));
   transform-origin: 50% 50%;
   will-change: transform;
 }
 
-
 .letter {
   display: inline-block;
+  transform: translateZ(0);
   will-change: transform, opacity, filter;
   backface-visibility: hidden;
-  transform: translateZ(0);
 }

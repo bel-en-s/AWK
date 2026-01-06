@@ -140,9 +140,6 @@ NAVBAR
   box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.18);
 }
 
-/* =========================================
-   3D base for tilt
-========================================= */
 
 .nav-chip,
 .nav-cta {
@@ -150,7 +147,7 @@ NAVBAR
   will-change: transform;
   padding: 20px 30px;
 }
-
+/* 
 .nav-chip,
 .nav-cta {
   display: inline-flex;        
@@ -180,4 +177,4 @@ NAVBAR
 .nav-cta:hover,
 .nav-cta:focus-visible {
   z-index: 5;
-}
+} */

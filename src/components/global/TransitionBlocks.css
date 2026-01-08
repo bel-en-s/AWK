@@ -1,0 +1,26 @@
+.trb-grid {
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+    pointer-events: none;
+    overflow: hidden;
+    background: rgba(8, 8, 8, 0.18);
+    backdrop-filter: blur(10px);
+  }
+  
+  .trb-block {
+    position: absolute;
+    top: 0;
+    background: var(--cream, #e9ddc7);
+    transform: translateZ(0);
+    will-change: transform, filter;
+    border-left: 1px solid rgba(0, 0, 0, 0.22);
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  
+  @media (prefers-reduced-motion: reduce) {
+    .trb-grid {
+      display: none;
+    }
+  }
+  

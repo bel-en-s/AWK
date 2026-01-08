@@ -32,7 +32,6 @@ export default function Hero() {
     return () => window.removeEventListener("awk:loaded", onLoaded);
   }, []);
 
-  // ====== Hover class para invertir cursor al pasar por el copy ======
   useEffect(() => {
     if (!showCursor) return;
 
@@ -294,7 +293,7 @@ export default function Hero() {
 
   return (
     <section ref={heroRef} className="hero">
-      {showNav && <NavBar show={showNav} />}
+      {/* {showNav && <NavBar show={showNav} />} */}
 
       {showCursor && (
         <div ref={cursorWrapRef} className="cursor-landing-wrap">

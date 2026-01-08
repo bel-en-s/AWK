@@ -1,4 +1,3 @@
-// NavBar.jsx
 import { useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
 import "./Navbar.css";
@@ -7,8 +6,6 @@ export default function NavBar({ show = true }) {
   const rootRef = useRef(null);
 
   useLayoutEffect(() => {
-
-    
     if (!show) return;
 
     const root = rootRef.current;
@@ -21,11 +18,18 @@ export default function NavBar({ show = true }) {
       window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
 
     const cleanups = [];
+    let introTl = null;
 
-    // =========================
-    // Intro animation
-    // =========================
-    const ctx = gsap.context(() => {
+    const intro = () => {
+      if (prefersReduced) {
+        gsap.set(root, { autoAlpha: 1 });
+        gsap.set(animItems, { clearProps: "all", autoAlpha: 1 });
+        return;
+      }
+
+      introTl?.kill();
+      gsap.killTweensOf([root, animItems]);
+
       gsap.set(root, { autoAlpha: 1 });
 
       gsap.set(animItems, {
@@ -40,64 +44,34 @@ export default function NavBar({ show = true }) {
         force3D: true,
       });
 
-      const tl = gsap.timeline({ defaults: { ease: "none" } });
+      introTl = gsap.timeline({ defaults: { ease: "none" } });
 
       animItems.forEach((el, i) => {
-        tl.to(
+        introTl.to(
           el,
           {
             duration: 0.62,
             ease: "expo.out",
             keyframes: [
-              {
-                y: -26,
-                x: -6,
-                rotateZ: -2,
-                rotateX: -35,
-                autoAlpha: 0,
-                filter: "blur(14px)",
-                duration: 0,
-              },
-              {
-                y: 6,
-                x: 1,
-                rotateZ: 0.6,
-                rotateX: -10,
-                autoAlpha: 1,
-                filter: "blur(3px)",
-                duration: 0.22,
-                ease: "power2.out",
-              },
-              {
-                y: -2,
-                x: 0,
-                rotateZ: -0.25,
-                rotateX: -4,
-                filter: "blur(1px)",
-                duration: 0.16,
-                ease: "sine.inOut",
-              },
-              {
-                y: 0,
-                x: 0,
-                rotateZ: 0,
-                rotateX: 0,
-                filter: "blur(0px)",
-                duration: 0.24,
-                ease: "expo.out",
-              },
+              { y: -26, x: -6, rotateZ: -2, rotateX: -35, autoAlpha: 0, filter: "blur(14px)", duration: 0 },
+              { y: 6, x: 1, rotateZ: 0.6, rotateX: -10, autoAlpha: 1, filter: "blur(3px)", duration: 0.22, ease: "power2.out" },
+              { y: -2, x: 0, rotateZ: -0.25, rotateX: -4, filter: "blur(1px)", duration: 0.16, ease: "sine.inOut" },
+              { y: 0, x: 0, rotateZ: 0, rotateX: 0, filter: "blur(0px)", duration: 0.24, ease: "expo.out" },
             ],
           },
           i * 0.18
         );
       });
+    };
 
-      return () => tl.kill();
+    const ctx = gsap.context(() => {
+      intro();
     }, root);
 
-    // =========================
-    // html hover class
-    // =========================
+    const onPageLoad = () => intro();
+    document.addEventListener("astro:page-load", onPageLoad);
+    cleanups.push(() => document.removeEventListener("astro:page-load", onPageLoad));
+
     const addHoverClass = () =>
       document.documentElement.classList.add("nav-hover");
     const removeHoverClass = () =>
@@ -111,17 +85,13 @@ export default function NavBar({ show = true }) {
       root.removeEventListener("pointerleave", removeHoverClass);
     });
 
-    // =========================
-    // Tilt hover (tipo talkRef: enter / leave)
-    // =========================
     tiltEls.forEach((el, idx) => {
-      const dir = idx % 2 === 0 ? -1 : 1; // alterna izq/der
-      const BASE = 8; // grados base del tilt
+      const dir = idx % 2 === 0 ? -1 : 1;
+      const BASE = 8;
       const baseRot = dir * BASE;
 
       let wiggle = null;
 
-      // base estable
       gsap.set(el, {
         rotateZ: 0,
         rotateX: 0,
@@ -135,7 +105,6 @@ export default function NavBar({ show = true }) {
       const enter = () => {
         if (prefersReduced) return;
 
-        // tilt inmediato suave
         gsap.to(el, {
           rotateZ: baseRot,
           scale: 1.03,
@@ -145,7 +114,6 @@ export default function NavBar({ show = true }) {
           overwrite: "auto",
         });
 
-        // micro “respiración” opcional (muy sutil)
         wiggle?.kill();
         wiggle = gsap.to(el, {
           rotateZ: baseRot + dir * 2,
@@ -190,24 +158,27 @@ export default function NavBar({ show = true }) {
     });
 
     return () => {
+      introTl?.kill();
       cleanups.forEach((fn) => fn());
       document.documentElement.classList.remove("nav-hover");
       ctx.revert();
     };
   }, [show]);
 
+  const base = import.meta.env.BASE_URL;
+
   const links = [
-    { href: "#work", label: "WORK" },
-    { href: "#service", label: "SERVICE" },
-    { href: "#people", label: "PEOPLE" },
-    { href: "#blog", label: "BLOG" },
+    { href: `${base}`, label: "HOME" },
+    { href: `${base}work/`, label: "WORK" },
+    { href: `${base}people/`, label: "PEOPLE" },
+    { href: `${base}blog/`, label: "BLOG" },
   ];
 
-  const logoSrc = `${import.meta.env.BASE_URL}images/ojos.svg`;
+  const logoSrc = `${base}images/ojos.svg`;
 
   return (
     <nav ref={rootRef} className="nav" aria-label="Primary">
-      <a className="nav-logo nav-anim" href="#top" aria-label="Home">
+      <a className="nav-logo nav-anim" href={base} aria-label="Home">
         <img className="nav-logoImg" src={logoSrc} alt="" aria-hidden="true" />
       </a>
 
@@ -223,7 +194,7 @@ export default function NavBar({ show = true }) {
         ))}
       </div>
 
-      <a className="nav-cta nav-anim" href="#contact">
+      <a className="nav-cta nav-anim invert" style={{ mixBlendMode: "difference" }} href={`${base}contact/`}>
         GET IN TOUCH
       </a>
     </nav>

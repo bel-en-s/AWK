@@ -5,6 +5,12 @@
   background: var(--cream, #efe7d7);
 }
 
+.hero-title,
+.hero-talk,
+.hero-panel {
+  opacity: 0;
+  visibility: hidden;
+}
 
 .cursor-landing-wrap {
   position: absolute;
@@ -13,18 +19,21 @@
   pointer-events: none;
 }
 
+
+.hero--servicesMode .cursor-landing-wrap {
+
+  filter: none;
+}
+
 .hero-content {
   position: absolute;
   top: clamp(18px, 3.2vh, 142px);
   padding-top: 100px;
-
   left: var(--hero-center-x, 50%);
   transform: translateX(-50%);
-
   z-index: 5;
   width: min(1120px, calc(100vw - 2 * clamp(16px, 3.6vw, 48px)));
   max-width: 100%;
-
   display: flex;
   justify-content: center;
   pointer-events: none;
@@ -41,75 +50,82 @@
 
 .hero-title-letter {
   display: inline-block;
-  font-size: 25rem;
+  font-size: 3rem;
   will-change: transform, opacity, filter;
   backface-visibility: hidden;
   transform: translateZ(0);
 }
 
 @media (max-width: 380px) {
-  .hero-title-letter {
-    font-size: clamp(78px, 20vw, 260px);
-  }
-  .hero-title {
-    letter-spacing: -0.03em;
-  }
+  .hero-title-letter { font-size: clamp(78px, 20vw, 260px); }
+  .hero-title { letter-spacing: -0.03em; }
 }
 
 @media (min-width: 1280px) {
-  .hero-title-letter {
-    font-size: clamp(140px, 16vw, 360px);
-  }
+  .hero-title-letter { font-size: clamp(140px, 16vw, 360px); }
 }
 
 
-.hero-copy {
+.hero-panel {
   position: absolute;
   left: 10px;
   bottom: 10px;
 
-  width: 300px;
-
-  padding: 18px 18px 16px;
+  width: 360px;
+  min-height: 160px;
 
   background: #000;
-  color: #fff;
-  border-radius: 18px;
+  border-radius: 0;
 
   box-shadow: 0 18px 60px rgba(0, 0, 0, 0.18);
 
-  z-index: 2000; 
+  z-index: 2000;
   overflow: hidden;
 
-  display: flex;
-  flex-direction: column;
-  gap: clamp(14px, 2vw, 22px);
-
-  will-change: left, right, top, bottom, width, height, border-radius, padding;
+  will-change: left, right, top, bottom, width, height, border-radius, background-color;
   transform: translateZ(0);
 }
 
-.hero-copy-header {
-  flex: 0 0 auto;
+/* card que “morph-ea” */
+.hero-panelCard {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: calc(100% - 44px);
+
+  border: 1px solid transparent;
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
+
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  will-change: left, top, width, height, border-radius, padding, background-color, box-shadow, border-color, transform;
 }
 
-.hero-copy-text {
+/* texto */
+.hero-panelText {
   margin: 0;
   font-family: var(--font-alt, system-ui);
   font-weight: 500;
-  font-size: 25px;
-  line-height: 1.35;
   letter-spacing: 0.01em;
   opacity: 0.92;
   text-decoration: underline;
+  text-align: center;
 }
 
-/* Services dentro del panel */
-.hero-services-wrap {
-  flex: 1 1 auto;
-  min-height: 0; /* importante para que el contenido pueda scrollear si querés */
-  overflow: auto; /* si Services es largo, scrollea adentro del panel */
-  padding-right: 6px;
+/* cuando la card ya es “tarjeta”, queremos texto a la izquierda */
+.hero-panelCard {
+  --card-mode: 0; /* 0=center, 1=left */
+}
+.hero-panelCard .hero-panelText {
+  text-align: center;
+}
+.hero-panelCard[style*="--card-mode: 1"] .hero-panelText {
+  text-align: left;
 }
 
 /* CTA */
@@ -142,6 +158,5 @@
   will-change: transform, opacity;
   backface-visibility: hidden;
 
-  transition: transform 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
-  z-index: 5;
+  z-index: 3001;
 }

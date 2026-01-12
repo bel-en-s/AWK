@@ -1,8 +1,10 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import Work from "../components/Work.jsx";
+import Footer from "../components/global/Footer.jsx";
 ---
 
 <Layout title="Work" desc="Selected work">
   <Work client:load />
+  <Footer />
 </Layout>

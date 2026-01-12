@@ -4,7 +4,7 @@ import "./Work.css";
 const PROJECTS = [
   {
     title: "Redroom Gesture 14",
-    image: "images/portfolio/img_1.jpg",
+    image: "images/portfolio/1.jpg",
     category: "Concept Series",
     year: "2025",
   },
@@ -16,7 +16,7 @@ const PROJECTS = [
   },
   {
     title: "Blur Formation 03",
-    image: "images/portfolio/img_3.jpg",
+    image: "images/portfolio/3.jpg",
     category: "Kinetic Study",
     year: "2024",
   },

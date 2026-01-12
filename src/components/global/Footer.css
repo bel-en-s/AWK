@@ -1,0 +1,154 @@
+.awk-footer{
+  width:100%;
+  background:#EBE8E3;
+  color:#111;
+  padding: clamp(28px, 5vw, 64px) clamp(16px, 3.5vw, 48px);
+
+  /* controles de escala */
+  --pill-fs: clamp(18px, 1.7vw, 30px);
+  --pill-py: clamp(14px, 1.4vw, 20px);
+  --pill-px: clamp(20px, 2.2vw, 34px);
+  --row-gap: clamp(10px, 1.3vw, 18px);
+
+  --circle: clamp(54px, 4.2vw, 78px);
+}
+
+.awk-footer__inner{
+  width: min(1400px, 100%);
+  margin: 0 auto;
+}
+
+/* TOP: una línea y centrado (desktop) */
+.awk-footer__top{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap: var(--row-gap);
+  flex-wrap: nowrap;
+  overflow: visible; /* <-- no recorta */
+  padding: 0 2px;
+  margin-bottom: clamp(22px, 3.6vw, 52px);
+}
+
+/* CTA group */
+.awk-ctaGroup{
+  display:inline-flex;
+  align-items:center;
+  gap: 14px; /* espacio entre texto y flecha */
+  flex: 0 0 auto;
+}
+
+.awk-ctaLabel{
+  font: 500 var(--pill-fs)/1.05 "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  letter-spacing: -0.02em;
+  border-radius: 999px;
+  padding: var(--pill-py) calc(var(--pill-px) + 4px);
+  border: 1.5px solid #111;
+  background:#111;
+  color:#f3efe8;
+  text-decoration:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  white-space: nowrap;
+}
+
+.awk-ctaCircle{
+  width: var(--circle);
+  height: var(--circle);
+  border-radius: 999px;
+  background:#111;
+  box-shadow: 0 0 0 1.5px #111;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+  flex: 0 0 auto;
+}
+
+.awk-chevron{
+  width: 18px;
+  height: 18px;
+  border-right: 3px solid #f3efe8;
+  border-top: 3px solid #f3efe8;
+  transform: rotate(45deg);
+  margin-left: 2px;
+}
+
+/* Pills */
+.awk-pill{
+  font: 500 var(--pill-fs)/1.05 "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  letter-spacing: -0.02em;
+  border-radius: 999px;
+  padding: var(--pill-py) var(--pill-px);
+  border: 1.5px solid rgba(20,20,20,0.70);
+  background: transparent;
+  color:#111;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  user-select:none;
+  -webkit-tap-highlight-color: transparent;
+  transition: background .25s ease, color .25s ease, border-color .25s ease;
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+
+.awk-pill:hover{
+  background:#111;
+  color:#f3efe8;
+  border-color:#111;
+}
+
+/* Si el viewport es chico, habilitamos scroll (pero arrancando desde el inicio, no centrado) */
+@media (max-width: 1100px){
+  .awk-footer{
+    --pill-fs: clamp(16px, 2.2vw, 22px);
+    --pill-py: clamp(12px, 1.8vw, 16px);
+    --pill-px: clamp(16px, 2.4vw, 24px);
+    --row-gap: clamp(10px, 1.6vw, 14px);
+    --circle: clamp(48px, 7vw, 62px);
+  }
+
+  .awk-footer__top{
+    justify-content:flex-start; /* <-- evita recorte a ambos lados */
+    overflow-x:auto;
+    overflow-y:hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width:none;
+    padding-bottom: 8px;
+  }
+  .awk-footer__top::-webkit-scrollbar{ display:none; }
+}
+
+.awk-footer__logo{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex: 0 0 auto;
+  padding: 0 14px;
+}
+
+.awk-footer__eyes{
+  width: clamp(54px, 6vw, 96px);
+  height:auto;
+  filter: drop-shadow(0 10px 18px rgba(0,0,0,0.18));
+}
+
+@media (max-width: 900px){
+  .awk-footer__bottom{
+    flex-direction: column;
+    justify-content:center;
+    gap: 16px;
+  }
+  .awk-footer__meta--left,
+  .awk-footer__meta--right{
+    justify-content:center;
+    width:100%;
+  }
+  .awk-footer__mono{
+    white-space: normal;
+    text-align:center;
+  }
+}

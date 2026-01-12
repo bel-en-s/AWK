@@ -6,7 +6,6 @@
   background: #000;
   z-index: 2147483647;
 
-  /* arranca visible (React monta y GSAP controla) */
   opacity: 1;
   pointer-events: auto;
 
@@ -29,6 +28,13 @@
   backface-visibility: hidden;
   -webkit-font-smoothing: antialiased;
   text-rendering: geometricPrecision;
+
+  /* anti-flicker: arranca oculto y lo prendemos desde JS */
+  visibility: hidden;
+}
+
+.loader-title.is-ready {
+  visibility: visible;
 }
 
 .loader-title-inner {
@@ -45,4 +51,15 @@
   transform: translateZ(0);
   will-change: transform, opacity, filter;
   backface-visibility: hidden;
+}
+
+
+.loader-title-inner {
+  position: relative;
+  display: inline-block;
+}
+
+.letter {
+  display: inline-block;
+  will-change: transform, opacity, filter;
 }

@@ -1,9 +1,14 @@
+/* Navbar.css */
 
 .nav {
   position: fixed;
-  top: clamp(10px, 2.2vh, 22px);
-  left: 50%;
-  transform: translateX(-50%) translateY(-6px);
+  top: calc(clamp(10px, 2.2vh, 22px) - 6px);
+
+  left: 0;
+  right: 0;
+  margin-inline: auto;
+
+  transform: none;
 
   width: min(1120px, calc(100vw - 2 * clamp(16px, 3.6vw, 48px)));
 
@@ -14,16 +19,14 @@
 
   z-index: 2147483647;
   opacity: 0;
-  isolation: isolate; 
+
   pointer-events: auto;
-  will-change: transform, opacity;
+  will-change: opacity;
 }
 
 .nav-cta.invert {
-  color: #fff;
   mix-blend-mode: difference;
 }
-
 
 .nav::before,
 .nav::after {
@@ -34,8 +37,6 @@
 .nav * {
   pointer-events: auto;
 }
-
-
 
 .nav-logo {
   justify-self: start;
@@ -67,8 +68,6 @@
   gap: 0;
 }
 
-
-
 .nav-chip {
   font-family: "WorkSansSemiBold", "WorkSans", system-ui, -apple-system, Segoe UI,
     Roboto, Arial, sans-serif;
@@ -94,17 +93,21 @@
 }
 
 /* alternancia */
-.nav-chip.is-square { border-radius: 0px; }
-.nav-chip.is-pill   { border-radius: 999px; }
+.nav-chip.is-square {
+  border-radius: 0px;
+}
+.nav-chip.is-pill {
+  border-radius: 999px;
+}
 
-.nav-chip:hover { opacity: 0.82; }
+.nav-chip:hover {
+  opacity: 0.82;
+}
 
 .nav-chip:focus-visible {
   outline: none;
   box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.18);
 }
-
-
 
 .nav-cta {
   justify-self: end;
@@ -116,18 +119,19 @@
   text-transform: uppercase;
   text-decoration: underline;
 
-  color: #000;
+  color: #ffffff;
   padding: 10px 14px;
   line-height: 1;
-  color: #fff;    
   transform: translateZ(0);
   backface-visibility: hidden;
-  will-change: transform, opacity, filter;
+  will-change: transform, opacity;
 
   mix-blend-mode: difference;
 }
 
-.nav-cta:hover { opacity: 0.82; }
+.nav-cta:hover {
+  opacity: 0.82;
+}
 
 .nav-cta:focus-visible {
   outline: none;
@@ -135,13 +139,13 @@
   mix-blend-mode: difference;
 }
 
-
 .nav-chip,
 .nav-cta {
   transform-style: preserve-3d;
   will-change: transform;
   padding: 20px 30px;
 }
+
 /* 
 .nav-chip,
 .nav-cta {
@@ -153,15 +157,12 @@
 
   box-sizing: border-box;
 
-
   min-height: 44px;              
 }
 
 .nav-chip + .nav-chip {
   margin-left: 0;           
 }
-
-
 
 .nav-center .nav-chip:last-child {
   border-right: 1px solid #000;
@@ -172,4 +173,5 @@
 .nav-cta:hover,
 .nav-cta:focus-visible {
   z-index: 5;
-} */
+} 
+*/

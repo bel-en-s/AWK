@@ -1,3 +1,4 @@
+// NavBar.jsx
 import { useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
 import "./Navbar.css";
@@ -13,6 +14,8 @@ export default function NavBar({ show = true }) {
 
     const animItems = Array.from(root.querySelectorAll(".nav-anim"));
     const tiltEls = Array.from(root.querySelectorAll(".nav-chip, .nav-cta"));
+    const cta = root.querySelector(".nav-cta");
+    const blurItems = animItems.filter((el) => el !== cta);
 
     const prefersReduced =
       window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
@@ -20,7 +23,36 @@ export default function NavBar({ show = true }) {
     const cleanups = [];
     let introTl = null;
 
-    const intro = () => {
+    const preset = () => {
+      gsap.set(root, { autoAlpha: 0 });
+
+      gsap.set(blurItems, {
+        y: -26,
+        x: -6,
+        rotateZ: -2,
+        rotateX: -35,
+        autoAlpha: 0,
+        filter: "blur(14px)",
+        transformPerspective: 900,
+        transformOrigin: "50% 0%",
+      });
+
+      if (cta) {
+        gsap.set(cta, {
+          y: -26,
+          x: -6,
+          rotateZ: -2,
+          rotateX: -35,
+          autoAlpha: 0,
+          filter: "none",
+          transformPerspective: 900,
+          transformOrigin: "50% 0%",
+          mixBlendMode: "difference",
+        });
+      }
+    };
+
+    const playIntro = () => {
       if (prefersReduced) {
         gsap.set(root, { autoAlpha: 1 });
         gsap.set(animItems, { clearProps: "all", autoAlpha: 1 });
@@ -32,50 +64,141 @@ export default function NavBar({ show = true }) {
 
       gsap.set(root, { autoAlpha: 1 });
 
-      gsap.set(animItems, {
-        y: -26,
-        x: -6,
-        rotateZ: -2,
-        rotateX: -35,
-        autoAlpha: 0,
-        filter: "blur(14px)",
-        transformPerspective: 900,
-        transformOrigin: "50% 0%",
-        force3D: true,
-      });
-
       introTl = gsap.timeline({ defaults: { ease: "none" } });
 
-      animItems.forEach((el, i) => {
+      blurItems.forEach((el, i) => {
         introTl.to(
           el,
           {
             duration: 0.62,
             ease: "expo.out",
             keyframes: [
-              { y: -26, x: -6, rotateZ: -2, rotateX: -35, autoAlpha: 0, filter: "blur(14px)", duration: 0 },
-              { y: 6, x: 1, rotateZ: 0.6, rotateX: -10, autoAlpha: 1, filter: "blur(3px)", duration: 0.22, ease: "power2.out" },
-              { y: -2, x: 0, rotateZ: -0.25, rotateX: -4, filter: "blur(1px)", duration: 0.16, ease: "sine.inOut" },
-              { y: 0, x: 0, rotateZ: 0, rotateX: 0, filter: "blur(0px)", duration: 0.24, ease: "expo.out" },
+              {
+                y: -26,
+                x: -6,
+                rotateZ: -2,
+                rotateX: -35,
+                autoAlpha: 0,
+                filter: "blur(14px)",
+                duration: 0,
+              },
+              {
+                y: 6,
+                x: 1,
+                rotateZ: 0.6,
+                rotateX: -10,
+                autoAlpha: 1,
+                filter: "blur(3px)",
+                duration: 0.22,
+                ease: "power2.out",
+              },
+              {
+                y: -2,
+                x: 0,
+                rotateZ: -0.25,
+                rotateX: -4,
+                filter: "blur(1px)",
+                duration: 0.16,
+                ease: "sine.inOut",
+              },
+              {
+                y: 0,
+                x: 0,
+                rotateZ: 0,
+                rotateX: 0,
+                filter: "none",
+                duration: 0.24,
+                ease: "expo.out",
+              },
             ],
           },
           i * 0.18
         );
       });
+
+      if (cta) {
+        const ctaIndex = animItems.indexOf(cta);
+        introTl.to(
+          cta,
+          {
+            duration: 0.62,
+            ease: "expo.out",
+            keyframes: [
+              {
+                y: -26,
+                x: -6,
+                rotateZ: -2,
+                rotateX: -35,
+                autoAlpha: 0,
+                filter: "none",
+                duration: 0,
+              },
+              {
+                y: 6,
+                x: 1,
+                rotateZ: 0.6,
+                rotateX: -10,
+                autoAlpha: 1,
+                filter: "none",
+                duration: 0.22,
+                ease: "power2.out",
+              },
+              {
+                y: -2,
+                x: 0,
+                rotateZ: -0.25,
+                rotateX: -4,
+                filter: "none",
+                duration: 0.16,
+                ease: "sine.inOut",
+              },
+              {
+                y: 0,
+                x: 0,
+                rotateZ: 0,
+                rotateX: 0,
+                filter: "none",
+                duration: 0.24,
+                ease: "expo.out",
+              },
+            ],
+          },
+          Math.max(0, ctaIndex) * 0.18
+        );
+      }
+
+      introTl.set(animItems, { clearProps: "filter" });
+    };
+
+    const start = () => {
+      preset();
+
+      if (!window.__AWK_LOADED__) {
+        const onLoaded = () => playIntro();
+        window.addEventListener("awk:loaded", onLoaded, { once: true });
+        cleanups.push(() => window.removeEventListener("awk:loaded", onLoaded));
+
+        const t = window.setTimeout(() => playIntro(), 2500);
+        cleanups.push(() => window.clearTimeout(t));
+        return;
+      }
+
+      playIntro();
     };
 
     const ctx = gsap.context(() => {
-      intro();
+      start();
     }, root);
 
-    const onPageLoad = () => intro();
+    const onPageLoad = () => {
+      preset();
+      playIntro();
+    };
     document.addEventListener("astro:page-load", onPageLoad);
     cleanups.push(() => document.removeEventListener("astro:page-load", onPageLoad));
 
-    const addHoverClass = () =>
-      document.documentElement.classList.add("nav-hover");
-    const removeHoverClass = () =>
-      document.documentElement.classList.remove("nav-hover");
+    const addHoverClass = () => document.documentElement.classList.add("nav-hover");
+    const removeHoverClass = () => document.documentElement.classList.remove("nav-hover");
 
     root.addEventListener("pointerenter", addHoverClass);
     root.addEventListener("pointerleave", removeHoverClass);
@@ -99,7 +222,6 @@ export default function NavBar({ show = true }) {
         scale: 1,
         transformOrigin: "50% 50%",
         willChange: "transform",
-        force3D: true,
       });
 
       const enter = () => {
@@ -177,7 +299,12 @@ export default function NavBar({ show = true }) {
   const logoSrc = `${base}images/ojos.svg`;
 
   return (
-    <nav ref={rootRef} className="nav" aria-label="Primary">
+    <nav
+      ref={rootRef}
+      className="nav"
+      aria-label="Primary"
+      style={{ opacity: 0, visibility: "hidden" }}
+    >
       <a className="nav-logo nav-anim" href={base} aria-label="Home">
         <img className="nav-logoImg" src={logoSrc} alt="" aria-hidden="true" />
       </a>
@@ -194,7 +321,7 @@ export default function NavBar({ show = true }) {
         ))}
       </div>
 
-      <a className="nav-cta nav-anim invert" style={{ mixBlendMode: "difference" }} href={`${base}contact/`}>
+      <a className="nav-cta nav-anim invert" href={`${base}contact/`}>
         GET IN TOUCH
       </a>
     </nav>

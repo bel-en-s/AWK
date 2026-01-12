@@ -1,14 +1,14 @@
 import { useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
 import "./Loader.css";
+import CursorLanding from "./CursorLanding";
 
 export default function Loader({
   text = "AWAKE",
-  // timing
-  inDuration = 0.6,
+  inDuration = 0.65,
   outDuration = 0.55,
   hold = 0.25,
-  stagger = 0.04,
+  stagger = 0.05,
 }) {
   const rootRef = useRef(null);
 
@@ -16,7 +16,6 @@ export default function Loader({
     const root = rootRef.current;
     if (!root) return;
 
-    // si ya cargó antes, no muestres loader
     if (window.__AWK_LOADED__) {
       gsap.set(root, { autoAlpha: 0, pointerEvents: "none" });
       return;
@@ -26,7 +25,10 @@ export default function Loader({
       window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
 
     const title = root.querySelector(".loader-title");
+    const inner = root.querySelector(".loader-title-inner");
     const letters = Array.from(root.querySelectorAll(".letter"));
+
+    if (!title || !inner || letters.length === 0) return;
 
     const done = () => {
       window.__AWK_LOADED__ = true;
@@ -34,13 +36,20 @@ export default function Loader({
       gsap.set(root, { autoAlpha: 0, pointerEvents: "none" });
     };
 
-    // estado inicial (sin “flicker”)
     gsap.set(root, { autoAlpha: 1, pointerEvents: "auto" });
+
+    title.classList.remove("is-ready");
+
+    // Estado inicial (todo arriba, sin flash)
     gsap.set(title, { filter: "blur(0px)" });
-    gsap.set(letters, { yPercent: 120, opacity: 0, filter: "blur(10px)" });
+    gsap.set(inner, { y: -18, autoAlpha: 0, filter: "blur(10px)" });
+    gsap.set(letters, { yPercent: -120, opacity: 0, filter: "blur(10px)" });
+
+    title.classList.add("is-ready");
 
     if (prefersReduced) {
-      // accesible: muestra un toque y oculta
+      gsap.set(inner, { y: 0, autoAlpha: 1, filter: "blur(0px)" });
+      gsap.set(letters, { yPercent: 0, opacity: 1, filter: "blur(0px)" });
       const t = window.setTimeout(done, 250);
       return () => window.clearTimeout(t);
     }
@@ -51,34 +60,56 @@ export default function Loader({
         onComplete: done,
       });
 
-      tl.to(letters, {
-        yPercent: 0,
-        opacity: 1,
+      // Baja el título (desde arriba) y se enfoca
+      tl.to(inner, {
+        y: 0,
+        autoAlpha: 1,
         filter: "blur(0px)",
-        duration: inDuration,
-        stagger,
-        delay: 0.05,
+        duration: 0.55,
+        ease: "expo.out",
       });
+
+      // Letras entran desde arriba una por una
+      tl.to(
+        letters,
+        {
+          yPercent: 0,
+          opacity: 1,
+          filter: "blur(0px)",
+          duration: inDuration,
+          stagger,
+          ease: "expo.out",
+        },
+        "<+0.05"
+      );
 
       tl.to({}, { duration: hold });
 
-      tl.to(letters, {
-        yPercent: -120,
-        opacity: 0,
-        filter: "blur(10px)",
-        duration: outDuration,
-        ease: "power3.in",
-        stagger: 0.03,
-      }, ">-0.05");
+      // Salida hacia arriba (se van para arriba)
+      tl.to(
+        letters,
+        {
+          yPercent: -120,
+          opacity: 0,
+          filter: "blur(10px)",
+          duration: outDuration,
+          ease: "power3.in",
+          stagger: 0.03,
+        },
+        ">-0.05"
+      );
 
-      tl.to(root, { autoAlpha: 0, duration: 0.2 }, "<+0.15");
+      tl.to(inner, { y: -12, autoAlpha: 0, filter: "blur(10px)", duration: 0.25 }, "<+0.05");
+      tl.to(root, { autoAlpha: 0, duration: 0.2 }, "<+0.12");
+
+      return () => tl.kill();
     }, root);
 
     return () => ctx.revert();
   }, [text, inDuration, outDuration, hold, stagger]);
 
   return (
-    <div ref={rootRef} className="loader" aria-hidden="true">
+    <div ref={rootRef}  data-cursor="blue" className="loader" aria-hidden="true">
       <div className="loader-title" role="presentation">
         <span className="loader-title-inner">
           {String(text).split("").map((ch, i) => (

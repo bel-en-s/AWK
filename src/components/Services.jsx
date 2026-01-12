@@ -1,55 +1,75 @@
-import { useLayoutEffect, useRef } from "react";
 import ServiceCard from "./ServiceCard";
 import "./Services.css";
 
-export default function Services() {
-  
+export default function Services({ inHero = false }) {
   const cards = [
     {
-      title: "Branding & Visual\nIdentity",
-      items: ["Naming", "Sistemas visuales", "Guías de marca"],
-      href: "#branding",
+      variant: "service",
+      title: "Content\n& Motion",
+      items: ["Visual content", "Renders", "Animaciones", "Assets para redes"],
+      href: "#content",
     },
     {
-      title: "UX/UI & Product\nDesign",
-      items: ["Websites", "Apps", "Dashboards", "Interfaces completas"],
-      href: "#product",
+      variant: "service",
+      title: "Prototipos &\nExperiencias\nInteractivas",
+      items: ["Flujos", "WebGL", "GSAP"],
+      href: "#prototypes",
     },
     {
-      title: "Concepts &\nCampaigns",
-      items: ["Conceptos", "Campañas", "Social-first"],
-      href: "#campaigns",
+      variant: "service",
+      title: "Consultoría\nCreativa",
+      items: ["Posicionamiento", "Narrativa de marca", "Estrategia"],
+      href: "#consultoria",
     },
     {
-      title: "Web & Motion\nDevelopment",
-      items: ["Landing premium", "GSAP", "Interacciones", "3D ready"],
-      href: "#dev",
+      variant: "service",
+      title: "Ads &\nPerformance\nCreative",
+      items: ["Creatividad para paid", "Social", "Banners", "y +"],
+      href: "#ads",
+    },
+    {
+      variant: "service",
+      title: "3D & VisualCraft",
+      items: ["Renders", "Escena", "Producto digital"],
+      href: "#3d",
+    },
+    {
+      variant: "cta",
+      title: "Start\na project",
+      ctaLabel: "LET'S TALK",
+      ctaHref: "#contact",
     },
   ];
 
   return (
-    <section className="svc" id="service" aria-label="Services">
+    <section
+      className={`svc ${inHero ? "svc--inHero" : ""}`}
+      id="service"
+      aria-label="Services"
+      style={
+        inHero ? { opacity: 0, visibility: "hidden", pointerEvents: "none" } : undefined
+      }
+    >
       <div className="svc-inner">
-        <div className="svc-fixed" aria-label="Intro card">
-          <div className="svc-fixedCard">
-            <p className="svc-fixedText">
-              Awake™ is a digital
-              <br />
-              product studio
-              <br />
-              crafting memorable
-              <br />
-              customer
-              <br />
-              experiences.
-            </p>
-          </div>
-        </div>
-
         <div className="svc-track" aria-label="Services horizontal track">
           <div className="svc-row">
+            {/* White intro card = primera card del carrusel (como Figma) */}
+            <div className="svc-introCard" aria-label="Intro card">
+              <p className="svc-introText">
+                Awake™ is a digital
+                <br />
+                product studio
+                <br />
+                crafting memorable
+                <br />
+                customer
+                <br />
+                experiences.
+              </p>
+            </div>
+
             {cards.map((c) => (
-              <ServiceCard key={c.title} title={c.title} items={c.items} href={c.href} />
+              <ServiceCard key={c.title} {...c} />
             ))}
           </div>
         </div>

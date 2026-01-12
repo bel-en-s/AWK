@@ -1,3 +1,4 @@
+
 .hero {
   position: relative;
   height: 100vh;
@@ -5,12 +6,6 @@
   background: var(--cream, #efe7d7);
 }
 
-.hero-title,
-.hero-talk,
-.hero-panel {
-  opacity: 0;
-  visibility: hidden;
-}
 
 .cursor-landing-wrap {
   position: absolute;
@@ -20,24 +15,23 @@
 }
 
 
-.hero--servicesMode .cursor-landing-wrap {
-
-  filter: none;
-}
-
 .hero-content {
   position: absolute;
-  top: clamp(18px, 3.2vh, 142px);
-  padding-top: 100px;
+  /* top: clamp(12px, 3.2vh, 142px); */
+
+
   left: var(--hero-center-x, 50%);
   transform: translateX(-50%);
+
   z-index: 5;
-  width: min(1120px, calc(100vw - 2 * clamp(16px, 3.6vw, 48px)));
+  width: min(1400px, calc(100vw - 2 * clamp(16px, 3.6vw, 56px)));
   max-width: 100%;
+
   display: flex;
   justify-content: center;
   pointer-events: none;
 }
+
 
 .hero-title {
   font-weight: 200;
@@ -46,96 +40,115 @@
   white-space: nowrap;
   color: #000;
   pointer-events: auto;
+
+  --title-size: clamp(156px, 18vw, 240px);
+  font-size: var(--title-size);
+
+
+  visibility: hidden;
+}
+.hero-title.is-ready {
+  visibility: visible;
 }
 
 .hero-title-letter {
   display: inline-block;
-  font-size: 3rem;
+  font-size: inherit;
   will-change: transform, opacity, filter;
   backface-visibility: hidden;
   transform: translateZ(0);
 }
 
-@media (max-width: 380px) {
-  .hero-title-letter { font-size: clamp(78px, 20vw, 260px); }
-  .hero-title { letter-spacing: -0.03em; }
+
+@media (min-width: 681px) {
+  .hero-title {
+    --title-size: clamp(72px, 12vw, 420px);
+    letter-spacing: -0.033em;
+  }
 }
+
 
 @media (min-width: 1280px) {
-  .hero-title-letter { font-size: clamp(140px, 16vw, 360px); }
+  .hero-title {
+    --title-size: clamp(560px, 12.5vw, 620px);
+    letter-spacing: -0.035em;
+  }
 }
 
 
-.hero-panel {
+/* Ajustes de layout en mobile */
+@media (max-width: 680px) {
+  .hero-content {
+    top: clamp(10px, 2.6vh, 40px);
+    padding-top: 0px;
+  }
+}
+
+
+.hero-copy {
   position: absolute;
   left: 10px;
   bottom: 10px;
 
-  width: 360px;
-  min-height: 160px;
+  width: min(340px, calc(100vw - 20px));
+  padding: 18px 18px 16px;
 
   background: #000;
-  border-radius: 0;
+  color: #fff;
+
 
   box-shadow: 0 18px 60px rgba(0, 0, 0, 0.18);
 
   z-index: 2000;
   overflow: hidden;
 
-  will-change: left, right, top, bottom, width, height, border-radius, background-color;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(14px, 2vw, 22px);
+
+  will-change: left, right, top, bottom, width, height, border-radius, padding;
+  transform: translateZ(0);
+    font-family: var(--font-alt, system-ui);
+    font-size: 50px;
+}
+
+.hero-copy-header {
+  flex: 0 0 auto;
+}
+
+.hero-copy-inner {
   transform: translateZ(0);
 }
 
-/* card que “morph-ea” */
-.hero-panelCard {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: calc(100% - 44px);
-
-  border: 1px solid transparent;
-  background: transparent;
-  border-radius: 0;
-  padding: 0;
-
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  will-change: left, top, width, height, border-radius, padding, background-color, box-shadow, border-color, transform;
-}
-
-/* texto */
-.hero-panelText {
+.hero-copy-text {
   margin: 0;
   font-family: var(--font-alt, system-ui);
   font-weight: 500;
+  font-size: clamp(18px, 1.35vw, 25px);
+  line-height: 1.35;
   letter-spacing: 0.01em;
   opacity: 0.92;
   text-decoration: underline;
-  text-align: center;
 }
 
-/* cuando la card ya es “tarjeta”, queremos texto a la izquierda */
-.hero-panelCard {
-  --card-mode: 0; /* 0=center, 1=left */
-}
-.hero-panelCard .hero-panelText {
-  text-align: center;
-}
-.hero-panelCard[style*="--card-mode: 1"] .hero-panelText {
-  text-align: left;
+/* (Si metés Services adentro) */
+.hero-services-wrap {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding-right: 6px;
 }
 
-/* CTA */
+/* =========================
+   CTA
+========================= */
 .hero-talk {
   position: absolute;
   right: clamp(16px, 3vw, 36px);
-  bottom: clamp(36px, 3vh, 56px);
+  bottom: clamp(24px, 3vh, 56px);
 
-  width: 200px;
-  height: 80px;
+  width: clamp(160px, 18vw, 220px);
+  height: clamp(64px, 7vw, 84px);
 
   display: grid;
   place-items: center;
@@ -147,7 +160,7 @@
   box-shadow: 0 18px 60px rgba(0, 0, 0, 0.22);
 
   font-family: var(--font-main, "VinaSans", sans-serif);
-  font-size: 22px;
+  font-size: clamp(18px, 1.4vw, 22px);
   letter-spacing: 0.16em;
   line-height: 1.05;
   text-transform: uppercase;
@@ -158,5 +171,48 @@
   will-change: transform, opacity;
   backface-visibility: hidden;
 
-  z-index: 3001;
+  transition: transform 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  z-index: 5;
+}
+
+
+.hero-content {
+  top: clamp(12px, 3.2vh, 142px);
+  padding: 0 !important; 
+}
+
+.hero-title {
+  margin: 0 !important; 
+  padding: 0 !important;
+}
+
+.hero-mid {
+  position: absolute;
+  left: var(--mid-x, 50%);
+  transform: translateX(-50%);
+  bottom: 50px;
+  z-index: 6;
+  pointer-events: none;
+}
+
+.hero-mid-text {
+  margin: 0;
+  color: #000;
+  font-family: var(--font-alt, system-ui);
+  font-weight: 500;
+  font-size: clamp(12px, 0.95vw, 16px);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: underline;
+  opacity: 0.9;
+  white-space: nowrap;
+}
+
+.type-letter {
+  display: inline-block;
+}
+.type-caret {
+  display: inline-block;
+  margin-left: 2px;
+  transform: translateY(-1px);
 }

@@ -3,9 +3,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 import CursorLanding from "./global/CursorLanding";
-import NavBar from "./global/Navbar";
 import Services from "./Services";
-
 import "./Hero.css";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -17,8 +15,10 @@ export default function Hero() {
   const heroRef = useRef(null);
   const cursorWrapRef = useRef(null);
   const titleRef = useRef(null);
-  const copyRef = useRef(null);
-  const copyInnerRef = useRef(null);
+
+  const copyBgRef = useRef(null);
+  const copyCardRef = useRef(null);
+
   const midRef = useRef(null);
   const talkRef = useRef(null);
 
@@ -36,7 +36,7 @@ export default function Hero() {
   useEffect(() => {
     if (!showCursor) return;
 
-    const el = copyRef.current;
+    const el = copyCardRef.current;
     if (!el) return;
 
     const cls = "nav-hover";
@@ -57,7 +57,7 @@ export default function Hero() {
     };
   }, [showCursor]);
 
-  // ====== Intro timeline ======
+  // ====== Intro timeline (igual vibe que tenías, pero aplicado a bg+card) ======
   useLayoutEffect(() => {
     if (!showCursor) return;
 
@@ -66,11 +66,14 @@ export default function Hero() {
     const heroEl = heroRef.current;
     const wrap = cursorWrapRef.current;
     const title = titleRef.current;
-    const copyEl = copyRef.current;
+
+    const bg = copyBgRef.current;
+    const card = copyCardRef.current;
+
     const midEl = midRef.current;
     const talkEl = talkRef.current;
 
-    if (!heroEl || !wrap || !title || !copyEl || !midEl || !talkEl) return;
+    if (!heroEl || !wrap || !title || !bg || !card || !midEl || !talkEl) return;
 
     const letters = title.querySelectorAll(".hero-title-letter");
     const typeLetters = midEl.querySelectorAll(".type-letter");
@@ -80,7 +83,7 @@ export default function Hero() {
       window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
 
     const ctx = gsap.context(() => {
-      gsap.killTweensOf([wrap, letters, copyEl, talkEl, typeLetters, caret]);
+      gsap.killTweensOf([wrap, letters, bg, card, talkEl, typeLetters, caret]);
 
       gsap.set(wrap, { autoAlpha: 0, scale: 0.9, y: 10, filter: "blur(10px)" });
 
@@ -95,7 +98,9 @@ export default function Hero() {
         force3D: true,
       });
 
-      gsap.set(copyEl, { autoAlpha: 0, y: 10, filter: "blur(10px)" });
+      gsap.set(bg, { autoAlpha: 0, y: 10, filter: "blur(10px)" });
+      gsap.set(card, { autoAlpha: 0, y: 10, filter: "blur(10px)" });
+
       gsap.set(midEl, { autoAlpha: 1 });
       gsap.set(typeLetters, { autoAlpha: 0 });
       if (caret) gsap.set(caret, { autoAlpha: 0 });
@@ -104,13 +109,8 @@ export default function Hero() {
 
       if (prefersReduced) {
         gsap.set(wrap, { autoAlpha: 1, scale: 1, y: 0, filter: "blur(0px)" });
-        gsap.set(letters, {
-          yPercent: 0,
-          rotateX: 0,
-          autoAlpha: 1,
-          filter: "blur(0px)",
-        });
-        gsap.set(copyEl, { autoAlpha: 1, y: 0, filter: "blur(0px)" });
+        gsap.set(letters, { yPercent: 0, rotateX: 0, autoAlpha: 1, filter: "blur(0px)" });
+        gsap.set([bg, card], { autoAlpha: 1, y: 0, filter: "blur(0px)" });
         gsap.set(typeLetters, { autoAlpha: 1 });
         if (caret) gsap.set(caret, { autoAlpha: 1 });
         gsap.set(talkEl, { autoAlpha: 1, y: 0, filter: "blur(0px)" });
@@ -120,18 +120,7 @@ export default function Hero() {
 
       const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
-      tl.to(
-        wrap,
-        {
-          autoAlpha: 1,
-          scale: 1,
-          y: 0,
-          filter: "blur(0px)",
-          duration: 0.8,
-          ease: "power3.out",
-        },
-        0
-      );
+      tl.to(wrap, { autoAlpha: 1, scale: 1, y: 0, filter: "blur(0px)", duration: 0.8 }, 0);
 
       tl.to(
         letters,
@@ -149,17 +138,7 @@ export default function Hero() {
 
       tl.add(() => setShowNav(true), ">+=0.12");
 
-      tl.to(
-        copyEl,
-        {
-          autoAlpha: 1,
-          y: 0,
-          filter: "blur(0px)",
-          duration: 0.55,
-          ease: "expo.out",
-        },
-        ">-0.05"
-      );
+      tl.to([bg, card], { autoAlpha: 1, y: 0, filter: "blur(0px)", duration: 0.55, ease: "expo.out" }, ">-0.05");
 
       let caretTween = null;
 
@@ -176,11 +155,7 @@ export default function Hero() {
         tl.add(() => caretTween?.play(), "<");
       }
 
-      tl.to(
-        typeLetters,
-        { autoAlpha: 1, duration: 0.0001, stagger: 0.03, ease: "none" },
-        ">-0.05"
-      );
+      tl.to(typeLetters, { autoAlpha: 1, duration: 0.0001, stagger: 0.03, ease: "none" }, ">-0.05");
 
       if (caret) {
         tl.add(() => {
@@ -191,17 +166,7 @@ export default function Hero() {
         tl.to(caret, { autoAlpha: 0, duration: 0.18, ease: "none" }, ">-0.02");
       }
 
-      tl.to(
-        talkEl,
-        {
-          autoAlpha: 1,
-          y: 0,
-          filter: "blur(0px)",
-          duration: 0.6,
-          ease: "expo.out",
-        },
-        ">-0.05"
-      );
+      tl.to(talkEl, { autoAlpha: 1, y: 0, filter: "blur(0px)", duration: 0.6, ease: "expo.out" }, ">-0.05");
 
       return () => tl.kill();
     }, heroEl);
@@ -248,24 +213,14 @@ export default function Hero() {
       window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
 
     const ctx = gsap.context(() => {
-      gsap.set(el, {
-        rotateZ: -8,
-        transformOrigin: "50% 50%",
-        willChange: "transform",
-        force3D: true,
-      });
+      gsap.set(el, { rotateZ: -8, transformOrigin: "50% 50%", willChange: "transform", force3D: true });
 
       let wiggle = null;
 
       const enter = () => {
         if (prefersReduced) return;
 
-        gsap.to(el, {
-          rotateZ: 6,
-          duration: 0.32,
-          ease: "expo.out",
-          overwrite: "auto",
-        });
+        gsap.to(el, { rotateZ: 6, duration: 0.32, ease: "expo.out", overwrite: "auto" });
 
         wiggle?.kill();
         wiggle = gsap.to(el, {
@@ -284,12 +239,7 @@ export default function Hero() {
         wiggle?.kill();
         wiggle = null;
 
-        gsap.to(el, {
-          rotateZ: -8,
-          duration: 0.55,
-          ease: "expo.out",
-          overwrite: "auto",
-        });
+        gsap.to(el, { rotateZ: -8, duration: 0.55, ease: "expo.out", overwrite: "auto" });
       };
 
       el.addEventListener("pointerenter", enter);
@@ -305,38 +255,69 @@ export default function Hero() {
     return () => ctx.revert();
   }, []);
 
-  // ====== MASTER PIN: HERO -> SERVICES (AZUL) + HORIZONTAL SCROLL ======
+  // ====== MASTER PIN: bg black -> fullscreen blue + card morph a white slot ======
   useLayoutEffect(() => {
     if (!showCursor) return;
 
     const heroEl = heroRef.current;
-    const copyEl = copyRef.current;
-    const copyInner = copyInnerRef.current;
+    const bg = copyBgRef.current;
+    const card = copyCardRef.current;
     const title = titleRef.current;
     const midEl = midRef.current;
     const talkEl = talkRef.current;
 
-    if (!heroEl || !copyEl) return;
+    if (!heroEl || !bg || !card) return;
 
     const ctx = gsap.context(() => {
       const svc = heroEl.querySelector(".svc");
-      const svcIntroCard = heroEl.querySelector(".svc-introCard");
+      const svcIntroCard = heroEl.querySelector(".svc-introCard"); // ocupa espacio
       const svcTrack = heroEl.querySelector(".svc-track");
       const svcRow = heroEl.querySelector(".svc-row");
 
-      // ✅ FIX: antes chequeabas svcFixedCard (no existe) y rompía todo
       if (!svc || !svcIntroCard || !svcTrack || !svcRow) return;
 
       const prefersReduced =
         window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
 
-      gsap.set(copyEl, { clearProps: "top,right" });
+      const getDist = () => Math.max(0, svcRow.scrollWidth - svcTrack.clientWidth);
+
+      // Estado base y mediciones consistentes
+      const resetForMeasure = () => {
+        gsap.set([bg, card], {
+          clearProps: "top,right,width,height",
+        });
+        gsap.set(bg, { left: 10, bottom: 10, top: "auto", right: "auto" });
+        gsap.set(card, { left: 10, bottom: 10, top: "auto", right: "auto" });
+      };
+
+      const measure = () => {
+        resetForMeasure();
+
+        // fijamos width/height iniciales (auto no anima bien)
+        const bgR = bg.getBoundingClientRect();
+        const cR = card.getBoundingClientRect();
+
+        gsap.set(bg, { width: bgR.width, height: bgR.height });
+        gsap.set(card, { width: cR.width, height: cR.height });
+
+        const heroR = heroEl.getBoundingClientRect();
+        const to = svcIntroCard.getBoundingClientRect();
+
+        return {
+          heroLeft: heroR.left,
+          heroTop: heroR.top,
+          toLeft: to.left,
+          toTop: to.top,
+          toW: to.width,
+          toH: to.height,
+        };
+      };
 
       gsap.set(svc, { autoAlpha: 0, pointerEvents: "none" });
-      gsap.set(svcIntroCard, { autoAlpha: 0, y: 10, filter: "blur(10px)" });
       gsap.set(svcRow, { x: 0 });
 
-      const getDist = () => Math.max(0, svcRow.scrollWidth - svcTrack.clientWidth);
+      // clave: NO mostrar la introCard real (evita duplicado) pero deja layout
+      gsap.set(svcIntroCard, { autoAlpha: 0 });
 
       if (prefersReduced) {
         ScrollTrigger.create({
@@ -346,6 +327,12 @@ export default function Hero() {
         });
         return;
       }
+
+      const onRefreshInit = () => {
+        resetForMeasure();
+        gsap.set(svcRow, { x: 0 });
+      };
+      ScrollTrigger.addEventListener("refreshInit", onRefreshInit);
 
       const tl = gsap.timeline({
         scrollTrigger: {
@@ -359,17 +346,17 @@ export default function Hero() {
         },
       });
 
+      // 1) BG (negro) se expande a fullscreen
       tl.to(
-        copyEl,
+        bg,
         {
           left: 0,
           bottom: 0,
           top: 0,
           right: 0,
-          width: "100%",
-          height: "100%",
+          width: () => window.innerWidth,
+          height: () => window.innerHeight,
           borderRadius: 0,
-          padding: "clamp(18px, 3vw, 44px)",
           boxShadow: "none",
           ease: "none",
           duration: 0.52,
@@ -377,39 +364,56 @@ export default function Hero() {
         0
       );
 
-      if (copyInner) tl.to(copyInner, { y: 0, ease: "none", duration: 0.52 }, 0);
-
+      // 2) Apaga UI del hero
       tl.to(
         [title, midEl, talkEl],
         { autoAlpha: 0, filter: "blur(10px)", duration: 0.18, ease: "none" },
-        0.28
+        0.22
       );
 
+      // 3) BG cambia a azul (mientras expande)
       tl.to(
-        copyEl,
+        bg,
         {
           backgroundColor: "var(--svc-blue, #0A25FF)",
-          color: "#fff",
           duration: 0.18,
           ease: "none",
         },
-        0.34
+        0.30
       );
 
-      tl.set(copyEl, { zIndex: 0 }, 0.50);
+      // 4) Services aparece (sin “flash”, porque el azul ya viene del bg)
+      tl.to(svc, { autoAlpha: 1, duration: 0.12, ease: "none" }, 0.40);
+      tl.set(svc, { pointerEvents: "auto" }, 0.42);
 
-      tl.to(svc, { autoAlpha: 1, duration: 0.12, ease: "none" }, 0.52);
-      tl.set(svc, { pointerEvents: "auto" }, 0.54);
-
-      tl.to(copyInner, { autoAlpha: 0, duration: 0.12, ease: "none" }, 0.52);
-
-      // ✅ intro white card aparece (selector correcto)
+      // 5) La card (con texto) MORPHEA a la blanca, hacia el slot de la introCard
       tl.to(
-        svcIntroCard,
-        { autoAlpha: 1, y: 0, filter: "blur(0px)", duration: 0.18, ease: "expo.out" },
-        0.54
+        card,
+        {
+          left: () => {
+            const m = measure();
+            return Math.round(m.toLeft - m.heroLeft);
+          },
+          top: () => {
+            const m = measure();
+            return Math.round(m.toTop - m.heroTop);
+          },
+          bottom: "auto",
+          right: "auto",
+          width: () => Math.round(measure().toW),
+          height: () => Math.round(measure().toH),
+          backgroundColor: "#fff",
+          color: "#000",
+          padding: "24px",
+          borderRadius: "22px",
+          boxShadow: "0 18px 50px rgba(0,0,0,0.18)",
+          ease: "none",
+          duration: 0.34,
+        },
+        0.18
       );
 
+      // 6) Horizontal scroll
       tl.to(
         svcRow,
         {
@@ -425,6 +429,7 @@ export default function Hero() {
 
       return () => {
         window.removeEventListener("load", onLoad);
+        ScrollTrigger.removeEventListener("refreshInit", onRefreshInit);
         tl.kill();
       };
     }, heroEl);
@@ -436,14 +441,8 @@ export default function Hero() {
 
   return (
     <section ref={heroRef} className="hero hero--withServices">
-      {/* {showNav && <NavBar show={showNav} />} */}
-
       {showCursor && (
-        <div
-          ref={cursorWrapRef}
-          className="cursor-landing-wrap"
-          style={{ opacity: 0, visibility: "hidden" }}
-        >
+        <div ref={cursorWrapRef} className="cursor-landing-wrap" style={{ opacity: 0, visibility: "hidden" }}>
           <CursorLanding activeAreaRef={heroRef} />
         </div>
       )}
@@ -464,28 +463,30 @@ export default function Hero() {
         </h1>
       </div>
 
+      {/* BG (negro -> fullscreen azul) */}
       <div
-        ref={copyRef}
+        ref={copyBgRef}
+        className="hero-copy-bg"
+        aria-hidden="true"
+        style={{ opacity: 0, visibility: "hidden" }}
+      />
+
+      {/* CARD (texto) — es el MISMO div que morphea a la card blanca */}
+      <div
+        ref={copyCardRef}
         data-cursor="blue"
-        className="hero-copy"
+        className="hero-copy-card"
         role="note"
         aria-label="Awake intro"
         tabIndex={0}
         style={{ opacity: 0, visibility: "hidden" }}
       >
-        <div ref={copyInnerRef} className="hero-copy-inner">
-          <p className="hero-copy-text">
-            Awake™ is a digital product studio crafting memorable customer experiences.
-          </p>
-        </div>
+        <p className="hero-copy-text">
+          Awake™ is a digital product studio crafting memorable customer experiences.
+        </p>
       </div>
 
-      <div
-        ref={midRef}
-        className="hero-mid"
-        aria-label={TYPE_TEXT}
-        style={{ opacity: 0, visibility: "hidden" }}
-      >
+      <div ref={midRef} className="hero-mid" aria-label={TYPE_TEXT} style={{ opacity: 0, visibility: "hidden" }}>
         <p className="hero-mid-text" aria-hidden="true">
           {TYPE_TEXT.split("").map((ch, i) => (
             <span key={i} className="type-letter">

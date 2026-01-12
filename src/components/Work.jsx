@@ -3,9 +3,9 @@ import "./Work.css";
 
 const PROJECTS = [
   {
-    title: "Redroom Gesture 14",
+    title: "Motion Clinic",
     image: "images/portfolio/1.jpg",
-    category: "Concept Series",
+    category: "Creative Web Design",
     year: "2025",
   },
   {

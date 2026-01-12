@@ -53,8 +53,7 @@ export default function Services({ inHero = false }) {
       <div className="svc-inner">
         <div className="svc-track" aria-label="Services horizontal track">
           <div className="svc-row">
-            {/* White intro card = primera card del carrusel (como Figma) */}
-            <div className="svc-introCard" aria-label="Intro card">
+            <div className="svc-introCard" data-intro-card aria-label="Intro card">
               <p className="svc-introText">
                 Awake™ is a digital
                 <br />

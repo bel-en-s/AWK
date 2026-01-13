@@ -1,5 +1,10 @@
+
 :root {
   --svc-blue: #0A25FF;
+
+  /* ✅ mínimo “cuadrado figma” (no se achica más que esto) */
+  --hero-copy-min: 340px;
+  --hero-copy-min-mobile: 300px;
 }
 
 /* =========================
@@ -84,7 +89,7 @@
 
 @media (max-width: 680px) {
   .hero-content {
-    top: clamp(10px, 2.6vh, 40px);
+    top: 350px;
   }
 }
 
@@ -97,51 +102,77 @@
   left: 10px;
   bottom: 10px;
 
-  width: min(340px, calc(100vw - 20px));
-  /* height inicial viene de GSAP (medición), por eso no la hardcodeamos */
-  height: auto;
+  /* base: cuadrado mínimo */
+  width: var(--hero-copy-min);
+  height: var(--hero-copy-min);
+
+  /* en mobile, baja el mínimo */
+  max-width: calc(100vw - 20px);
 
   background: #000;
   border-radius: 22px;
   box-shadow: 0 18px 60px rgba(0, 0, 0, 0.18);
 
-  z-index: 4; /* atrás de Services */
+  z-index: 4;
   pointer-events: none;
 
   overflow: hidden;
   will-change: left, right, top, bottom, width, height, border-radius, background-color;
+
+  opacity: 1;
+  visibility: visible;
+}
+
+@media (max-width: 680px) {
+  .hero-copy-bg {
+    width: var(--hero-copy-min-mobile);
+    height: var(--hero-copy-min-mobile);
+  }
 }
 
 /* =========================
    MORPH CARD (TEXT)
-   (este ES el div que morphea a la card blanca)
 ========================= */
 .hero-copy-card {
   position: absolute;
   left: 10px;
   bottom: 10px;
 
-  width: min(340px, calc(100vw - 20px));
+  /* ✅ que no se achique más que el mínimo */
+  width: var(--hero-copy-min);
+  max-width: calc(100vw - 20px);
+
+  /* el texto puede crecer en alto, pero el BG ya es cuadrado */
   height: auto;
 
   padding: 18px 18px 16px;
 
   color: #fff;
-  background: transparent; /* se vuelve blanca con GSAP */
+  background: transparent;
   border-radius: 22px;
 
-  z-index: 7; /* arriba de Services */
+  z-index: 7;
   pointer-events: auto;
 
   box-sizing: border-box;
   will-change: left, right, top, bottom, width, height, border-radius, padding, background-color, color, box-shadow;
+
+  opacity: 1;
+  visibility: visible;
+}
+
+@media (max-width: 680px) {
+  .hero-copy-card {
+    width: var(--hero-copy-min-mobile);
+  }
+
 }
 
 .hero-copy-text {
   margin: 0;
   font-family: var(--font-alt, system-ui);
   font-weight: 500;
-  font-size: clamp(18px, 1.35vw, 25px);
+  font-size: 23px;
   line-height: 1.35;
   letter-spacing: 0.01em;
   opacity: 0.92;
@@ -158,13 +189,9 @@
   position: absolute;
   inset: 0;
   z-index: 5;
-  /* importante: el azul “real” viene del bg expandible,
-     Services puede quedar transparente */
   background: transparent;
 }
 
-/* ✅ evita duplicado: la introCard real NO se ve,
-   pero sigue ocupando espacio en el carrusel */
 .svc--inHero .svc-introCard {
   opacity: 0 !important;
   pointer-events: none !important;
@@ -214,7 +241,7 @@
 ========================= */
 .hero-talk {
   position: absolute;
-  right: clamp(16px, 3vw, 36px);
+  right:200px;
   bottom: clamp(24px, 3vh, 56px);
 
   width: clamp(160px, 18vw, 220px);
@@ -240,7 +267,17 @@
   transform-origin: 50% 50%;
   will-change: transform, opacity;
   backface-visibility: hidden;
-
+  margin-bottom: 20vh;
   transition: transform 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
   z-index: 9;
+}
+
+.hero-copy-bg {
+  border-radius: 0;
+  height: 180px;
+}
+
+html.is-scroll-locked,
+body.is-scroll-locked {
+  overscroll-behavior: none;
 }

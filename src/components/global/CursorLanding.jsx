@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 
 export default function CursorLanding({
   cursorSrc = `${import.meta.env.BASE_URL}images/cursor.svg`,
-  blueCursorSrc = `${import.meta.env.BASE_URL}images/cursor-blue.svg`, // ✅
+  blueCursorSrc = `${import.meta.env.BASE_URL}images/cursor-blue.svg`,
   eyesSrc = `${import.meta.env.BASE_URL}images/ojos.svg`,
   trailSrc = `${import.meta.env.BASE_URL}images/trail.svg`,
 
@@ -56,7 +56,10 @@ export default function CursorLanding({
   enterTrail = true,
 
   // ✅ cursor modes por data-attribute
-  cursorAttr = "data-cursor", // por si querés custom
+  cursorAttr = "data-cursor",
+
+  // ✅ NUEVO: evento global para ocultar/mostrar ojos (desde Hero)
+  eyesEventName = "awk:eyes", // dispatch: window.dispatchEvent(new CustomEvent("awk:eyes",{detail:{show:false}}))
 }) {
   const rafRef = useRef(null);
   const overlayRef = useRef(null);
@@ -98,6 +101,9 @@ export default function CursorLanding({
 
     let lastInputAt = performance.now();
 
+    // ✅ NUEVO: flag global para forzar oculto (Services)
+    let eyesForceHidden = false;
+
     // -------------------------
     // Cursor MODE (data-cursor)
     // -------------------------
@@ -108,7 +114,6 @@ export default function CursorLanding({
       if (mode === cursorMode) return;
       cursorMode = mode;
 
-      // ✅ NORMAL: "difference" (destaca sobre fondos claros)
       if (mode === "normal") {
         cursorEl.src = cursorSrc;
         cursorEl.style.mixBlendMode = "difference";
@@ -118,7 +123,6 @@ export default function CursorLanding({
         return;
       }
 
-      // ✅ BLUE: fijo y legible sobre negro (sin blend)
       if (mode === "blue") {
         cursorEl.src = blueCursorSrc;
         cursorEl.style.mixBlendMode = "normal";
@@ -128,7 +132,6 @@ export default function CursorLanding({
         return;
       }
 
-      // ✅ INVERT: fuerza blanco + difference (por si lo querés)
       if (mode === "invert") {
         cursorEl.src = cursorSrc;
         cursorEl.style.mixBlendMode = "difference";
@@ -154,9 +157,6 @@ export default function CursorLanding({
       applyCursorMode(to);
     };
 
-    // -------------------------
-    // Active area logic (eyes)
-    // -------------------------
     const computeInside = (x, y) => {
       if (!eyesOnlyInside) return true;
       const el = activeAreaRef?.current;
@@ -167,7 +167,10 @@ export default function CursorLanding({
 
     const setEyesVisible = (v) => {
       if (!eyesEl) return;
-      const target = v ? eyesOpacity : 0;
+
+      // ✅ respeta forzado oculto
+      const want = v && !eyesForceHidden;
+      const target = want ? eyesOpacity : 0;
 
       if (gsap) {
         gsap.to(eyesEl, {
@@ -187,9 +190,11 @@ export default function CursorLanding({
 
       lastInside = inside;
       enteredInside = inside;
+
+      // ✅ si estás en services, siempre oculto aunque “inside”
       setEyesVisible(inside);
 
-      if (inside) {
+      if (inside && !eyesForceHidden) {
         eyes.x = mouse.x;
         eyes.y = mouse.y;
         prevEyes.x = eyes.x;
@@ -238,7 +243,6 @@ export default function CursorLanding({
         isolation: "auto",
       });
 
-      // ✅ mejor para blend (y más standard)
       document.body.appendChild(overlay);
       overlayRef.current = overlay;
     };
@@ -264,9 +268,6 @@ export default function CursorLanding({
         zIndex: "3",
         transform: "translate3d(0,0,0)",
         backfaceVisibility: "hidden",
-
-        // ✅ default mode
-        mixBlendMode: "difference",
         filter:
           "drop-shadow(0 0 8px rgba(255,255,255,0.25)) drop-shadow(0 0 1px rgba(0,0,0,0.35))",
       });
@@ -301,6 +302,8 @@ export default function CursorLanding({
     };
 
     const makeTrail = (x, y) => {
+      // ✅ si ojos están forzados ocultos, NO trail
+      if (eyesForceHidden) return;
       if (!gsap || !overlay) return;
 
       const img = document.createElement("img");
@@ -369,6 +372,38 @@ export default function CursorLanding({
     };
 
     // -------------------------
+    // ✅ NUEVO: evento externo para ocultar/mostrar ojos
+    // -------------------------
+    const setEyesForcedHidden = (hidden) => {
+      eyesForceHidden = !!hidden;
+
+      // si los ocultás, además reseteá “inside” para que al volver aparezcan limpios
+      if (eyesForceHidden) {
+        setEyesVisible(false);
+      } else {
+        // re-sincroniza instant con estado actual
+        const inside = computeInside(mouse.x, mouse.y);
+        lastInside = inside;
+        setEyesVisible(inside);
+
+        // reengancha posición para que no “salten”
+        eyes.x = mouse.x;
+        eyes.y = mouse.y;
+        prevEyes.x = eyes.x;
+        prevEyes.y = eyes.y;
+        prevMouse.x = mouse.x;
+        prevMouse.y = mouse.y;
+      }
+    };
+
+    const onEyesEvent = (e) => {
+      // soporta: detail.show (boolean) o detail.hidden
+      const d = e?.detail || {};
+      if (typeof d.show === "boolean") setEyesForcedHidden(!d.show);
+      else if (typeof d.hidden === "boolean") setEyesForcedHidden(d.hidden);
+    };
+
+    // -------------------------
     // Start
     // -------------------------
     const start = async () => {
@@ -381,9 +416,12 @@ export default function CursorLanding({
       createEyes();
       createCursor();
 
-      // ✅ escucha data-cursor global (sirve aunque haya pointer-events none arriba)
+      // ✅ escucha data-cursor global
       document.addEventListener("pointerover", onOver, true);
       document.addEventListener("pointerout", onOut, true);
+
+      // ✅ escucha toggle ojos desde Hero
+      window.addEventListener(eyesEventName, onEyesEvent);
 
       lastInside = computeInside(mouse.x, mouse.y);
       setEyesVisible(lastInside);
@@ -431,6 +469,12 @@ export default function CursorLanding({
         const cx = cursor.x - cursorSize * cursorAnchor.x;
         const cy = cursor.y - cursorSize * cursorAnchor.y;
         if (cursorEl) cursorEl.style.transform = `translate3d(${cx}px, ${cy}px, 0)`;
+
+        // ✅ si ojos están forzados ocultos, no proceses física ni trails
+        if (eyesForceHidden) {
+          rafRef.current = requestAnimationFrame(animate);
+          return;
+        }
 
         if (lastInside) {
           const vxe = eyes.x - prevEyes.x;
@@ -500,6 +544,8 @@ export default function CursorLanding({
       document.removeEventListener("pointerover", onOver, true);
       document.removeEventListener("pointerout", onOut, true);
 
+      window.removeEventListener(eyesEventName, onEyesEvent);
+
       window.removeEventListener("pointermove", handlePointerMove);
       window.removeEventListener("touchstart", onTouchStart);
       window.removeEventListener("touchmove", onTouchMove);
@@ -554,6 +600,7 @@ export default function CursorLanding({
     autoTrailEveryMs,
     enterTrail,
     cursorAttr,
+    eyesEventName,
   ]);
 
   return null;

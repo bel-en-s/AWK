@@ -10,7 +10,7 @@ const PROJECTS = [
   },
   {
     title: "Shadowwear 6AM",
-    image: "images/portfolio/img_2.jpg",
+    image: "images/portfolio/2.jpg",
     category: "Photography",
     year: "2024",
   },
@@ -22,7 +22,7 @@ const PROJECTS = [
   },
   {
     title: "Sunglass Operator",
-    image: "images/portfolio/img_4.jpg",
+    image: "images/portfolio/4.jpg",
     category: "Editorial Motion",
     year: "2023",
   },

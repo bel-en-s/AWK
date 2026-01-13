@@ -195,10 +195,14 @@ export default function NavBar({ show = true }) {
       playIntro();
     };
     document.addEventListener("astro:page-load", onPageLoad);
-    cleanups.push(() => document.removeEventListener("astro:page-load", onPageLoad));
+    cleanups.push(() =>
+      document.removeEventListener("astro:page-load", onPageLoad)
+    );
 
-    const addHoverClass = () => document.documentElement.classList.add("nav-hover");
-    const removeHoverClass = () => document.documentElement.classList.remove("nav-hover");
+    const addHoverClass = () =>
+      document.documentElement.classList.add("nav-hover");
+    const removeHoverClass = () =>
+      document.documentElement.classList.remove("nav-hover");
 
     root.addEventListener("pointerenter", addHoverClass);
     root.addEventListener("pointerleave", removeHoverClass);
@@ -314,7 +318,9 @@ export default function NavBar({ show = true }) {
           <a
             key={l.href}
             href={l.href}
-            className={`nav-chip nav-anim ${i % 2 === 0 ? "is-square" : "is-pill"}`}
+            className={`nav-chip nav-anim ${
+              i % 2 === 0 ? "is-square" : "is-pill"
+            }`}
           >
             {l.label}
           </a>

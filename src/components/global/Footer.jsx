@@ -156,14 +156,14 @@ export default function Footer({ show = true }) {
         </div>
 
         <div className="awk-footer__bottom" aria-label="Footer info">
-          <div className="awk-footer__meta awk-footer__meta--left">
-            <span className="awk-footer__mono">Contact_sebastian@awk.agency</span>
-          </div>
+        
 
           <div className="awk-footer__logo" aria-label="AWK logo">
             <img className="awk-footer__eyes" src={eyesSrc} alt="" />
           </div>
-
+  <div className="awk-footer__meta awk-footer__meta--left">
+            <span className="awk-footer__mono">Contact_sebastian@awk.agency</span>
+          </div>
           <div className="awk-footer__meta awk-footer__meta--right">
             <span className="awk-footer__mono">Based in_Miami_Buenos Aires</span>
           </div>

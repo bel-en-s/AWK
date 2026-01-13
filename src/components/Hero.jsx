@@ -1,4 +1,5 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+// Hero.jsx
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -9,9 +10,21 @@ import "./Hero.css";
 gsap.registerPlugin(ScrollTrigger);
 
 export default function Hero() {
+  // =========================
+  // State
+  // =========================
   const [showCursor, setShowCursor] = useState(false);
   const [showNav, setShowNav] = useState(false);
 
+  // "bootReady" = ya setee presets iniciales (evita micro-flicker)
+  const [bootReady, setBootReady] = useState(false);
+
+  // "unlockScroll" = cuando termina intro + triggers listos
+  const [unlockScroll, setUnlockScroll] = useState(false);
+
+  // =========================
+  // Refs
+  // =========================
   const heroRef = useRef(null);
   const cursorWrapRef = useRef(null);
   const titleRef = useRef(null);
@@ -22,6 +35,140 @@ export default function Hero() {
   const midRef = useRef(null);
   const talkRef = useRef(null);
 
+  // =========================
+  // Constants
+  // =========================
+  const TYPE_TEXT = useMemo(() => "Creative digital experiences", []);
+
+  // =========================
+  // Helpers
+  // =========================
+ const lockScroll = (locked) => {
+  const html = document.documentElement;
+  const body = document.body;
+
+  // guarda scroll actual
+  if (locked) {
+    if (window.__AWK_SCROLL_LOCKED__) return;
+
+    const y = window.scrollY || window.pageYOffset || 0;
+    window.__AWK_SCROLL_LOCKED__ = true;
+    window.__AWK_SCROLL_Y__ = y;
+
+    html.classList.add("is-scroll-locked");
+    body.classList.add("is-scroll-locked");
+
+    // el truco real: body fixed
+    body.style.position = "fixed";
+    body.style.top = `-${y}px`;
+    body.style.left = "0";
+    body.style.right = "0";
+    body.style.width = "100%";
+    body.style.overflow = "hidden";
+    body.style.touchAction = "none";
+
+    const prevent = (e) => e.preventDefault();
+    const onKeyLock = (e) => {
+      const keys = ["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", " "];
+      if (keys.includes(e.key)) e.preventDefault();
+    };
+
+    window.__AWK_PREVENT_SCROLL__ = prevent;
+    window.__AWK_KEYLOCK__ = onKeyLock;
+
+    window.addEventListener("wheel", prevent, { passive: false });
+    window.addEventListener("touchmove", prevent, { passive: false });
+    window.addEventListener("keydown", onKeyLock, { passive: false });
+
+    // por si algún browser igual dispara scroll:
+    const hardClamp = () => window.scrollTo(0, 0);
+    window.__AWK_HARDCLAMP__ = hardClamp;
+    window.addEventListener("scroll", hardClamp, { passive: true });
+
+    // dejalo arriba sí o sí
+    window.scrollTo(0, 0);
+
+    return;
+  }
+
+  if (!window.__AWK_SCROLL_LOCKED__) return;
+
+  window.__AWK_SCROLL_LOCKED__ = false;
+
+  html.classList.remove("is-scroll-locked");
+  body.classList.remove("is-scroll-locked");
+
+  const y = window.__AWK_SCROLL_Y__ || 0;
+
+  body.style.position = "";
+  body.style.top = "";
+  body.style.left = "";
+  body.style.right = "";
+  body.style.width = "";
+  body.style.overflow = "";
+  body.style.touchAction = "";
+
+  const prevent = window.__AWK_PREVENT_SCROLL__;
+  const onKeyLock = window.__AWK_KEYLOCK__;
+  const hardClamp = window.__AWK_HARDCLAMP__;
+
+  if (prevent) {
+    window.removeEventListener("wheel", prevent);
+    window.removeEventListener("touchmove", prevent);
+    window.__AWK_PREVENT_SCROLL__ = null;
+  }
+  if (onKeyLock) {
+    window.removeEventListener("keydown", onKeyLock);
+    window.__AWK_KEYLOCK__ = null;
+  }
+  if (hardClamp) {
+    window.removeEventListener("scroll", hardClamp);
+    window.__AWK_HARDCLAMP__ = null;
+  }
+
+  // restaurá scroll real
+  window.scrollTo(0, y);
+};
+
+
+  const waitForLayoutStability = async (rootEl, timeoutMs = 1200) => {
+    // Espera fonts + imágenes del hero (pero con timeout)
+    const waitFonts = async () => {
+      try {
+        if (document.fonts?.ready) await document.fonts.ready;
+      } catch (_) {}
+    };
+
+    const waitImages = async () => {
+      try {
+        const imgs = Array.from(rootEl.querySelectorAll("img"));
+        if (!imgs.length) return;
+
+        await Promise.all(
+          imgs.map(
+            (img) =>
+              new Promise((res) => {
+                if (img.complete) return res();
+                const done = () => res();
+                img.addEventListener("load", done, { once: true });
+                img.addEventListener("error", done, { once: true });
+              })
+          )
+        );
+      } catch (_) {}
+    };
+
+    const withTimeout = (p) =>
+      Promise.race([p, new Promise((res) => setTimeout(res, timeoutMs))]);
+
+    await withTimeout(Promise.all([waitFonts(), waitImages()]));
+  };
+
+  // =========================
+  // Show cursor gate:
+  // - si loader ya pasó, mostramos al toque
+  // - si no, esperamos awk:loaded
+  // =========================
   useEffect(() => {
     const already = !!window.__AWK_LOADED__;
     if (already) {
@@ -33,6 +180,48 @@ export default function Hero() {
     return () => window.removeEventListener("awk:loaded", onLoaded);
   }, []);
 
+  // =========================
+  // Astro SPA: entrar desde otra página
+  // - forzar scroll top
+  // - matar triggers viejos (pins colgados)
+  // - refresh fuerte al page-load
+  // =========================
+  useLayoutEffect(() => {
+    const killAllTriggers = () => {
+      try {
+        ScrollTrigger.getAll().forEach((t) => t.kill(true));
+        ScrollTrigger.clearScrollMemory?.();
+      } catch (_) {}
+    };
+
+    const onPageLoad = () => {
+      // Astro a veces preserva scroll al navegar
+      // Para un hero que depende del pin, conviene arrancar arriba.
+      window.scrollTo(0, 0);
+
+      // Refresh en frames para que mida bien después del swap
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          ScrollTrigger.refresh(true);
+        });
+      });
+      setTimeout(() => ScrollTrigger.refresh(true), 0);
+    };
+
+    document.addEventListener("astro:before-swap", killAllTriggers);
+    document.addEventListener("astro:page-load", onPageLoad);
+    document.addEventListener("astro:after-swap", onPageLoad);
+
+    return () => {
+      document.removeEventListener("astro:before-swap", killAllTriggers);
+      document.removeEventListener("astro:page-load", onPageLoad);
+      document.removeEventListener("astro:after-swap", onPageLoad);
+    };
+  }, []);
+
+  // =========================
+  // Hover helper (nav-hover)
+  // =========================
   useEffect(() => {
     if (!showCursor) return;
 
@@ -57,7 +246,78 @@ export default function Hero() {
     };
   }, [showCursor]);
 
-  // ====== Intro timeline (igual vibe que tenías, pero aplicado a bg+card) ======
+  // =========================
+  // BOOT PRESET (evita FOUC del rect negro)
+  // - corre apenas existe el DOM del hero (aunque cursor no esté)
+  // - setea EXACTO el estado inicial del rect, sin esperar scroll/intro
+  // =========================
+  useLayoutEffect(() => {
+    const heroEl = heroRef.current;
+    const bg = copyBgRef.current;
+    const card = copyCardRef.current;
+
+    if (!heroEl || !bg || !card) return;
+
+    // lock scroll desde el principio del mount (tu punto #1)
+    lockScroll(true);
+    setUnlockScroll(false);
+
+    const RECT_H = 180;
+    const RECT_PAD = 18;
+    const rectWidth = () => Math.min(280, window.innerWidth - 20);
+
+    // Seteo inmediato antes del primer paint "real"
+    gsap.set(bg, {
+      left: 10,
+      bottom: 10,
+      top: "auto",
+      right: "auto",
+      width: rectWidth,
+      height: RECT_H,
+      borderRadius: 0,
+      backgroundColor: "#0b0b0b",
+      border: "1px solid rgba(255,255,255,0.16)",
+      boxShadow: "0 12px 34px rgba(0,0,0,0.22)",
+      autoAlpha: 1,
+    });
+
+    gsap.set(card, {
+      left: 10,
+      bottom: 10,
+      top: "auto",
+      right: "auto",
+      width: rectWidth,
+      height: RECT_H,
+      borderRadius: 0,
+      backgroundColor: "transparent",
+      color: "#fff",
+      padding: RECT_PAD,
+      boxShadow: "none",
+      autoAlpha: 1,
+    });
+
+    // Flag para CSS (si querés)
+    heroEl.dataset.ready = "true";
+    setBootReady(true);
+
+    // Si cambia el viewport, mantené el tamaño estable (sin refresh por ahora)
+    const onResize = () => {
+      gsap.set(bg, { width: rectWidth(), height: RECT_H });
+      gsap.set(card, { width: rectWidth(), height: RECT_H, padding: RECT_PAD });
+      ScrollTrigger.refresh(true);
+    };
+
+    window.addEventListener("resize", onResize);
+    return () => {
+      window.removeEventListener("resize", onResize);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // =========================
+  // Intro animation (cursor + title + type + talk)
+  // - cuando termina: desbloquea scroll (punto #1)
+  // =========================
   useLayoutEffect(() => {
     if (!showCursor) return;
 
@@ -98,9 +358,6 @@ export default function Hero() {
         force3D: true,
       });
 
-      gsap.set(bg, { autoAlpha: 0, y: 10, filter: "blur(10px)" });
-      gsap.set(card, { autoAlpha: 0, y: 10, filter: "blur(10px)" });
-
       gsap.set(midEl, { autoAlpha: 1 });
       gsap.set(typeLetters, { autoAlpha: 0 });
       if (caret) gsap.set(caret, { autoAlpha: 0 });
@@ -109,16 +366,26 @@ export default function Hero() {
 
       if (prefersReduced) {
         gsap.set(wrap, { autoAlpha: 1, scale: 1, y: 0, filter: "blur(0px)" });
-        gsap.set(letters, { yPercent: 0, rotateX: 0, autoAlpha: 1, filter: "blur(0px)" });
-        gsap.set([bg, card], { autoAlpha: 1, y: 0, filter: "blur(0px)" });
+        gsap.set(letters, {
+          yPercent: 0,
+          rotateX: 0,
+          autoAlpha: 1,
+          filter: "blur(0px)",
+        });
         gsap.set(typeLetters, { autoAlpha: 1 });
-        if (caret) gsap.set(caret, { autoAlpha: 1 });
+        if (caret) gsap.set(caret, { autoAlpha: 0 });
         gsap.set(talkEl, { autoAlpha: 1, y: 0, filter: "blur(0px)" });
+
         setShowNav(true);
+
+        // desbloqueo inmediato
+        setUnlockScroll(true);
         return;
       }
 
-      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+      const tl = gsap.timeline({
+        defaults: { ease: "power3.out" },
+      });
 
       tl.to(wrap, { autoAlpha: 1, scale: 1, y: 0, filter: "blur(0px)", duration: 0.8 }, 0);
 
@@ -138,10 +405,7 @@ export default function Hero() {
 
       tl.add(() => setShowNav(true), ">+=0.12");
 
-      tl.to([bg, card], { autoAlpha: 1, y: 0, filter: "blur(0px)", duration: 0.55, ease: "expo.out" }, ">-0.05");
-
       let caretTween = null;
-
       if (caret) {
         gsap.set(caret, { autoAlpha: 1 });
         caretTween = gsap.to(caret, {
@@ -168,43 +432,32 @@ export default function Hero() {
 
       tl.to(talkEl, { autoAlpha: 1, y: 0, filter: "blur(0px)", duration: 0.6, ease: "expo.out" }, ">-0.05");
 
+      // ✅ al final del intro: desbloquea scroll
+      tl.add(() => setUnlockScroll(true), ">+=0.02");
+
       return () => tl.kill();
     }, heroEl);
 
     return () => ctx.revert();
   }, [showCursor]);
 
-  // ====== Sync hero center with nav center ======
-  useLayoutEffect(() => {
-    if (!showNav) return;
-
-    const heroEl = heroRef.current;
-    if (!heroEl) return;
-
-    const navCenter = document.querySelector(".nav .nav-center");
-    if (!navCenter) return;
-
-    const apply = () => {
-      const r = navCenter.getBoundingClientRect();
-      const cx = r.left + r.width / 2;
-      heroEl.style.setProperty("--hero-center-x", `${cx}px`);
-    };
-
-    apply();
-    const ro = new ResizeObserver(apply);
-    ro.observe(navCenter);
-
-    window.addEventListener("resize", apply);
-    const raf = requestAnimationFrame(apply);
+  // =========================
+  // Scroll lock effect (state-driven)
+  // =========================
+  useEffect(() => {
+    // si todavía no arrancó el boot, bloqueamos igual
+    const shouldLock = !unlockScroll;
+    lockScroll(shouldLock);
 
     return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener("resize", apply);
-      ro.disconnect();
+      // al desmontar, asegurá desbloqueo
+      lockScroll(false);
     };
-  }, [showNav]);
+  }, [unlockScroll]);
 
-  // ====== Wiggle CTA ======
+  // =========================
+  // Wiggle CTA
+  // =========================
   useLayoutEffect(() => {
     const el = talkRef.current;
     if (!el) return;
@@ -213,7 +466,12 @@ export default function Hero() {
       window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
 
     const ctx = gsap.context(() => {
-      gsap.set(el, { rotateZ: -8, transformOrigin: "50% 50%", willChange: "transform", force3D: true });
+      gsap.set(el, {
+        rotateZ: -8,
+        transformOrigin: "50% 50%",
+        willChange: "transform",
+        force3D: true,
+      });
 
       let wiggle = null;
 
@@ -255,9 +513,15 @@ export default function Hero() {
     return () => ctx.revert();
   }, []);
 
-  // ====== MASTER PIN: bg black -> fullscreen blue + card morph a white slot ======
+  // =========================
+  // Hero -> Services (ScrollTrigger)
+  // - espera layout estable
+  // - mata triggers viejos del hero
+  // - refresh fuerte (fix #2)
+  // =========================
   useLayoutEffect(() => {
     if (!showCursor) return;
+    if (!bootReady) return;
 
     const heroEl = heroRef.current;
     const bg = copyBgRef.current;
@@ -266,187 +530,257 @@ export default function Hero() {
     const midEl = midRef.current;
     const talkEl = talkRef.current;
 
-    if (!heroEl || !bg || !card) return;
+    if (!heroEl || !bg || !card || !title || !midEl || !talkEl) return;
 
-    const ctx = gsap.context(() => {
-      const svc = heroEl.querySelector(".svc");
-      const svcIntroCard = heroEl.querySelector(".svc-introCard"); // ocupa espacio
-      const svcTrack = heroEl.querySelector(".svc-track");
-      const svcRow = heroEl.querySelector(".svc-row");
+    let killed = false;
 
-      if (!svc || !svcIntroCard || !svcTrack || !svcRow) return;
+    const run = async () => {
+      // 1) asegurá scrollTop=0 cuando entrás por nav
+      // (si no, el pin empieza en un lugar raro)
+      window.scrollTo(0, 0);
 
-      const prefersReduced =
-        window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+      // 2) espera estabilidad (fonts/images)
+      await waitForLayoutStability(heroEl, 1200);
+      if (killed) return;
 
-      const getDist = () => Math.max(0, svcRow.scrollWidth - svcTrack.clientWidth);
+      // 3) mata triggers previos SOLO del hero (por las dudas)
+      ScrollTrigger.getAll()
+        .filter((t) => t?.vars?.trigger === heroEl || t?.vars?.id === "HERO_SERVICES")
+        .forEach((t) => t.kill(true));
 
-      // Estado base y mediciones consistentes
-      const resetForMeasure = () => {
-        gsap.set([bg, card], {
-          clearProps: "top,right,width,height",
-        });
-        gsap.set(bg, { left: 10, bottom: 10, top: "auto", right: "auto" });
-        gsap.set(card, { left: 10, bottom: 10, top: "auto", right: "auto" });
-      };
+      const ctx = gsap.context(() => {
+        const svc = heroEl.querySelector(".svc");
+        const svcIntroCard = heroEl.querySelector(".svc-introCard");
+        const svcTrack = heroEl.querySelector(".svc-track");
+        const svcRow = heroEl.querySelector(".svc-row");
 
-      const measure = () => {
-        resetForMeasure();
+        if (!svc || !svcIntroCard || !svcTrack || !svcRow) return;
 
-        // fijamos width/height iniciales (auto no anima bien)
-        const bgR = bg.getBoundingClientRect();
-        const cR = card.getBoundingClientRect();
+        const prefersReduced =
+          window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
 
-        gsap.set(bg, { width: bgR.width, height: bgR.height });
-        gsap.set(card, { width: cR.width, height: cR.height });
+        const getDist = () => Math.max(0, svcRow.scrollWidth - svcTrack.clientWidth);
 
-        const heroR = heroEl.getBoundingClientRect();
-        const to = svcIntroCard.getBoundingClientRect();
+        const RECT_H = 180;
+        const RECT_PAD = 18;
+        const rectWidth = () => Math.min(280, window.innerWidth - 20);
 
-        return {
-          heroLeft: heroR.left,
-          heroTop: heroR.top,
-          toLeft: to.left,
-          toTop: to.top,
-          toW: to.width,
-          toH: to.height,
+        const resetForMeasure = () => {
+          gsap.set([bg, card], { clearProps: "top,right,width,height,transform" });
+
+          gsap.set(bg, {
+            left: 10,
+            bottom: 10,
+            top: "auto",
+            right: "auto",
+            width: rectWidth,
+            height: RECT_H,
+            borderRadius: 0,
+            backgroundColor: "#0b0b0b",
+            border: "1px solid rgba(255,255,255,0.16)",
+            boxShadow: "0 12px 34px rgba(0,0,0,0.22)",
+            autoAlpha: 1,
+          });
+
+          gsap.set(card, {
+            left: 10,
+            bottom: 10,
+            top: "auto",
+            right: "auto",
+            width: rectWidth,
+            height: RECT_H,
+            borderRadius: 0,
+            backgroundColor: "transparent",
+            color: "#fff",
+            padding: RECT_PAD,
+            boxShadow: "none",
+            autoAlpha: 1,
+          });
         };
-      };
 
-      gsap.set(svc, { autoAlpha: 0, pointerEvents: "none" });
-      gsap.set(svcRow, { x: 0 });
+        const measure = () => {
+          resetForMeasure();
 
-      // clave: NO mostrar la introCard real (evita duplicado) pero deja layout
-      gsap.set(svcIntroCard, { autoAlpha: 0 });
+          const heroR = heroEl.getBoundingClientRect();
+          const to = svcIntroCard.getBoundingClientRect();
 
-      if (prefersReduced) {
-        ScrollTrigger.create({
-          trigger: heroEl,
-          start: "top top",
-          end: () => `+=${window.innerHeight + getDist()}`,
-        });
-        return;
-      }
+          return {
+            heroLeft: heroR.left,
+            heroTop: heroR.top,
+            toLeft: to.left,
+            toTop: to.top,
+            toW: to.width,
+            toH: to.height,
+          };
+        };
 
-      const onRefreshInit = () => {
-        resetForMeasure();
+        gsap.set(svc, { autoAlpha: 0, pointerEvents: "none" });
         gsap.set(svcRow, { x: 0 });
-      };
-      ScrollTrigger.addEventListener("refreshInit", onRefreshInit);
+        gsap.set(svcIntroCard, { autoAlpha: 0 });
 
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: heroEl,
-          start: "top top",
-          end: () => `+=${Math.round(window.innerHeight * 1.25 + getDist())}`,
-          scrub: 1,
-          pin: true,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-        },
-      });
+        if (prefersReduced) {
+          ScrollTrigger.create({
+            id: "HERO_SERVICES_FALLBACK",
+            trigger: heroEl,
+            start: "top top",
+            end: () => `+=${window.innerHeight + getDist()}`,
+          });
+          return;
+        }
 
-      // 1) BG (negro) se expande a fullscreen
-      tl.to(
-        bg,
-        {
-          left: 0,
-          bottom: 0,
-          top: 0,
-          right: 0,
-          width: () => window.innerWidth,
-          height: () => window.innerHeight,
-          borderRadius: 0,
-          boxShadow: "none",
-          ease: "none",
-          duration: 0.52,
-        },
-        0
-      );
+        const onRefreshInit = () => {
+          resetForMeasure();
+          gsap.set(svcRow, { x: 0 });
+        };
+        ScrollTrigger.addEventListener("refreshInit", onRefreshInit);
 
-      // 2) Apaga UI del hero
-      tl.to(
-        [title, midEl, talkEl],
-        { autoAlpha: 0, filter: "blur(10px)", duration: 0.18, ease: "none" },
-        0.22
-      );
+        const syncEyes = (inServices) => {
+          window.dispatchEvent(
+            new CustomEvent("awk:eyes", {
+              detail: { show: !inServices },
+            })
+          );
+        };
 
-      // 3) BG cambia a azul (mientras expande)
-      tl.to(
-        bg,
-        {
-          backgroundColor: "var(--svc-blue, #0A25FF)",
-          duration: 0.18,
-          ease: "none",
-        },
-        0.30
-      );
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            id: "HERO_SERVICES",
+            trigger: heroEl,
+            start: "top top",
+            end: () => `+=${Math.round(window.innerHeight * 1.25 + getDist())}`,
+            scrub: 1,
+            pin: true,
+            anticipatePin: 1,
+            invalidateOnRefresh: true,
 
-      // 4) Services aparece (sin “flash”, porque el azul ya viene del bg)
-      tl.to(svc, { autoAlpha: 1, duration: 0.12, ease: "none" }, 0.40);
-      tl.set(svc, { pointerEvents: "auto" }, 0.42);
-
-      // 5) La card (con texto) MORPHEA a la blanca, hacia el slot de la introCard
-      tl.to(
-        card,
-        {
-          left: () => {
-            const m = measure();
-            return Math.round(m.toLeft - m.heroLeft);
+            // ojos off en services
+            onUpdate: (self) => {
+              const inServices = self.progress > 0.32;
+              if (self._eyesInServices !== inServices) {
+                self._eyesInServices = inServices;
+                syncEyes(inServices);
+              }
+            },
+            onRefresh: (self) => {
+              const inServices = self.progress > 0.32;
+              self._eyesInServices = inServices;
+              syncEyes(inServices);
+            },
           },
-          top: () => {
-            const m = measure();
-            return Math.round(m.toTop - m.heroTop);
+        });
+
+        tl.set({}, {}, 0);
+        resetForMeasure();
+
+        // 1) BG expands fullscreen
+        tl.to(
+          bg,
+          {
+            left: 0,
+            bottom: 0,
+            top: 0,
+            right: 0,
+            width: () => window.innerWidth,
+            height: () => window.innerHeight,
+            borderRadius: 0,
+            border: "0px solid rgba(255,255,255,0)",
+            boxShadow: "none",
+            ease: "none",
+            duration: 0.52,
           },
-          bottom: "auto",
-          right: "auto",
-          width: () => Math.round(measure().toW),
-          height: () => Math.round(measure().toH),
-          backgroundColor: "#fff",
-          color: "#000",
-          padding: "24px",
-          borderRadius: "22px",
-          boxShadow: "0 18px 50px rgba(0,0,0,0.18)",
-          ease: "none",
-          duration: 0.34,
-        },
-        0.18
-      );
+          0
+        );
 
-      // 6) Horizontal scroll
-      tl.to(
-        svcRow,
-        {
-          x: () => -getDist(),
-          ease: "none",
-          duration: 0.48,
-        },
-        0.62
-      );
+        // 2) hide hero UI
+        tl.to([title, midEl, talkEl], { autoAlpha: 0, filter: "blur(10px)", duration: 0.18, ease: "none" }, 0.22);
 
-      const onLoad = () => ScrollTrigger.refresh();
-      window.addEventListener("load", onLoad);
+        // 3) bg to blue
+        tl.to(bg, { backgroundColor: "var(--svc-blue, #0A25FF)", duration: 0.18, ease: "none" }, 0.30);
 
-      return () => {
-        window.removeEventListener("load", onLoad);
-        ScrollTrigger.removeEventListener("refreshInit", onRefreshInit);
-        tl.kill();
-      };
-    }, heroEl);
+        // 4) services on
+        tl.to(svc, { autoAlpha: 1, duration: 0.12, ease: "none" }, 0.40);
+        tl.set(svc, { pointerEvents: "auto" }, 0.42);
 
-    return () => ctx.revert();
-  }, [showCursor]);
+        // 5) card morph to intro slot
+        tl.to(
+          card,
+          {
+            left: () => Math.round(measure().toLeft - measure().heroLeft),
+            top: () => Math.round(measure().toTop - measure().heroTop),
+            bottom: "auto",
+            right: "auto",
+            width: () => Math.round(measure().toW),
+            height: () => Math.round(measure().toH),
 
-  const TYPE_TEXT = "Creative digital experiences";
+            backgroundColor: "#fff",
+            color: "#000",
+            padding: "24px",
+            borderRadius: "22px",
+            boxShadow: "0 18px 50px rgba(0,0,0,0.18)",
+            ease: "none",
+            duration: 0.34,
+          },
+          0.18
+        );
 
+        // 6) horizontal scroll
+        tl.to(svcRow, { x: () => -getDist(), ease: "none", duration: 0.48 }, 0.62);
+
+        // refresh fuerte (fix navegación interna)
+        requestAnimationFrame(() => ScrollTrigger.refresh(true));
+        setTimeout(() => ScrollTrigger.refresh(true), 0);
+
+        // re-refresh cuando algo cambie ancho (cards)
+        const ro = new ResizeObserver(() => ScrollTrigger.refresh(true));
+        ro.observe(svcRow);
+        ro.observe(svcTrack);
+
+        const onLoad = () => ScrollTrigger.refresh(true);
+        window.addEventListener("load", onLoad);
+
+        return () => {
+          window.removeEventListener("load", onLoad);
+          ro.disconnect();
+          ScrollTrigger.removeEventListener("refreshInit", onRefreshInit);
+          syncEyes(false);
+          tl.scrollTrigger?.kill(true);
+          tl.kill();
+        };
+      }, heroEl);
+
+      // cleanup
+      return () => ctx.revert();
+    };
+
+    let cleanup = null;
+    run().then((fn) => {
+      cleanup = fn;
+    });
+
+    return () => {
+      killed = true;
+      if (cleanup) cleanup();
+    };
+  }, [showCursor, bootReady]);
+
+  // =========================
+  // Render
+  // =========================
   return (
-    <section ref={heroRef} className="hero hero--withServices">
+    <section
+      ref={heroRef}
+      className="hero hero--withServices"
+      // data-ready evita FOUC si querés usarlo en CSS
+      data-ready={bootReady ? "true" : "false"}
+    >
+      {/* Cursor overlay */}
       {showCursor && (
         <div ref={cursorWrapRef} className="cursor-landing-wrap" style={{ opacity: 0, visibility: "hidden" }}>
           <CursorLanding activeAreaRef={heroRef} />
         </div>
       )}
 
+      {/* Title */}
       <div className="hero-content">
         <h1
           ref={titleRef}
@@ -463,15 +797,10 @@ export default function Hero() {
         </h1>
       </div>
 
-      {/* BG (negro -> fullscreen azul) */}
-      <div
-        ref={copyBgRef}
-        className="hero-copy-bg"
-        aria-hidden="true"
-        style={{ opacity: 0, visibility: "hidden" }}
-      />
+      {/* BG: rect negro que se expande */}
+      <div ref={copyBgRef} className="hero-copy-bg" aria-hidden="true" />
 
-      {/* CARD (texto) — es el MISMO div que morphea a la card blanca */}
+      {/* CARD: texto encima; luego morphea a blanca */}
       <div
         ref={copyCardRef}
         data-cursor="blue"
@@ -479,13 +808,13 @@ export default function Hero() {
         role="note"
         aria-label="Awake intro"
         tabIndex={0}
-        style={{ opacity: 0, visibility: "hidden" }}
       >
         <p className="hero-copy-text">
           Awake™ is a digital product studio crafting memorable customer experiences.
         </p>
       </div>
 
+      {/* Mid typing */}
       <div ref={midRef} className="hero-mid" aria-label={TYPE_TEXT} style={{ opacity: 0, visibility: "hidden" }}>
         <p className="hero-mid-text" aria-hidden="true">
           {TYPE_TEXT.split("").map((ch, i) => (
@@ -499,16 +828,12 @@ export default function Hero() {
         </p>
       </div>
 
-      <a
-        ref={talkRef}
-        className="hero-talk"
-        href="#contact"
-        aria-label="Let's talk"
-        style={{ opacity: 0, visibility: "hidden" }}
-      >
+      {/* CTA */}
+      <a ref={talkRef} className="hero-talk" href="#contact" aria-label="Let's talk" style={{ opacity: 0, visibility: "hidden" }}>
         LET&apos;S TALK
       </a>
 
+      {/* Services */}
       <Services inHero />
     </section>
   );

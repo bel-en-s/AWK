@@ -1,124 +1,283 @@
-import { useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import "./Loader.css";
-import CursorLanding from "./CursorLanding";
+
+const HERO_BOOT_KEY = "AWK_HERO_BOOTED";
+const AWK_NAV_KIND = "AWK_NAV_KIND"; // "spa" | "hard"
+
+function isHeroRoute() {
+  if (typeof window === "undefined") return true;
+  const p = (window.location.pathname || "/").replace(/\/+$/, "");
+  return p === "" || p === "/" || p === "/AWK";
+}
+
+function navType() {
+  try {
+    const e = performance.getEntriesByType?.("navigation")?.[0];
+    return e?.type || "navigate";
+  } catch (_) {
+    return "navigate";
+  }
+}
+
+async function waitFonts(timeoutMs = 1200) {
+  try {
+    if (!document.fonts?.ready) return;
+    await Promise.race([
+      document.fonts.ready,
+      new Promise((res) => setTimeout(res, timeoutMs)),
+    ]);
+  } catch (_) {}
+}
 
 export default function Loader({
   text = "AWAKE",
-  inDuration = 0.65,
-  outDuration = 0.55,
-  hold = 0.25,
-  stagger = 0.05,
+
+  // mínimo visible (percepción)
+  minShowMs = 1200,
+
+  // intro letters
+  introStagger = 0.06,
+  introDuration = 0.55,
+
+  // delete A(mid) + E(last)
+  deleteDelay = 0.10,
+  deleteDuration = 0.22,
+
+  // FLIP settle duration (AWK join)
+  joinDuration = 0.45,
+
+  // curtain
+  curtainDelay = 0.18,
+  curtainDuration = 0.9,
+  curtainEase = "expo.inOut",
+
+  // final fade
+  fadeOut = 0.12,
 }) {
   const rootRef = useRef(null);
+  const [done, setDone] = useState(false);
 
   useLayoutEffect(() => {
     const root = rootRef.current;
     if (!root) return;
 
-    if (window.__AWK_LOADED__) {
+    const navKind = sessionStorage.getItem(AWK_NAV_KIND) || "hard";
+    const alreadyBooted = !!sessionStorage.getItem(HERO_BOOT_KEY);
+    const type = navType();
+    const isReload = type === "reload";
+
+    // ✅ corre solo:
+    // - nunca en SPA
+    // - sí en primera entrada directa
+    // - sí en hard refresh aunque ya booted
+    const shouldRun =
+      isHeroRoute() &&
+      navKind !== "spa" &&
+      (isReload || !alreadyBooted);
+
+    console.log("[Loader]", {
+      path: window.location.pathname,
+      navKind,
+      alreadyBooted,
+      navType: type,
+      shouldRun,
+    });
+
+    gsap.set(root, { autoAlpha: 1, pointerEvents: "all" });
+
+    if (!shouldRun) {
       gsap.set(root, { autoAlpha: 0, pointerEvents: "none" });
+      window.__AWK_LOADED__ = true;
+      window.dispatchEvent(new CustomEvent("awk:loaded"));
+      setDone(true);
       return;
     }
 
-    const prefersReduced =
-      window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    sessionStorage.setItem(HERO_BOOT_KEY, "1");
+    sessionStorage.setItem(AWK_NAV_KIND, "hard");
+    window.__AWK_LOADED__ = false;
 
-    const title = root.querySelector(".loader-title");
-    const inner = root.querySelector(".loader-title-inner");
-    const letters = Array.from(root.querySelectorAll(".letter"));
+    // lock scroll
+    const html = document.documentElement;
+    const body = document.body;
+    html.classList.add("is-scroll-locked");
+    body.classList.add("is-scroll-locked");
+    body.style.overflow = "hidden";
+    body.style.touchAction = "none";
 
-    if (!title || !inner || letters.length === 0) return;
+    const word = root.querySelector(".loader__word");
+    const letters = Array.from(root.querySelectorAll(".loader__letter"));
+    const curtain = root.querySelector(".loader__curtain");
 
-    const done = () => {
-      window.__AWK_LOADED__ = true;
-      window.dispatchEvent(new Event("awk:loaded"));
-      gsap.set(root, { autoAlpha: 0, pointerEvents: "none" });
+    // AWAKE indices: 0 A, 1 W, 2 A, 3 K, 4 E
+    const midA = letters[2];
+    const lastE = letters[letters.length - 1];
+
+    const keepA = letters[0];
+    const keepW = letters[1];
+    const keepK = letters[3];
+    const keep = [keepA, keepW, keepK].filter(Boolean);
+    const remove = [midA, lastE].filter(Boolean);
+
+    const cleanupUnlock = () => {
+      html.classList.remove("is-scroll-locked");
+      body.classList.remove("is-scroll-locked");
+      body.style.overflow = "";
+      body.style.touchAction = "";
     };
 
-    gsap.set(root, { autoAlpha: 1, pointerEvents: "auto" });
-
-    title.classList.remove("is-ready");
-
-    // Estado inicial (todo arriba, sin flash)
-    gsap.set(title, { filter: "blur(0px)" });
-    gsap.set(inner, { y: -18, autoAlpha: 0, filter: "blur(10px)" });
-    gsap.set(letters, { yPercent: -120, opacity: 0, filter: "blur(10px)" });
-
-    title.classList.add("is-ready");
-
-    if (prefersReduced) {
-      gsap.set(inner, { y: 0, autoAlpha: 1, filter: "blur(0px)" });
-      gsap.set(letters, { yPercent: 0, opacity: 1, filter: "blur(0px)" });
-      const t = window.setTimeout(done, 250);
-      return () => window.clearTimeout(t);
-    }
-
     const ctx = gsap.context(() => {
+      // ✅ evita FOUC de tipografía: oculto el word hasta fonts ready
+      gsap.set(word, { autoAlpha: 0 });
+
+      gsap.set(curtain, { yPercent: 100, autoAlpha: 1 });
+
+      gsap.set(letters, {
+        autoAlpha: 0,
+        yPercent: 90,
+        rotateX: -55,
+        transformPerspective: 900,
+        transformOrigin: "50% 100%",
+        filter: "blur(10px)",
+        willChange: "transform, opacity, filter",
+      });
+
+      const startAt = performance.now();
+
       const tl = gsap.timeline({
-        defaults: { ease: "power3.out" },
-        onComplete: done,
+        defaults: { ease: "expo.out" },
+        onComplete: () => {
+          cleanupUnlock();
+          window.__AWK_LOADED__ = true;
+          window.dispatchEvent(new CustomEvent("awk:loaded"));
+          setDone(true);
+        },
       });
 
-      // Baja el título (desde arriba) y se enfoca
-      tl.to(inner, {
-        y: 0,
-        autoAlpha: 1,
-        filter: "blur(0px)",
-        duration: 0.55,
-        ease: "expo.out",
-      });
+      // 0) esperar fonts antes de mostrar texto (sin salto de tipografía)
+      tl.add(async () => {
+        await waitFonts(1400);
+        gsap.set(word, { autoAlpha: 1 });
+      }, 0);
 
-      // Letras entran desde arriba una por una
+      // 1) intro letters
       tl.to(
         letters,
         {
+          autoAlpha: 1,
           yPercent: 0,
-          opacity: 1,
+          rotateX: 0,
           filter: "blur(0px)",
-          duration: inDuration,
-          stagger,
-          ease: "expo.out",
+          duration: introDuration,
+          stagger: { each: introStagger, from: "start" },
         },
-        "<+0.05"
+        0.02
       );
 
-      tl.to({}, { duration: hold });
+      // 2) mínimo visible
+      tl.add(() => {
+        const elapsed = performance.now() - startAt;
+        const remaining = Math.max(0, minShowMs - elapsed);
+        if (remaining > 0) tl.to({}, { duration: remaining / 1000, ease: "none" });
+      }, ">");
 
-      // Salida hacia arriba (se van para arriba)
+      // 3) borrar A del medio y E final
       tl.to(
-        letters,
+        remove,
         {
-          yPercent: -120,
-          opacity: 0,
-          filter: "blur(10px)",
-          duration: outDuration,
-          ease: "power3.in",
-          stagger: 0.03,
+          autoAlpha: 0,
+          yPercent: -18,
+          filter: "blur(12px)",
+          duration: deleteDuration,
+          ease: "power2.inOut",
         },
-        ">-0.05"
+        `>+=${deleteDelay}`
       );
 
-      tl.to(inner, { y: -12, autoAlpha: 0, filter: "blur(10px)", duration: 0.25 }, "<+0.05");
-      tl.to(root, { autoAlpha: 0, duration: 0.2 }, "<+0.12");
+      // 4) reacomodar a "AWK" con FLIP (sin plugin)
+      tl.add(() => {
+        if (keep.length !== 3) return;
+
+        // posiciones antes del reflow
+        const first = keep.map((el) => el.getBoundingClientRect());
+
+        // sacamos del flow las removidas (para que flex reacomode)
+        remove.forEach((el) => {
+          if (!el) return;
+          el.style.display = "none";
+        });
+
+        // fuerza reflow
+        void word.offsetWidth;
+
+        // posiciones después
+        const last = keep.map((el) => el.getBoundingClientRect());
+
+        // aplica delta y anima a 0
+        keep.forEach((el, i) => {
+          const dx = first[i].left - last[i].left;
+          const dy = first[i].top - last[i].top;
+          gsap.set(el, { x: dx, y: dy });
+        });
+
+        gsap.to(keep, {
+          x: 0,
+          y: 0,
+          duration: joinDuration,
+          ease: "expo.inOut",
+          overwrite: true,
+        });
+      }, ">-=0.02");
+
+      // 5) telón
+      tl.to({}, { duration: curtainDelay, ease: "none" }, ">");
+      tl.to(
+        curtain,
+        { yPercent: 0, duration: curtainDuration, ease: curtainEase },
+        ">"
+      );
+
+      // 6) fade root
+      tl.to(root, { autoAlpha: 0, duration: fadeOut, ease: "none" }, ">-=0.06");
 
       return () => tl.kill();
     }, root);
 
-    return () => ctx.revert();
-  }, [text, inDuration, outDuration, hold, stagger]);
+    return () => {
+      ctx.revert();
+      cleanupUnlock();
+    };
+  }, [
+    text,
+    minShowMs,
+    introStagger,
+    introDuration,
+    deleteDelay,
+    deleteDuration,
+    joinDuration,
+    curtainDelay,
+    curtainDuration,
+    curtainEase,
+    fadeOut,
+  ]);
+
+  if (done) return null;
 
   return (
-    <div ref={rootRef}  data-cursor="blue" className="loader" aria-hidden="true">
-      <div className="loader-title" role="presentation">
-        <span className="loader-title-inner">
-          {String(text).split("").map((ch, i) => (
-            <span className="letter" key={`${ch}-${i}`}>
-              {ch === " " ? "\u00A0" : ch}
+    <div ref={rootRef} className="loader" aria-label="Loading" role="status">
+      <div className="loader__word" aria-hidden="true">
+        {String(text)
+          .toUpperCase()
+          .split("")
+          .map((ch, i) => (
+            <span key={i} className="loader__letter">
+              {ch}
             </span>
           ))}
-        </span>
       </div>
+
+      <div className="loader__curtain" aria-hidden="true" />
     </div>
   );
 }

@@ -10,9 +10,7 @@ import "./Hero.css";
 gsap.registerPlugin(ScrollTrigger);
 
 export default function Hero() {
-  // =========================
-  // State
-  // =========================
+
   const [showCursor, setShowCursor] = useState(false);
   const [showNav, setShowNav] = useState(false);
 
@@ -21,6 +19,14 @@ export default function Hero() {
 
   // "unlockScroll" = cuando termina intro + triggers listos
   const [unlockScroll, setUnlockScroll] = useState(false);
+
+  useEffect(() => {
+    console.log("HERO MOUNT");
+    return () => {
+      console.log("HERO UNMOUNT");
+    };
+  }, []);
+  
 
   // =========================
   // Refs
@@ -43,92 +49,34 @@ export default function Hero() {
   // =========================
   // Helpers
   // =========================
- const lockScroll = (locked) => {
-  const html = document.documentElement;
-  const body = document.body;
-
-  // guarda scroll actual
-  if (locked) {
-    if (window.__AWK_SCROLL_LOCKED__) return;
-
-    const y = window.scrollY || window.pageYOffset || 0;
-    window.__AWK_SCROLL_LOCKED__ = true;
-    window.__AWK_SCROLL_Y__ = y;
-
-    html.classList.add("is-scroll-locked");
-    body.classList.add("is-scroll-locked");
-
-    // el truco real: body fixed
-    body.style.position = "fixed";
-    body.style.top = `-${y}px`;
-    body.style.left = "0";
-    body.style.right = "0";
-    body.style.width = "100%";
-    body.style.overflow = "hidden";
-    body.style.touchAction = "none";
-
-    const prevent = (e) => e.preventDefault();
-    const onKeyLock = (e) => {
-      const keys = ["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", " "];
-      if (keys.includes(e.key)) e.preventDefault();
-    };
-
-    window.__AWK_PREVENT_SCROLL__ = prevent;
-    window.__AWK_KEYLOCK__ = onKeyLock;
-
-    window.addEventListener("wheel", prevent, { passive: false });
-    window.addEventListener("touchmove", prevent, { passive: false });
-    window.addEventListener("keydown", onKeyLock, { passive: false });
-
-    // por si algún browser igual dispara scroll:
-    const hardClamp = () => window.scrollTo(0, 0);
-    window.__AWK_HARDCLAMP__ = hardClamp;
-    window.addEventListener("scroll", hardClamp, { passive: true });
-
-    // dejalo arriba sí o sí
-    window.scrollTo(0, 0);
-
-    return;
-  }
-
-  if (!window.__AWK_SCROLL_LOCKED__) return;
-
-  window.__AWK_SCROLL_LOCKED__ = false;
-
-  html.classList.remove("is-scroll-locked");
-  body.classList.remove("is-scroll-locked");
-
-  const y = window.__AWK_SCROLL_Y__ || 0;
-
-  body.style.position = "";
-  body.style.top = "";
-  body.style.left = "";
-  body.style.right = "";
-  body.style.width = "";
-  body.style.overflow = "";
-  body.style.touchAction = "";
-
-  const prevent = window.__AWK_PREVENT_SCROLL__;
-  const onKeyLock = window.__AWK_KEYLOCK__;
-  const hardClamp = window.__AWK_HARDCLAMP__;
-
-  if (prevent) {
-    window.removeEventListener("wheel", prevent);
-    window.removeEventListener("touchmove", prevent);
-    window.__AWK_PREVENT_SCROLL__ = null;
-  }
-  if (onKeyLock) {
-    window.removeEventListener("keydown", onKeyLock);
-    window.__AWK_KEYLOCK__ = null;
-  }
-  if (hardClamp) {
-    window.removeEventListener("scroll", hardClamp);
-    window.__AWK_HARDCLAMP__ = null;
-  }
-
-  // restaurá scroll real
-  window.scrollTo(0, y);
-};
+  const lockScroll = (locked) => {
+    const lenis = window.__LENIS__;
+    const html = document.documentElement;
+    const body = document.body;
+  
+    if (locked) {
+      html.classList.add("is-scroll-locked");
+      body.classList.add("is-scroll-locked");
+      body.style.overflow = "hidden";
+      body.style.touchAction = "none";
+  
+      // clave: pausá Lenis (no fixes el body)
+      lenis?.stop?.();
+  
+      // mantené arriba si tu hero lo necesita
+      lenis?.scrollTo?.(0, { immediate: true });
+      window.scrollTo(0, 0);
+      return;
+    }
+  
+    html.classList.remove("is-scroll-locked");
+    body.classList.remove("is-scroll-locked");
+    body.style.overflow = "";
+    body.style.touchAction = "";
+  
+    lenis?.start?.();
+  };
+  
 
 
   const waitForLayoutStability = async (rootEl, timeoutMs = 1200) => {
@@ -164,21 +112,7 @@ export default function Hero() {
     await withTimeout(Promise.all([waitFonts(), waitImages()]));
   };
 
-  // =========================
-  // Show cursor gate:
-  // - si loader ya pasó, mostramos al toque
-  // - si no, esperamos awk:loaded
-  // =========================
-  useEffect(() => {
-    const already = !!window.__AWK_LOADED__;
-    if (already) {
-      setShowCursor(true);
-      return;
-    }
-    const onLoaded = () => setShowCursor(true);
-    window.addEventListener("awk:loaded", onLoaded);
-    return () => window.removeEventListener("awk:loaded", onLoaded);
-  }, []);
+
 
   // =========================
   // Astro SPA: entrar desde otra página
@@ -251,6 +185,20 @@ export default function Hero() {
   // - corre apenas existe el DOM del hero (aunque cursor no esté)
   // - setea EXACTO el estado inicial del rect, sin esperar scroll/intro
   // =========================
+
+  useEffect(() => {
+  const onLoaded = () => setShowCursor(true);
+
+  if (window.__AWK_LOADED__) {
+    setShowCursor(true);
+    return;
+  }
+
+  window.addEventListener("awk:loaded", onLoaded);
+  return () => window.removeEventListener("awk:loaded", onLoaded);
+}, []);
+
+
   useLayoutEffect(() => {
     const heroEl = heroRef.current;
     const bg = copyBgRef.current;
@@ -261,6 +209,9 @@ export default function Hero() {
     // lock scroll desde el principio del mount (tu punto #1)
     lockScroll(true);
     setUnlockScroll(false);
+  
+
+    // setShowCursor(true);
 
     const RECT_H = 180;
     const RECT_PAD = 18;
@@ -522,6 +473,8 @@ export default function Hero() {
   useLayoutEffect(() => {
     if (!showCursor) return;
     if (!bootReady) return;
+    if (!unlockScroll) return;
+    
 
     const heroEl = heroRef.current;
     const bg = copyBgRef.current;
@@ -761,7 +714,7 @@ export default function Hero() {
       killed = true;
       if (cleanup) cleanup();
     };
-  }, [showCursor, bootReady]);
+  }, [showCursor, bootReady, unlockScroll]);
 
   // =========================
   // Render

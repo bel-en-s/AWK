@@ -4,25 +4,19 @@ import LenisSmoothScroll from "../scripts/lenis.jsx";
 import TransitionBlocks from "../components/global/TransitionBlocks.jsx";
 import NavBar from "../components/global/Navbar.jsx";
 import { ClientRouter } from "astro:transitions";
-
-const { title, desc } = Astro.props;
 ---
 
 <html lang="es">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title || "AWAKE Landing"}</title>
-    {desc ? <meta name="description" content={desc} /> : null}
     <ClientRouter />
   </head>
 
   <body>
     <TransitionBlocks client:load transition:persist="trb" />
     <LenisSmoothScroll client:load transition:persist="lenis" />
-
     <NavBar client:load transition:persist="nav" />
-
     <slot />
   </body>
 </html>

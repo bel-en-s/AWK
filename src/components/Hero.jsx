@@ -1,4 +1,4 @@
-// src/components/Hero.jsx
+
 import { useLayoutEffect, useMemo, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -8,6 +8,11 @@ import Services from "./Services";
 import "./Hero.css";
 
 gsap.registerPlugin(ScrollTrigger);
+
+// ✅ Lenis bridge (tu lenis.jsx usa window.ScrollTrigger?.update?.())
+if (typeof window !== "undefined") {
+  window.ScrollTrigger = ScrollTrigger;
+}
 
 export default function Hero() {
   const heroRef = useRef(null);
@@ -43,6 +48,9 @@ export default function Hero() {
     };
 
     const ctx = gsap.context(() => {
+      // ✅ evita refreshes por cambios de barra en mobile
+      ScrollTrigger.config({ ignoreMobileResize: true });
+
       // ----------------------------
       // Intro AWAKE (letters)
       // ----------------------------
@@ -52,7 +60,6 @@ export default function Hero() {
         : [];
 
       if (title && titleLetters.length) {
-        // evita FOUC por tu CSS de visibility hidden
         title.classList.add("is-ready");
 
         gsap.set(titleLetters, { transformPerspective: 900 });
@@ -77,9 +84,19 @@ export default function Hero() {
       // ----------------------------
       const PAD = 10;
       const RECT_H = 180;
-      const rectW = () => Math.min(340, window.innerWidth - PAD * 2); // podés atarlo a CSS vars si querés
+
+      const rectW = () => Math.min(340, window.innerWidth - PAD * 2);
       const rectH = () => RECT_H;
 
+      // ✅ altura estable (iOS address bar safe)
+      const vhStable = () =>
+        Math.round(
+          window.visualViewport?.height ||
+            document.documentElement.clientHeight ||
+            window.innerHeight
+        );
+
+      // BG y card: fixed + transforms (butter)
       gsap.set(bg, {
         position: "fixed",
         left: PAD,
@@ -119,7 +136,7 @@ export default function Hero() {
       const computeScales = () => {
         const w = rectW();
         const h = rectH();
-        return { sx: window.innerWidth / w, sy: window.innerHeight / h };
+        return { sx: window.innerWidth / w, sy: vhStable() / h };
       };
 
       // ----------------------------
@@ -144,15 +161,19 @@ export default function Hero() {
           id: "HERO_MAIN",
           trigger: heroEl,
           start: "top top",
-          end: () => `+=${Math.round(window.innerHeight * 1.35 + getDist())}`,
-          scrub: 0.9,                 // ✅ butter: un toque de smoothing
+
+          // ✅ end estable (no depende de innerHeight cambiante)
+          end: () => `+=${Math.round(vhStable() * 1.35 + getDist())}`,
+
+          scrub: 0.9,
           pin: true,
           pinSpacing: true,
           anticipatePin: 1,
           invalidateOnRefresh: true,
+
+          // ✅ iOS fixed pin suele ser más estable
           pinType: isIOS ? "fixed" : "transform",
 
-          // ✅ estabilidad: cuando pin activo, setear clases
           onToggle: (self) => {
             setRootClass("is-hero-pinning", self.isActive);
             if (!self.isActive) {
@@ -190,7 +211,7 @@ export default function Hero() {
         0
       );
 
-      // 2) card acompaña (morph: radius/padding/color)
+      // 2) card acompaña + morph props
       tl.to(
         card,
         {
@@ -203,7 +224,7 @@ export default function Hero() {
         0
       );
 
-      // 3) counter-scale (texto NO crece)
+      // 3) counter-scale: texto NO crece
       tl.to(
         inner,
         {
@@ -214,18 +235,21 @@ export default function Hero() {
         0
       );
 
-      // 4) ocultar UI del hero un poco después (evita salto)
+      // 4) ocultar UI del hero un poco después
       const midEl = midRef.current;
       const talkEl = talkRef.current;
       if (title || midEl || talkEl) {
-        tl.to([title, midEl, talkEl].filter(Boolean), { autoAlpha: 0, duration: 0.2 }, 0.25);
+        tl.to(
+          [title, midEl, talkEl].filter(Boolean),
+          { autoAlpha: 0, duration: 0.2 },
+          0.25
+        );
       }
 
-      // 5) entrar en modo azul + ocultar ojitos + services
+      // 5) services + modo azul + ocultar ojos
       if (hasServices) {
         gsap.set(svc, { autoAlpha: 0, pointerEvents: "none" });
 
-        // 🔵 azul + “ocultar ojitos” + “fondo de la página azul” (anti rubber-band)
         tl.add(() => {
           setRootClass("is-hero-blue", true);
           setRootClass("is-eyes-hidden", true);
@@ -245,11 +269,8 @@ export default function Hero() {
           0.60
         );
 
-        // al volver para atrás, re-mostrar ojos y sacar azul
+        // scrub hacia atrás: sacar azul/ojos si volvés al inicio
         tl.add(() => {
-          // si estás antes del momento azul, sacamos clases
-          // (ScrollTrigger se encarga con onToggle cuando desactiva; esto es para scrub hacia atrás)
-          // condición simple: si progress < ~0.35, chau azul/ojos
           const st = ScrollTrigger.getById("HERO_MAIN");
           if (st && st.progress < 0.34) {
             setRootClass("is-hero-blue", false);
@@ -258,7 +279,7 @@ export default function Hero() {
         }, 0.33);
       }
 
-      // refresh controlado (no spam)
+      // refresh controlado (evita spam)
       let raf = 0;
       const onResize = () => {
         cancelAnimationFrame(raf);
@@ -327,3 +348,4 @@ export default function Hero() {
     </section>
   );
 }
+

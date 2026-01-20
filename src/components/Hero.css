@@ -12,7 +12,7 @@
 ========================= */
 .hero {
   position: relative;
-  height: 100vh;
+  min-height: 100svh; /* ✅ en iOS es estable */
   overflow: hidden;
   background: var(--cream, #efe7d7);
 }
@@ -300,10 +300,7 @@
   z-index: 9;
 }
 
-.hero-copy-bg {
-  border-radius: 0;
-  height: 180px;
-}
+
 
 html.is-scroll-locked,
 body.is-scroll-locked {

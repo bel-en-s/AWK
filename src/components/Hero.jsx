@@ -26,7 +26,7 @@ export default function Hero() {
   const midRef = useRef(null);
   const talkRef = useRef(null);
 
-  const TYPE_TEXT = useMemo(() => "Creative digital experiences", []);
+  const TYPE_TEXT = useMemo(() => "Creative Digital Experiences", []);
 
   useLayoutEffect(() => {
     const heroEl = heroRef.current;

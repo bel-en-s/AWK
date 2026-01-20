@@ -8,6 +8,21 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: "DMSans";
+  src: url("../assets/fonts/DMSans-VariableFont_opsz,wght.ttf") format("truetype");
+  font-weight: 100 1000;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "WorkSans";
+  src: url("../assets/fonts/WorkSans-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
 html.awk-cursor-none,
 html.awk-cursor-none body,
 html.awk-cursor-none * { cursor: none !important; }
@@ -24,13 +39,7 @@ html.awk-cursor-none * { cursor: none !important; }
 
 
 
-@font-face {
-  font-family: "WorkSans";
-  src: url("../assets/fonts/WorkSans-Medium.ttf") format("truetype");
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
+
 
 /* (Optional) Google font */
 @import url("https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap");
@@ -49,6 +58,7 @@ html.awk-cursor-none * { cursor: none !important; }
 
   --font-main: "VinaSans", sans-serif;
   --font-alt: "WorkSans", system-ui, sans-serif;
+  --font-dm: "DMSans", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
 
   --cursor-normal: url("/AWK/images/cursor.svg") 0 0;
   --cursor-small: url("/AWK/images/cursor-small.svg") 0 0;

@@ -9,7 +9,7 @@
   isolation: isolate;
 }
 
-/* el word queda escondido hasta que fonts estén listas */
+
 .loader__word {
   position: relative;
   z-index: 5;
@@ -18,19 +18,19 @@
   justify-content: center;
   gap: 0.02em;
 
-  /* ✅ poné la misma tipografía del Hero para que no haya “swap” */
-  font-family: var(--font-display, "Major Mono Display", system-ui, sans-serif);
 
-  font-weight: 600;
-  letter-spacing: -0.035em;
+  font-family: var(--font-main);
+
+  /* font-weight: 600; */
+  letter-spacing: -26px;
   line-height: 0.9;
-  font-size: clamp(72px, 10vw, 140px);
+  font-size: 500px;
   color: rgba(255, 255, 255, 0.96);
 
   user-select: none;
   transform: translateZ(0);
 
-  opacity: 0; /* ✅ evita el flash con font fallback */
+  opacity: 0;
   visibility: hidden;
 }
 

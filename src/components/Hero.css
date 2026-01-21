@@ -2,7 +2,6 @@
 :root {
   --svc-blue: #0A25FF;
 
-  /* ✅ mínimo “cuadrado figma” (no se achica más que esto) */
   --hero-copy-min: 340px;
   --hero-copy-min-mobile: 300px;
 }
@@ -12,7 +11,7 @@
 ========================= */
 .hero {
   position: relative;
-  min-height: 100svh; /* ✅ en iOS es estable */
+  min-height: 100svh;
   overflow: hidden;
   background: #ebe8e3;;
 }
@@ -116,9 +115,27 @@
     visibility: hidden;
   }
   .hero-talk{
-    left:50px;
+    left:190px;
+    top: 30%;
     margin-bottom: 30vh;
   }
+  .hero-mid {
+    position: absolute;
+
+  
+  }
+  
+  .hero-mid-text {
+    margin: 0;
+    color: #000;
+    font-family: var(--font-dm);
+    font-weight: 800;
+    font-size: 50px;
+    opacity: 0.9;
+    white-space: nowrap;
+  
+  }
+
 }
 
 /* =========================
@@ -138,7 +155,7 @@
   max-width: calc(100vw - 20px);
 
   background: #000;
-  border-radius: 22px;
+  /* border-radius: 22px; */
   box-shadow: 0 18px 60px rgba(0, 0, 0, 0.18);
 
   z-index: 4;
@@ -166,27 +183,28 @@
   left: 10px;
   bottom: 10px;
 
-  /* ✅ que no se achique más que el mínimo */
+
   width: var(--hero-copy-min);
   max-width: calc(100vw - 20px);
 
   /* el texto puede crecer en alto, pero el BG ya es cuadrado */
   height: auto;
 
-  padding: 18px 18px 16px;
+  padding: 20px ;
 
   color: #fff;
   background: transparent;
-  border-radius: 22px;
+  /* border-radius: 22px; */
 
   z-index: 7;
   pointer-events: auto;
 
   box-sizing: border-box;
   will-change: left, right, top, bottom, width, height, border-radius, padding, background-color, color, box-shadow;
-
+ 
   opacity: 1;
   visibility: visible;
+  font-family: var(--font-dm);
 }
 
 @media (max-width: 680px) {
@@ -200,14 +218,14 @@
   margin: 0;
   font-family: var(--font-dm);
   font-weight: 500;
-  font-size: 23px;
-  line-height: 1.35;
-  letter-spacing: 0.01em;
+  font-size: 26px;
+  /* line-height: 1.35; */
+  /* letter-spacing: 0.01em; */
   opacity: 0.92;
-
+  
   text-decoration: underline;
   text-decoration-thickness: 2px;
-  text-underline-offset: 0.22em;
+  /* text-underline-offset: 0.22em; */
 }
 
 /* =========================
@@ -231,11 +249,12 @@
 ========================= */
 .hero-mid {
   position: absolute;
-  left: var(--mid-x, 50%);
-  transform: translateX(-50%);
-  bottom: 150px;
+  left: 45% !important; 
+  text-align: center;  
+  bottom: 50px;
   z-index: 7;
   pointer-events: none;
+  text-align: center;  
 
 }
 
@@ -243,10 +262,14 @@
   margin: 0;
   color: #000;
   font-family: var(--font-dm);
-  font-weight: 500;
-  font-size: 30px;
+  font-weight: 800;
+  font-size: 50px;
   opacity: 0.9;
-  white-space: nowrap;
+  white-space: normal !important;   
+  text-align: center !important;   
+  text-align-last: center !important;
+  line-height: 0.95;        /* ajustá a gusto */
+
 }
 
 .type-letter {
@@ -264,7 +287,7 @@
 .hero-talk {
   position: absolute;
   right:200px;
-  top: 80%;
+  top: 50%;
 
   width: clamp(160px, 18vw, 220px);
   height: 30px;
@@ -275,7 +298,7 @@
   background: var(--blue, #1d4ed8);
   color: #fff;
   text-decoration: none;
-
+  padding:10px;
   box-shadow: 0 18px 60px rgba(0, 0, 0, 0.22);
   font-family: var(--font-dm);
   font-size: clamp(18px, 1.4vw, 22px);

@@ -1,4 +1,29 @@
-/* Navbar.css */
+/* =========================
+   NAV COLOR TOKENS
+========================= */
+:root{
+  --nav-ink: #000;                 /* texto/borde default */
+  --nav-surface: transparent;      /* fondo botones/panel */
+  --nav-cta-ink: #000;
+  --nav-cta-blend: difference;     /* tu look actual */
+  --nav-burger-surface: #fff;
+  --nav-backdrop: rgba(0,0,0,0.22);
+}
+
+/* Cuando el hero entra en modo azul */
+html.is-hero-blue{
+  --nav-ink: #fff;                 /* ✅ bordes y texto en blanco */
+  --nav-surface: transparent;      /* o rgba(0,0,0,0.06) si querés */
+  --nav-cta-ink: #fff;
+
+  /* con fondo azul, 'difference' a veces da colores raros:
+     mejor normal para que sea estable */
+  --nav-cta-blend: normal;
+
+  --nav-burger-surface: rgba(0,0,0,0.12);
+  --nav-backdrop: rgba(0,0,0,0.28);
+}
+
 
 .nav{
   position: fixed;
@@ -74,11 +99,13 @@
   letter-spacing: 0.04em;
   text-transform: uppercase;
   text-decoration: none;
-  color: #000;
+
   line-height: 1;
 
-  border: 1px solid #000;
-  background-color: #ebe8e3;
+  color: var(--nav-ink);
+  border: 1px solid var(--nav-ink);
+
+  background-color: transparent;
 
   transform: translateZ(0);
   backface-visibility: hidden;
@@ -99,8 +126,9 @@
 
 .nav-chip:focus-visible{
   outline: none;
-  box-shadow: 0 0 0 3px rgba(0,0,0,0.18);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--nav-ink) 22%, transparent);
 }
+
 
 /* CTA */
 .nav-cta{
@@ -113,7 +141,9 @@
   text-transform: uppercase;
   /* text-decoration: underline; */
 
-  color: #000;
+  color: var(--nav-cta-ink);
+mix-blend-mode: var(--nav-cta-blend);
+
   line-height: 1;
 
   padding: 10px 14px;
@@ -123,15 +153,14 @@
   transform-style: preserve-3d;
   will-change: transform, opacity;
 
-  mix-blend-mode: difference;
 }
 
 .nav-cta:hover{ opacity: 0.82; }
 
 .nav-cta:focus-visible{
   outline: none;
-  box-shadow: 0 0 0 3px rgba(0,0,0,0.18);
-  mix-blend-mode: difference;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--nav-ink) 22%, transparent);
+  mix-blend-mode: var(--nav-cta-blend);
 }
 
 /* Mobile: burger + panel */

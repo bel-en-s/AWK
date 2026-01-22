@@ -27,7 +27,6 @@ export default function Hero() {
 
   const TYPE_TEXT = useMemo(() => "Creative Digital\nExperiences", []);
 
-
   useLayoutEffect(() => {
     const heroEl = heroRef.current;
     const bg = copyBgRef.current;
@@ -37,6 +36,11 @@ export default function Hero() {
 
     const ua = navigator.userAgent || "";
     const isIOS = /iPad|iPhone|iPod/.test(ua);
+
+    // ✅ MOBILE detection (evita overlay fija en touch)
+    const isMobile =
+      window.matchMedia?.("(max-width: 920px)")?.matches ||
+      window.matchMedia?.("(pointer: coarse)")?.matches;
 
     const root = document.documentElement;
     const body = document.body;
@@ -95,7 +99,7 @@ export default function Hero() {
             window.innerHeight
         );
 
-      // BG fixed + transforms (butter)
+      // BG fixed
       gsap.set(bg, {
         position: "fixed",
         left: PAD,
@@ -106,10 +110,10 @@ export default function Hero() {
         transformOrigin: "0% 100%",
         scaleX: 1,
         scaleY: 1,
-        willChange: "transform, border-radius, background-color",
+        willChange: "left, bottom, width, height, transform, border-radius, background-color",
       });
 
-      // CARD: fixed, SIN escala fullscreen (para poder morphear a slot)
+      // CARD fixed (copy)
       gsap.set(card, {
         position: "fixed",
         left: PAD,
@@ -124,17 +128,12 @@ export default function Hero() {
         color: "#fff",
         padding: RECT_PAD,
         boxShadow: "none",
-        willChange: "left, top, width, height, border-radius, background-color, color, padding, box-shadow, opacity",
+        willChange:
+          "left, top, bottom, width, height, border-radius, background-color, color, padding, box-shadow, opacity, transform",
       });
 
       // Cursor arriba
       if (cursorWrapRef.current) gsap.set(cursorWrapRef.current, { autoAlpha: 1 });
-
-      const computeScales = () => {
-        const w = rectW();
-        const h = rectH();
-        return { sx: window.innerWidth / w, sy: vhStable() / h };
-      };
 
       // ----------------------------
       // Services optional
@@ -153,7 +152,7 @@ export default function Hero() {
       // ----------------------------
       // Main timeline (pin)
       // ----------------------------
-      const BLUE_AT = 0.32; // umbral para modo azul (navbar blanco)
+      const BLUE_AT = 0.32;
       const tl = gsap.timeline({
         defaults: { ease: "none" },
         scrollTrigger: {
@@ -176,7 +175,6 @@ export default function Hero() {
             }
           },
 
-          // ✅ prende/apaga SIEMPRE (cuando volvés para atrás)
           onUpdate: (self) => {
             const blue = self.progress >= BLUE_AT;
             setRootClass("is-hero-blue", blue);
@@ -207,6 +205,8 @@ export default function Hero() {
               color: "#fff",
               padding: RECT_PAD,
               boxShadow: "none",
+              autoAlpha: 1,
+              transform: "none",
             });
 
             if (hasServices) gsap.set(svcRow, { x: 0 });
@@ -214,12 +214,16 @@ export default function Hero() {
         },
       });
 
-      // 1) expand BG fullscreen
+      // 1) expand BG fullscreen (✅ sin PAD: pega a 0,0)
       tl.to(
         bg,
         {
-          scaleX: () => computeScales().sx,
-          scaleY: () => computeScales().sy,
+          left: 0,
+          bottom: 0,
+          width: () => window.innerWidth,
+          height: () => vhStable(),
+          scaleX: 1,
+          scaleY: 1,
           borderRadius: 0,
           boxShadow: "none",
           duration: 0.55,
@@ -239,7 +243,7 @@ export default function Hero() {
       }
 
       // ----------------------------
-      // Let's Talk tilt hover (SAFE)
+      // Let's Talk tilt hover (SAFE) - desktop only (pointer fine)
       // ----------------------------
       const prefersReducedTalk =
         window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
@@ -261,10 +265,26 @@ export default function Hero() {
         const BASE_RZ = -8;
         gsap.set(talkEl, { rotateZ: BASE_RZ, rotateX: 0, rotateY: 0, scale: 1 });
 
-        const toRX = gsap.quickTo(talkEl, "rotateX", { duration: 0.22, ease: "expo.out", overwrite: "auto" });
-        const toRY = gsap.quickTo(talkEl, "rotateY", { duration: 0.22, ease: "expo.out", overwrite: "auto" });
-        const toRZ = gsap.quickTo(talkEl, "rotateZ", { duration: 0.28, ease: "expo.out", overwrite: "auto" });
-        const toS  = gsap.quickTo(talkEl, "scale",   { duration: 0.28, ease: "expo.out", overwrite: "auto" });
+        const toRX = gsap.quickTo(talkEl, "rotateX", {
+          duration: 0.22,
+          ease: "expo.out",
+          overwrite: "auto",
+        });
+        const toRY = gsap.quickTo(talkEl, "rotateY", {
+          duration: 0.22,
+          ease: "expo.out",
+          overwrite: "auto",
+        });
+        const toRZ = gsap.quickTo(talkEl, "rotateZ", {
+          duration: 0.28,
+          ease: "expo.out",
+          overwrite: "auto",
+        });
+        const toS = gsap.quickTo(talkEl, "scale", {
+          duration: 0.28,
+          ease: "expo.out",
+          overwrite: "auto",
+        });
 
         const update = (e) => {
           cancelAnimationFrame(rafTalk);
@@ -278,7 +298,7 @@ export default function Hero() {
 
             const maxTilt = 10;
             const rx = gsap.utils.clamp(-maxTilt, maxTilt, -ny * maxTilt);
-            const ry = gsap.utils.clamp(-maxTilt, maxTilt,  nx * maxTilt);
+            const ry = gsap.utils.clamp(-maxTilt, maxTilt, nx * maxTilt);
 
             toRX(rx);
             toRY(ry);
@@ -288,10 +308,13 @@ export default function Hero() {
         };
 
         talkEnter = (e) => update(e);
-        talkMove  = (e) => update(e);
+        talkMove = (e) => update(e);
         talkLeave = () => {
           cancelAnimationFrame(rafTalk);
-          toRX(0); toRY(0); toRZ(BASE_RZ); toS(1);
+          toRX(0);
+          toRY(0);
+          toRZ(BASE_RZ);
+          toS(1);
         };
 
         talkEl.addEventListener("pointerenter", talkEnter);
@@ -301,55 +324,68 @@ export default function Hero() {
       }
 
       // ----------------------------
-      // Services reveal + BG turns blue + CARD morphs to white slot
+      // Services reveal + BG turns blue + (Desktop) CARD morphs to slot
       // ----------------------------
       if (hasServices) {
         gsap.set(svc, { autoAlpha: 0, pointerEvents: "none" });
 
-        // BG to blue (visual)
+        // BG to blue
         tl.to(bg, { backgroundColor: "var(--svc-blue, #0A25FF)", duration: 0.14 }, 0.32);
 
         // Services on
         tl.to(svc, { autoAlpha: 1, duration: 0.12 }, 0.40);
         tl.set(svc, { pointerEvents: "auto" }, 0.42);
 
-        // ✅ CARD -> morph a .svc-introCard (recupera “se transforma en card”)
-        // Nota: si no existe, no hacemos morph y listo.
-        if (svcIntroCard) {
-          const measureTarget = () => svcIntroCard.getBoundingClientRect();
+        // ✅ DESKTOP: morph / ✅ MOBILE: ocultar overlay para que se lean cards
+        if (!isMobile) {
+          if (svcIntroCard) {
+            const measureTarget = () => svcIntroCard.getBoundingClientRect();
 
-          tl.to(
-            card,
-            {
-              // card es fixed, así que usamos coords viewport directas
-              left: () => Math.round(measureTarget().left),
-              top: () => Math.round(measureTarget().top),
-              bottom: "auto",
-              right: "auto",
-              width: () => Math.round(measureTarget().width),
-              height: () => Math.round(measureTarget().height),
+            tl.to(
+              card,
+              {
+                left: () => Math.round(measureTarget().left),
+                top: () => Math.round(measureTarget().top),
+                bottom: "auto",
+                right: "auto",
+                width: () => Math.round(measureTarget().width),
+                height: () => Math.round(measureTarget().height),
 
-              backgroundColor: "#fff",
-              color: "#000",
-              padding: 24,
-              borderRadius: 22,
-              boxShadow: "0 18px 50px rgba(0,0,0,0.18)",
+                backgroundColor: "#fff",
+                color: "#000",
+                padding: 24,
+                borderRadius: 22,
+                boxShadow: "0 18px 50px rgba(0,0,0,0.18)",
 
-              duration: 0.34,
-            },
-            0.18
-          );
+                duration: 0.34,
+              },
+              0.18
+            );
+          } else {
+            tl.to(
+              card,
+              {
+                backgroundColor: "#fff",
+                color: "#000",
+                padding: 24,
+                borderRadius: 22,
+                boxShadow: "0 18px 50px rgba(0,0,0,0.18)",
+                duration: 0.22,
+              },
+              0.18
+            );
+          }
         } else {
-          // fallback visual: al menos lo “cardea” (aunque no se mueva a slot)
           tl.to(
             card,
             {
-              backgroundColor: "#fff",
-              color: "#000",
-              padding: 24,
-              borderRadius: 22,
-              boxShadow: "0 18px 50px rgba(0,0,0,0.18)",
-              duration: 0.22,
+              y: -20,
+              scale: 0.98,
+              autoAlpha: 0,
+              duration: 0.18,
+              onComplete: () => {
+                card.style.pointerEvents = "none";
+              },
             },
             0.18
           );
@@ -417,7 +453,7 @@ export default function Hero() {
 
       <div ref={copyBgRef} className="hero-copy-bg" aria-hidden="true" />
 
-      {/* ✅ ESTE ES EL COPY QUE MORPHEA A CARD BLANCA */}
+      {/* ✅ ESTE ES EL COPY QUE MORPHEA A CARD BLANCA (desktop), y se oculta en mobile */}
       <div ref={copyCardRef} className="hero-copy-card" role="note" tabIndex={0}>
         <p className="hero-copy-text">
           Awake™ is a digital product studio crafting memorable customer experiences.
@@ -425,21 +461,20 @@ export default function Hero() {
       </div>
 
       <div ref={midRef} className="hero-mid" aria-label={TYPE_TEXT}>
-      <p className="hero-mid-text" aria-hidden="true">
-        {TYPE_TEXT.split("").map((ch, i) =>
-          ch === "\n" ? (
-            <br key={`br-${i}`} />
-          ) : (
-            <span key={i} className="type-letter">
-              {ch === " " ? "\u00A0" : ch}
-            </span>
-          )
-        )}
-        <span className="type-caret" aria-hidden="true">
-          |
-        </span>
-      </p>
-
+        <p className="hero-mid-text" aria-hidden="true">
+          {TYPE_TEXT.split("").map((ch, i) =>
+            ch === "\n" ? (
+              <br key={`br-${i}`} />
+            ) : (
+              <span key={i} className="type-letter">
+                {ch === " " ? "\u00A0" : ch}
+              </span>
+            )
+          )}
+          <span className="type-caret" aria-hidden="true">
+            |
+          </span>
+        </p>
       </div>
 
       <a ref={talkRef} className="hero-talk" href="#contact" aria-label="Let's talk">

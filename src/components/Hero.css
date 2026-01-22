@@ -1,9 +1,17 @@
-
 :root {
   --svc-blue: #0A25FF;
 
   --hero-copy-min: 340px;
   --hero-copy-min-mobile: 300px;
+}
+
+/* ✅ reset básico para evitar márgenes raros */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 /* =========================
@@ -13,7 +21,12 @@
   position: relative;
   min-height: 100svh;
   overflow: hidden;
-  background: #ebe8e3;;
+  background: #ebe8e3;
+
+  /* ✅ FULL BLEED aunque esté adentro de un container */
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
 }
 
 /* Cursor overlay */
@@ -72,8 +85,6 @@
   transform: translateZ(0);
 }
 
-
-
 @media (max-width: 680px) {
   .hero-content {
     top: 350px;
@@ -82,26 +93,20 @@
 
 @media (max-width: 1040px) {
   .hero-title {
-    /* margin-top: 20% !important; */
     padding: 0 !important;
-  
     font-weight: 200;
     line-height: 0.86;
     letter-spacing: -0.035em;
     white-space: nowrap;
     color: #000;
     pointer-events: auto;
-
     font-size: 500px;
-  
     visibility: hidden;
   }
 }
 
 @media (max-width: 920px) {
   .hero-title {
-
-  
     font-weight: 200;
     line-height: 0.86;
     letter-spacing: -0.035em;
@@ -110,21 +115,21 @@
     pointer-events: auto;
 
     font-size: 190px;
-    position:absolute;
-   bottom:100px;
+    position: absolute;
+    bottom: 100px;
     visibility: hidden;
   }
-  .hero-talk{
-    left:190px;
+
+  .hero-talk {
+    left: 190px;
     top: 30%;
     margin-bottom: 30vh;
   }
+
   .hero-mid {
     position: absolute;
-
-  
   }
-  
+
   .hero-mid-text {
     margin: 0;
     color: #000;
@@ -133,29 +138,22 @@
     font-size: 50px;
     opacity: 0.9;
     white-space: nowrap;
-  
   }
-
 }
 
 /* =========================
    EXPANDING BG (BLACK -> BLUE)
-   (solo fondo, sin texto)
 ========================= */
 .hero-copy-bg {
   position: absolute;
   left: 10px;
   bottom: 10px;
 
-  /* base: cuadrado mínimo */
   width: var(--hero-copy-min);
   height: var(--hero-copy-min);
-
-  /* en mobile, baja el mínimo */
   max-width: calc(100vw - 20px);
 
   background: #000;
-  /* border-radius: 22px; */
   box-shadow: 0 18px 60px rgba(0, 0, 0, 0.18);
 
   z-index: 4;
@@ -183,25 +181,21 @@
   left: 10px;
   bottom: 10px;
 
-
   width: var(--hero-copy-min);
   max-width: calc(100vw - 20px);
-
-  /* el texto puede crecer en alto, pero el BG ya es cuadrado */
   height: auto;
 
-  padding: 20px ;
+  padding: 20px;
 
   color: #fff;
   background: transparent;
-  /* border-radius: 22px; */
 
   z-index: 7;
   pointer-events: auto;
 
   box-sizing: border-box;
-  will-change: left, right, top, bottom, width, height, border-radius, padding, background-color, color, box-shadow;
- 
+  will-change: left, right, top, bottom, width, height, border-radius, padding, background-color, color, box-shadow, opacity, transform;
+
   opacity: 1;
   visibility: visible;
   font-family: var(--font-dm);
@@ -211,7 +205,6 @@
   .hero-copy-card {
     width: var(--hero-copy-min-mobile);
   }
-
 }
 
 .hero-copy-text {
@@ -219,13 +212,10 @@
   font-family: var(--font-dm);
   font-weight: 500;
   font-size: 26px;
-  /* line-height: 1.35; */
-  /* letter-spacing: 0.01em; */
   opacity: 0.92;
-  
+
   text-decoration: underline;
   text-decoration-thickness: 2px;
-  /* text-underline-offset: 0.22em; */
 }
 
 /* =========================
@@ -238,10 +228,19 @@
   background: transparent;
 }
 
+/* ✅ DESKTOP: ocultamos la introCard "real" porque el overlay la reemplaza */
 .svc--inHero .svc-introCard {
   opacity: 0 !important;
   pointer-events: none !important;
   transition: none !important;
+}
+
+/* ✅ MOBILE: la introCard real se muestra para leerla dentro del carrusel */
+@media (max-width: 920px) {
+  .svc--inHero .svc-introCard {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
 }
 
 /* =========================
@@ -249,13 +248,11 @@
 ========================= */
 .hero-mid {
   position: absolute;
-  left: 45% !important; 
-  text-align: center;  
+  left: 45% !important;
   bottom: 50px;
   z-index: 7;
   pointer-events: none;
-  text-align: center;  
-
+  text-align: center;
 }
 
 .hero-mid-text {
@@ -265,11 +262,10 @@
   font-weight: 800;
   font-size: 50px;
   opacity: 0.9;
-  white-space: normal !important;   
-  text-align: center !important;   
+  white-space: normal !important;
+  text-align: center !important;
   text-align-last: center !important;
-  line-height: 0.95;        /* ajustá a gusto */
-
+  line-height: 0.95;
 }
 
 .type-letter {
@@ -286,7 +282,7 @@
 ========================= */
 .hero-talk {
   position: absolute;
-  right:200px;
+  right: 200px;
   top: 50%;
 
   width: clamp(160px, 18vw, 220px);
@@ -298,7 +294,7 @@
   background: var(--blue, #1d4ed8);
   color: #fff;
   text-decoration: none;
-  padding:10px;
+  padding: 10px;
   box-shadow: 0 18px 60px rgba(0, 0, 0, 0.22);
   font-family: var(--font-dm);
   font-size: clamp(18px, 1.4vw, 22px);
@@ -311,13 +307,15 @@
   transform-origin: 50% 50%;
   will-change: transform, opacity;
   backface-visibility: hidden;
+
   margin-bottom: 20vh;
   transition: transform 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
   z-index: 9;
 }
 
-
-
+/* =========================
+   SCROLL LOCK (si lo usás)
+========================= */
 html.is-scroll-locked,
 body.is-scroll-locked {
   overscroll-behavior: none;

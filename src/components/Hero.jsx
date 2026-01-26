@@ -9,7 +9,7 @@ import "./Hero.css";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// ✅ Lenis bridge (tu lenis.jsx usa window.ScrollTrigger?.update?.())
+
 if (typeof window !== "undefined") {
   window.ScrollTrigger = ScrollTrigger;
 }
@@ -37,7 +37,7 @@ export default function Hero() {
     const ua = navigator.userAgent || "";
     const isIOS = /iPad|iPhone|iPod/.test(ua);
 
-    // ✅ MOBILE detection (evita overlay fija en touch)
+    
     const isMobile =
       window.matchMedia?.("(max-width: 920px)")?.matches ||
       window.matchMedia?.("(pointer: coarse)")?.matches;
@@ -53,9 +53,7 @@ export default function Hero() {
     const ctx = gsap.context(() => {
       ScrollTrigger.config({ ignoreMobileResize: true });
 
-      // ----------------------------
-      // Intro AWAKE (letters)
-      // ----------------------------
+
       const title = titleRef.current;
       const titleLetters = title
         ? Array.from(title.querySelectorAll(".hero-title-letter"))
@@ -110,7 +108,7 @@ export default function Hero() {
         transformOrigin: "0% 100%",
         scaleX: 1,
         scaleY: 1,
-        willChange: "left, bottom, width, height, transform, border-radius, background-color",
+        willChange: "left, bottom, width, height, transform, background-color",
       });
 
       // CARD fixed (copy)
@@ -242,9 +240,6 @@ export default function Hero() {
         );
       }
 
-      // ----------------------------
-      // Let's Talk tilt hover (SAFE) - desktop only (pointer fine)
-      // ----------------------------
       const prefersReducedTalk =
         window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
       const isCoarseTalk = window.matchMedia?.("(pointer: coarse)")?.matches;
@@ -323,9 +318,6 @@ export default function Hero() {
         talkEl.addEventListener("blur", talkLeave);
       }
 
-      // ----------------------------
-      // Services reveal + BG turns blue + (Desktop) CARD morphs to slot
-      // ----------------------------
       if (hasServices) {
         gsap.set(svc, { autoAlpha: 0, pointerEvents: "none" });
 
@@ -336,7 +328,7 @@ export default function Hero() {
         tl.to(svc, { autoAlpha: 1, duration: 0.12 }, 0.40);
         tl.set(svc, { pointerEvents: "auto" }, 0.42);
 
-        // ✅ DESKTOP: morph / ✅ MOBILE: ocultar overlay para que se lean cards
+   
         if (!isMobile) {
           if (svcIntroCard) {
             const measureTarget = () => svcIntroCard.getBoundingClientRect();
@@ -354,7 +346,7 @@ export default function Hero() {
                 backgroundColor: "#fff",
                 color: "#000",
                 padding: 24,
-                borderRadius: 22,
+                // borderRadius: 22,
                 boxShadow: "0 18px 50px rgba(0,0,0,0.18)",
 
                 duration: 0.34,

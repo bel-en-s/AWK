@@ -5,31 +5,43 @@ export default function Services({ inHero = false }) {
   const cards = [
     {
       variant: "service",
-      title: "Content\n& Motion",
-      items: ["Visual content", "Renders", "Animaciones", "Assets para redes"],
+      title: "Branding & Visual Identity",
+      items: ["Naming", "Sistemas visuales", "Guías de marca"],
       href: "#content",
     },
     {
       variant: "service",
-      title: "Prototipos &\nExperiencias\nInteractivas",
-      items: ["Flujos", "WebGL", "GSAP"],
+      title: "UX/UI & Product design",
+      items: ["Websites", "Apps", "Dashboards", "Interfaces Completas"],
       href: "#prototypes",
     },
     {
       variant: "service",
-      title: "Consultoría\nCreativa",
+      title: "Creative Direction & Campaigns",
       items: ["Posicionamiento", "Narrativa de marca", "Estrategia"],
       href: "#consultoria",
     },
     {
       variant: "service",
-      title: "Ads &\nPerformance\nCreative",
+      title: "Social Content & Motion",
       items: ["Creatividad para paid", "Social", "Banners", "y +"],
       href: "#ads",
     },
     {
       variant: "service",
-      title: "3D & VisualCraft",
+      title: "Prototypes & Interactive Experiences",
+      items: ["Renders", "Escena", "Producto digital"],
+      href: "#3d",
+    },
+    {
+      variant: "service",
+      title: "Media & Performance",
+      items: ["Renders", "Escena", "Producto digital"],
+      href: "#3d",
+    },
+        {
+      variant: "service",
+      title: "3D Visual Craft",
       items: ["Renders", "Escena", "Producto digital"],
       href: "#3d",
     },
@@ -56,13 +68,13 @@ export default function Services({ inHero = false }) {
             <div className="svc-introCard" data-intro-card aria-label="Intro card">
               <p className="svc-introText">
                 Awake™ is a digital
-                <br />
+               
                 product studio
-                <br />
+       
                 crafting memorable
-                <br />
+     
                 customer
-                <br />
+   
                 experiences.
               </p>
             </div>

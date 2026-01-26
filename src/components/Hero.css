@@ -187,7 +187,7 @@ body {
 
   padding: 20px;
 
-  color: #fff;
+  color: #ebe8e3;
   background: transparent;
 
   z-index: 7;
@@ -211,7 +211,7 @@ body {
   margin: 0;
   font-family: var(--font-dm);
   font-weight: 500;
-  font-size: 26px;
+  font-size: 46px;
   opacity: 0.92;
 
   text-decoration: underline;

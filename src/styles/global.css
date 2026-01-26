@@ -59,6 +59,9 @@ html.awk-cursor-none * { cursor: none !important; }
   --font-main: "VinaSans", sans-serif;
   --font-alt: "WorkSans", system-ui, sans-serif;
   --font-dm: "DMSans", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-mono: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+  "Liberation Mono", "Courier New", monospace;
+
 
   --cursor-normal: url("/AWK/images/cursor.svg") 0 0;
   --cursor-small: url("/AWK/images/cursor-small.svg") 0 0;

@@ -3,10 +3,12 @@ import Layout from "../layouts/Layout.astro";
 import Loader from "../components/global/Loader.jsx";
 import Hero from "../components/Hero.jsx";
 import Footer from "../components/global/Footer.jsx";
+import FeaturedLinks from "../components/FeaturedLinks.jsx";
 ---
 
 <Layout title="Landing AWK" desc="Landing animada con Astro + React + GSAP">
   <Loader client:load />
   <Hero client:load />
+  <FeaturedLinks client:load />
   <Footer client:load />
 </Layout>

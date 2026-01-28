@@ -17,7 +17,7 @@
   .wk2-item {
     position: absolute;
     inset: 0;
-    will-change: transform;
+    will-change: transform; 
   }
   
   /* fondo full */

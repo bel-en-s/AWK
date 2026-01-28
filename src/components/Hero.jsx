@@ -6,7 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import CursorLanding from "./global/CursorLanding";
 import Services from "./Services";
 import "./Hero.css";
-
+import FeaturedLinks from "./FeaturedLinks";
 gsap.registerPlugin(ScrollTrigger);
 
 
@@ -445,7 +445,7 @@ export default function Hero() {
 
       <div ref={copyBgRef} className="hero-copy-bg" aria-hidden="true" />
 
-      {/* ✅ ESTE ES EL COPY QUE MORPHEA A CARD BLANCA (desktop), y se oculta en mobile */}
+      {/* ESTE ES EL COPY QUE MORPHEA A CARD BLANCA (desktop), y se oculta en mobile */}
       <div ref={copyCardRef} className="hero-copy-card" role="note" tabIndex={0}>
         <p className="hero-copy-text">
           Awake™ is a digital product studio crafting memorable customer experiences.
@@ -474,6 +474,7 @@ export default function Hero() {
       </a>
 
       <Services inHero />
+ 
     </section>
   );
 }

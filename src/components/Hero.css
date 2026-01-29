@@ -3,9 +3,18 @@
 
   --hero-copy-min: 340px;
   --hero-copy-min-mobile: 300px;
+  --copy-fs-closed: 26px;            
+  --copy-fs-open: 46px;
 }
 
-/* ✅ reset básico para evitar márgenes raros */
+@media (max-width: 920px){
+  :root{
+    --copy-fs-closed: 40px;
+    --copy-fs-open: 30px;
+  }
+}
+
+
 html,
 body {
   margin: 0;
@@ -124,6 +133,7 @@ body {
     left: 190px;
     top: 30%;
     margin-bottom: 30vh;
+    z-index:10000;
   }
 
   .hero-mid {
@@ -207,20 +217,26 @@ body {
   }
 }
 
-.hero-copy-text {
+.hero-copy-text{
   margin: 0;
   font-family: var(--font-dm);
   font-weight: 500;
-  font-size: 46px;
+  font-size: var(--copy-fs-closed);
   opacity: 0.92;
 
   text-decoration: underline;
   text-decoration-thickness: 2px;
+
+  /* opcional: que no “salte” seco cuando cambia de estado */
+  transition: font-size 220ms ease, letter-spacing 220ms ease;
 }
 
-/* =========================
-   SERVICES IN HERO
-========================= */
+html.is-hero-blue .hero-copy-text,
+body.is-hero-blue .hero-copy-text{
+  font-size: var(--copy-fs-open);
+}
+
+
 .svc--inHero {
   position: absolute;
   inset: 0;
@@ -228,7 +244,6 @@ body {
   background: transparent;
 }
 
-/* ✅ DESKTOP: ocultamos la introCard "real" porque el overlay la reemplaza */
 .svc--inHero .svc-introCard {
   opacity: 0 !important;
   pointer-events: none !important;

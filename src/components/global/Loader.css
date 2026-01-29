@@ -7,8 +7,11 @@
   background: #0b0b0b;
   pointer-events: all;
   isolation: isolate;
-}
 
+  /* ✅ evita scrolls raros en mobile */
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
 
 .loader__word {
   position: relative;
@@ -16,22 +19,26 @@
   display: inline-flex;
   align-items: baseline;
   justify-content: center;
-  gap: 0.02em;
-
 
   font-family: var(--font-main);
-
-  /* font-weight: 600; */
-  letter-spacing: -26px;
   line-height: 0.9;
-  font-size: 500px;
-  color: rgba(255, 255, 255, 0.96);
-
   user-select: none;
   transform: translateZ(0);
 
   opacity: 0;
   visibility: hidden;
+
+  /* ✅ responsive tokens */
+  --loader-size: min(62vmin, 520px);
+  --loader-tight: clamp(-0.22em, -2.2vw, -0.06em);
+
+  font-size: var(--loader-size);
+  letter-spacing: var(--loader-tight);
+  color: rgba(255, 255, 255, 0.96);
+
+  /* ✅ que nunca se vaya del viewport */
+  max-width: 92vw;
+  justify-self: center;
 }
 
 .loader__letter {
@@ -54,4 +61,49 @@
 html.is-scroll-locked,
 body.is-scroll-locked {
   overflow: hidden !important;
+}
+
+/* =========================
+   MOBILE: que “entren” las letras
+========================= */
+@media (max-width: 820px) {
+  .loader__word{
+    /* ✅ más chico para que entre en ancho y alto */
+    --loader-size: min(44vmin, 260px);
+
+    /* ✅ menos negativo (el -26px era una bomba en mobile) */
+    --loader-tight: clamp(-0.14em, -3.2vw, -0.04em);
+
+    /* ✅ centrado sólido */
+    align-items: center;
+    line-height: 0.92;
+
+    /* ✅ si tu animación mueve en Y, esto evita clip */
+    padding-bottom: 0.06em;
+  }
+}
+
+/* Muy chico (iPhone SE etc.) */
+@media (max-width: 420px) {
+  .loader__word{
+    --loader-size: min(40vmin, 220px);
+    --loader-tight: clamp(-0.12em, -3.8vw, -0.03em);
+  }
+}
+
+/* Landscape móvil (se queda sin alto) */
+@media (max-height: 520px) and (orientation: landscape) {
+  .loader__word{
+    --loader-size: min(34vmin, 200px);
+  }
+}
+
+/* Accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+  .loader__letter {
+    will-change: auto;
+  }
+  .loader__curtain {
+    will-change: auto;
+  }
 }

@@ -4,31 +4,31 @@ import "./Work.css";
 const PROJECTS = [
   {
     title: "Motion Clinic",
-    image: "images/portfolio/1.jpg",
+    image: "images/portfolio/PORTADAS-01.jpg",
     category: "Creative Web Design",
     year: "2025",
   },
   {
     title: "Shadowwear 6AM",
-    image: "images/portfolio/2.jpg",
+    image: "images/portfolio/PORTADAS-02.jpg",
     category: "Photography",
     year: "2024",
   },
   {
     title: "Blur Formation 03",
-    image: "images/portfolio/3.jpg",
+    image: "images/portfolio/PORTADAS-03.jpg",
     category: "Kinetic Study",
     year: "2024",
   },
   {
     title: "Sunglass Operator",
-    image: "images/portfolio/4.jpg",
+    image: "images/portfolio/PORTADAS-04.jpg",
     category: "Editorial Motion",
     year: "2023",
   },
   {
     title: "Azure Figure 5",
-    image: "images/portfolio/img_5.jpg",
+    image: "images/portfolio/PORTADAS-05.jpg",
     category: "Visual Research",
     year: "2024",
   },

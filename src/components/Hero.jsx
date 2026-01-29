@@ -1,3 +1,4 @@
+
 // Hero.jsx
 import { useLayoutEffect, useMemo, useRef } from "react";
 import gsap from "gsap";
@@ -8,7 +9,6 @@ import Services from "./Services";
 import "./Hero.css";
 import FeaturedLinks from "./FeaturedLinks";
 gsap.registerPlugin(ScrollTrigger);
-
 
 if (typeof window !== "undefined") {
   window.ScrollTrigger = ScrollTrigger;
@@ -37,7 +37,6 @@ export default function Hero() {
     const ua = navigator.userAgent || "";
     const isIOS = /iPad|iPhone|iPod/.test(ua);
 
-    
     const isMobile =
       window.matchMedia?.("(max-width: 920px)")?.matches ||
       window.matchMedia?.("(pointer: coarse)")?.matches;
@@ -53,6 +52,14 @@ export default function Hero() {
     const ctx = gsap.context(() => {
       ScrollTrigger.config({ ignoreMobileResize: true });
 
+      // ✅ helper: avisar a CursorLanding si los ojos deben verse o no
+      let lastEyesShow = null;
+      const emitEyes = (show) => {
+        const v = !!show;
+        if (lastEyesShow === v) return;
+        lastEyesShow = v;
+        window.dispatchEvent(new CustomEvent("awk:eyes", { detail: { show: v } }));
+      };
 
       const title = titleRef.current;
       const titleLetters = title
@@ -167,16 +174,28 @@ export default function Hero() {
 
           onToggle: (self) => {
             setRootClass("is-hero-pinning", self.isActive);
+
             if (!self.isActive) {
               setRootClass("is-hero-blue", false);
               setRootClass("is-eyes-hidden", false);
+
+              // ✅ fuera del hero -> ojos OFF
+              emitEyes(false);
+              return;
             }
+
+            // ✅ si entra activo, decide según progreso actual
+            const blueNow = self.progress >= BLUE_AT;
+            emitEyes(!blueNow);
           },
 
           onUpdate: (self) => {
             const blue = self.progress >= BLUE_AT;
             setRootClass("is-hero-blue", blue);
             setRootClass("is-eyes-hidden", blue);
+
+            // ✅ en azul -> ojos OFF, en negro -> ojos ON (solo mientras está activo)
+            if (self.isActive) emitEyes(!blue);
           },
 
           onRefreshInit: () => {
@@ -240,82 +259,81 @@ export default function Hero() {
         );
       }
 
+      // ----------------------------
+      // LET'S TALK hover tilt (refactor: igual a nav items)
+      // ----------------------------
       const prefersReducedTalk =
         window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
       const isCoarseTalk = window.matchMedia?.("(pointer: coarse)")?.matches;
 
-      let rafTalk = 0;
       let talkEnter = null;
-      let talkMove = null;
       let talkLeave = null;
+      let talkFocus = null;
+      let talkBlur = null;
+      let talkWiggle = null;
 
       if (talkEl && !prefersReducedTalk && !isCoarseTalk) {
+        const dir = 1; // poné -1 si lo querés al otro lado
+        const BASE = 8;
+        const baseRot = dir * BASE;
+
         gsap.set(talkEl, {
-          transformPerspective: 900,
+          rotateZ: 0,
+          rotateX: 0,
+          rotateY: 0,
+          scale: 1,
+          y: 0,
           transformOrigin: "50% 50%",
           willChange: "transform",
           force3D: true,
         });
 
-        const BASE_RZ = -8;
-        gsap.set(talkEl, { rotateZ: BASE_RZ, rotateX: 0, rotateY: 0, scale: 1 });
+        const enter = () => {
+          gsap.to(talkEl, {
+            rotateZ: baseRot,
+            scale: 1.03,
+            y: -1,
+            duration: 0.32,
+            ease: "expo.out",
+            overwrite: "auto",
+          });
 
-        const toRX = gsap.quickTo(talkEl, "rotateX", {
-          duration: 0.22,
-          ease: "expo.out",
-          overwrite: "auto",
-        });
-        const toRY = gsap.quickTo(talkEl, "rotateY", {
-          duration: 0.22,
-          ease: "expo.out",
-          overwrite: "auto",
-        });
-        const toRZ = gsap.quickTo(talkEl, "rotateZ", {
-          duration: 0.28,
-          ease: "expo.out",
-          overwrite: "auto",
-        });
-        const toS = gsap.quickTo(talkEl, "scale", {
-          duration: 0.28,
-          ease: "expo.out",
-          overwrite: "auto",
-        });
-
-        const update = (e) => {
-          cancelAnimationFrame(rafTalk);
-          rafTalk = requestAnimationFrame(() => {
-            const r = talkEl.getBoundingClientRect();
-            const px = (e.clientX - r.left) / Math.max(1, r.width);
-            const py = (e.clientY - r.top) / Math.max(1, r.height);
-
-            const nx = (px - 0.5) * 2;
-            const ny = (py - 0.5) * 2;
-
-            const maxTilt = 10;
-            const rx = gsap.utils.clamp(-maxTilt, maxTilt, -ny * maxTilt);
-            const ry = gsap.utils.clamp(-maxTilt, maxTilt, nx * maxTilt);
-
-            toRX(rx);
-            toRY(ry);
-            toRZ(BASE_RZ + nx * 4);
-            toS(1.02);
+          talkWiggle?.kill();
+          talkWiggle = gsap.to(talkEl, {
+            rotateZ: baseRot + dir * 2,
+            duration: 0.85,
+            ease: "sine.inOut",
+            yoyo: true,
+            repeat: -1,
+            overwrite: "auto",
           });
         };
 
-        talkEnter = (e) => update(e);
-        talkMove = (e) => update(e);
-        talkLeave = () => {
-          cancelAnimationFrame(rafTalk);
-          toRX(0);
-          toRY(0);
-          toRZ(BASE_RZ);
-          toS(1);
+        const leave = () => {
+          talkWiggle?.kill();
+          talkWiggle = null;
+
+          gsap.to(talkEl, {
+            rotateZ: 0,
+            rotateX: 0,
+            rotateY: 0,
+            scale: 1,
+            y: 0,
+            duration: 0.55,
+            ease: "expo.out",
+            overwrite: "auto",
+          });
         };
 
+        talkEnter = enter;
+        talkLeave = leave;
+        talkFocus = enter;
+        talkBlur = leave;
+
         talkEl.addEventListener("pointerenter", talkEnter);
-        talkEl.addEventListener("pointermove", talkMove);
         talkEl.addEventListener("pointerleave", talkLeave);
-        talkEl.addEventListener("blur", talkLeave);
+        talkEl.addEventListener("focus", talkFocus);
+        talkEl.addEventListener("blur", talkBlur);
       }
 
       if (hasServices) {
@@ -328,7 +346,6 @@ export default function Hero() {
         tl.to(svc, { autoAlpha: 1, duration: 0.12 }, 0.40);
         tl.set(svc, { pointerEvents: "auto" }, 0.42);
 
-   
         if (!isMobile) {
           if (svcIntroCard) {
             const measureTarget = () => svcIntroCard.getBoundingClientRect();
@@ -409,14 +426,17 @@ export default function Hero() {
         window.removeEventListener("resize", onResize);
         cancelAnimationFrame(raf);
 
-        if (talkRef.current && talkEnter && talkMove && talkLeave) {
+        if (talkRef.current && talkEnter && talkLeave) {
           const el = talkRef.current;
           el.removeEventListener("pointerenter", talkEnter);
-          el.removeEventListener("pointermove", talkMove);
           el.removeEventListener("pointerleave", talkLeave);
-          el.removeEventListener("blur", talkLeave);
+          if (talkFocus) el.removeEventListener("focus", talkFocus);
+          if (talkBlur) el.removeEventListener("blur", talkBlur);
+          talkWiggle?.kill();
         }
-        cancelAnimationFrame(rafTalk);
+
+        // ✅ al desmontar Hero -> ojos OFF
+        emitEyes(false);
 
         setRootClass("is-hero-blue", false);
         setRootClass("is-eyes-hidden", false);
@@ -433,8 +453,8 @@ export default function Hero() {
         <CursorLanding activeAreaRef={heroRef} />
       </div>
 
-      <div className="hero-content">
-        <h1 ref={titleRef} className="hero-title" aria-label="AWAKE">
+      <div className="hero-content"  data-cursor="blue" >
+        <h1 ref={titleRef} className="hero-title" aria-label="AWAKE"  data-cursor="blue" >
           {"AWAKE".split("").map((ch, i) => (
             <span key={i} className="hero-title-letter" aria-hidden="true">
               {ch}
@@ -446,7 +466,7 @@ export default function Hero() {
       <div ref={copyBgRef} className="hero-copy-bg" aria-hidden="true" />
 
       {/* ESTE ES EL COPY QUE MORPHEA A CARD BLANCA (desktop), y se oculta en mobile */}
-      <div ref={copyCardRef} className="hero-copy-card" role="note" tabIndex={0}>
+      <div ref={copyCardRef} className="hero-copy-card" role="note" tabIndex={0}  data-cursor="blue" >
         <p className="hero-copy-text">
           Awake™ is a digital product studio crafting memorable customer experiences.
         </p>
@@ -469,12 +489,12 @@ export default function Hero() {
         </p>
       </div>
 
-      <a ref={talkRef} className="hero-talk" href="#contact" aria-label="Let's talk">
+      <a ref={talkRef} className="hero-talk" href="#contact" aria-label="Let's talk" >
         LET&apos;S TALK
       </a>
 
       <Services inHero />
- 
     </section>
   );
 }
+

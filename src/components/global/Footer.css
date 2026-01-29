@@ -1,154 +1,107 @@
-.awk-footer{
-  width:100%;
-  background:#EBE8E3;
-  color:#111;
-  padding: clamp(28px, 5vw, 64px) clamp(16px, 3.5vw, 48px);
-
-  /* controles de escala */
-  --pill-fs: clamp(18px, 1.7vw, 30px);
-  --pill-py: clamp(14px, 1.4vw, 20px);
-  --pill-px: clamp(20px, 2.2vw, 34px);
-  --row-gap: clamp(10px, 1.3vw, 18px);
-
-  --circle: clamp(54px, 4.2vw, 78px);
+/* src/components/Footer.css */
+.awakeFooter{
+  width: 100%;
+  background: #EBE8E3;
+  color: #111;
+  padding: clamp(22px, 4.2vw, 58px) clamp(16px, 3.6vw, 64px);
 }
 
-.awk-footer__inner{
-  width: min(1400px, 100%);
+.awakeFooter__inner{
+  width: min(1500px, 100%);
   margin: 0 auto;
 }
 
-/* TOP: una línea y centrado (desktop) */
-.awk-footer__top{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap: var(--row-gap);
-  flex-wrap: nowrap;
-  overflow: visible; /* <-- no recorta */
-  padding: 0 2px;
-  margin-bottom: clamp(22px, 3.6vw, 52px);
+/* ===== TITLE (Figma-like) ===== */
+.awakeFooter__title{
+  margin: 0;
+  display: flex;
+  justify-content: center;          /* ✅ centrado real */
+  align-items: baseline;
+  gap: clamp(22px, 9vw, 170px);     /* ✅ espacio grande entre STAY y AWAKE */
+
+  text-transform: uppercase;
+  font-weight: 900;
+  line-height: 0.86;
+  letter-spacing: -0.03em;
+
+  /* tamaño tipo figma */
+  font-size: clamp(54px, 10.5vw, 150px);
+
+  /* ✅ menos negro (como la captura) */
+  color: rgba(0,0,0,0.88);
 }
 
-/* CTA group */
-.awk-ctaGroup{
-  display:inline-flex;
-  align-items:center;
-  gap: 14px; /* espacio entre texto y flecha */
-  flex: 0 0 auto;
+.awakeFooter__word{
+  display: block;
 }
 
-.awk-ctaLabel{
-  font: 500 var(--pill-fs)/1.05 "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  letter-spacing: -0.02em;
-  border-radius: 999px;
-  padding: var(--pill-py) calc(var(--pill-px) + 4px);
-  border: 1.5px solid #111;
-  background:#111;
-  color:#f3efe8;
-  text-decoration:none;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  white-space: nowrap;
+/* ===== BOTTOM ===== */
+.awakeFooter__bottom{
+  margin-top: clamp(18px, 3.2vw, 34px);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: clamp(14px, 2.6vw, 40px);
+  align-items: end;
 }
 
-.awk-ctaCircle{
-  width: var(--circle);
-  height: var(--circle);
-  border-radius: 999px;
-  background:#111;
-  box-shadow: 0 0 0 1.5px #111;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  text-decoration:none;
-  flex: 0 0 auto;
+/* Typewriter-ish */
+.awakeFooter__block{
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: clamp(12px, 1.15vw, 16px);
+  line-height: 1.55;
+  color: rgba(0,0,0,0.68);
 }
 
-.awk-chevron{
-  width: 18px;
-  height: 18px;
-  border-right: 3px solid #f3efe8;
-  border-top: 3px solid #f3efe8;
-  transform: rotate(45deg);
-  margin-left: 2px;
+.awakeFooter__head{
+  color: rgba(0,0,0,0.75);
+  margin-bottom: 2px;
 }
 
-/* Pills */
-.awk-pill{
-  font: 500 var(--pill-fs)/1.05 "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  letter-spacing: -0.02em;
-  border-radius: 999px;
-  padding: var(--pill-py) var(--pill-px);
-  border: 1.5px solid rgba(20,20,20,0.70);
-  background: transparent;
-  color:#111;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
-  user-select:none;
-  -webkit-tap-highlight-color: transparent;
-  transition: background .25s ease, color .25s ease, border-color .25s ease;
-  white-space: nowrap;
-  flex: 0 0 auto;
+.awakeFooter__line{
+  margin: 0;
 }
 
-.awk-pill:hover{
-  background:#111;
-  color:#f3efe8;
-  border-color:#111;
+.awakeFooter__block--center{ text-align: center; }
+.awakeFooter__block--right{ text-align: right; }
+
+/* Links del medio */
+.awakeFooter__link{
+  display: block;
+  color: rgba(0,0,0,0.68);
+  text-decoration: none;
+  width: fit-content;
+  margin: 0 auto;
 }
 
-/* Si el viewport es chico, habilitamos scroll (pero arrancando desde el inicio, no centrado) */
-@media (max-width: 1100px){
-  .awk-footer{
-    --pill-fs: clamp(16px, 2.2vw, 22px);
-    --pill-py: clamp(12px, 1.8vw, 16px);
-    --pill-px: clamp(16px, 2.4vw, 24px);
-    --row-gap: clamp(10px, 1.6vw, 14px);
-    --circle: clamp(48px, 7vw, 62px);
+.awakeFooter__link:hover{
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+
+@media (max-width: 840px){
+  .awakeFooter__title{
+    justify-content: center;  
+    gap: clamp(18px, 10vw, 90px);
+    font-size: clamp(44px, 12vw, 92px);
   }
 
-  .awk-footer__top{
-    justify-content:flex-start; /* <-- evita recorte a ambos lados */
-    overflow-x:auto;
-    overflow-y:hidden;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width:none;
-    padding-bottom: 8px;
+  .awakeFooter__bottom{
+    grid-template-columns: 1fr;
+    align-items: center;
+    gap: 18px;
   }
-  .awk-footer__top::-webkit-scrollbar{ display:none; }
-}
 
-.awk-footer__logo{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  flex: 0 0 auto;
-  padding: 0 14px;
-}
+  .awakeFooter__block--center,
+  .awakeFooter__block--right{
+    text-align: left;
+  }
 
-.awk-footer__eyes{
-  width: clamp(54px, 6vw, 96px);
-  height:auto;
-  filter: drop-shadow(0 10px 18px rgba(0,0,0,0.18));
-}
+  .awakeFooter__link{
+    margin: 0;
+  }
 
-@media (max-width: 900px){
-  .awk-footer__bottom{
-    flex-direction: row;
-    justify-content:center;
-    gap: 16px;
-  }
-  .awk-footer__meta--left,
-  .awk-footer__meta--right{
-    justify-content:center;
-    width:100%;
-  }
-  .awk-footer__mono{
-    white-space: normal;
-    text-align:center;
-  }
+  /* separaciones como en figma (bloques con aire) */
+  .awakeFooter__col--mid{ margin-top: 8px; }
+  .awakeFooter__col--right{ margin-top: 8px; }
 }

@@ -1,0 +1,13 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Blog from "../components/Blog.jsx";
+import Footer from "../components/global/Footer.jsx";
+import InfiniteLogoMarquee from "../components/UI/InfiniteLogoMarquee.jsx"
+import Footer from "../components/global/Footer.jsx";
+---
+
+<Layout title="Work" desc="Selected work">
+<Blog />
+   <InfiniteLogoMarquee client:load bg="light" fade />
+    <Footer client:load bg=blue />
+</Layout>

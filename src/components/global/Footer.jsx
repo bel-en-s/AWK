@@ -1,12 +1,23 @@
-// src/components/Footer.jsx
 import "./Footer.css";
 
-export default function Footer() {
+const BG_MAP = {
+  light: "#EBE8E3",
+  blue: "#0000fe",
+};
+
+export default function Footer({ bg = "light" }) {
+  const resolvedBg = BG_MAP[bg] ?? BG_MAP.light;
+
   return (
-    <footer className="awakeFooter" role="contentinfo">
+    <footer
+      className={`awakeFooter awakeFooter--${bg}`}
+      style={{ ["--footer-bg"]: resolvedBg }}
+      role="contentinfo"
+    >
       <div className="awakeFooter__inner">
         <h2 className="awakeFooter__title" aria-label="Stay Awake">
-          STAY&nbsp;AWAKE
+          <span className="awakeFooter__word">STAY</span>
+          <span className="awakeFooter__word">AWAKE</span>
         </h2>
 
         <div className="awakeFooter__bottom">

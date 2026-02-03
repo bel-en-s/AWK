@@ -1,10 +1,36 @@
 // NavBar.jsx
-import { useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useRef, useState, useEffect } from "react";
 import gsap from "gsap";
 import "./Navbar.css";
 
 export default function NavBar({ show = true }) {
   const rootRef = useRef(null);
+
+  // ✅ mobile menu state (NO afecta GSAP porque el useLayoutEffect depende solo de show)
+  const [isOpen, setIsOpen] = useState(false);
+
+  // ✅ Scroll lock + ESC + close on astro navigation
+  useEffect(() => {
+    const html = document.documentElement;
+
+    if (isOpen) html.classList.add("nav-lock");
+    else html.classList.remove("nav-lock");
+
+    const onKey = (e) => {
+      if (e.key === "Escape") setIsOpen(false);
+    };
+
+    const onPageLoad = () => setIsOpen(false);
+
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("astro:page-load", onPageLoad);
+
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("astro:page-load", onPageLoad);
+      html.classList.remove("nav-lock");
+    };
+  }, [isOpen]);
 
   useLayoutEffect(() => {
     if (!show) return;
@@ -303,33 +329,101 @@ export default function NavBar({ show = true }) {
   const logoSrc = `${base}images/ojos.svg`;
 
   return (
-    <nav
-      ref={rootRef}
-      className="nav"
-      aria-label="Primary"
-      style={{ opacity: 0, visibility: "hidden" }}
-    >
-      <a className="nav-logo nav-anim" href={base} aria-label="Home">
-        <img className="nav-logoImg" src={logoSrc} alt="" aria-hidden="true" />
-      </a>
+    <>
+      {/* ✅ backdrop mobile (no es hijo del nav => no afecta GSAP) */}
+      <div
+        className={`nav-backdrop ${isOpen ? "is-open" : ""}`}
+        onClick={() => setIsOpen(false)}
+        aria-hidden={!isOpen}
+      />
 
-      <div className="nav-center" role="navigation" aria-label="Sections">
-        {links.map((l, i) => (
-          <a
-            key={l.href}
-            href={l.href}
-            className={`nav-chip nav-anim ${
-              i % 2 === 0 ? "is-square" : "is-pill"
-            }`}
-          >
-            {l.label}
-          </a>
-        ))}
-      </div>
+      {/* ✅ TU NAV (idéntico) + SOLO agrego el burger dentro */}
+      <nav
+        ref={rootRef}
+        className="nav"
+        aria-label="Primary"
+        style={{ opacity: 0, visibility: "hidden" }}
+      >
+        <a className="nav-logo nav-anim" href={base} aria-label="Home">
+          <img className="nav-logoImg" src={logoSrc} alt="" aria-hidden="true" />
+        </a>
 
-      <a className="nav-cta nav-anim invert" href={`${base}contact/`}>
-        GET IN TOUCH
-      </a>
-    </nav>
+        <div className="nav-center" role="navigation" aria-label="Sections">
+          {links.map((l, i) => (
+            <a
+              key={l.href}
+              href={l.href}
+              className={`nav-chip nav-anim ${i % 2 === 0 ? "is-square" : "is-pill"}`}
+            >
+              {l.label}
+            </a>
+          ))}
+        </div>
+
+        <a className="nav-cta nav-anim invert" href={`${base}contact/`}>
+          GET IN TOUCH
+        </a>
+
+        {/* ✅ Burger (no tiene nav-chip/nav-cta => no entra en tiltEls) */}
+        <button
+          type="button"
+          className="nav-burger nav-mobile"
+          aria-label={isOpen ? "Close menu" : "Open menu"}
+          aria-expanded={isOpen}
+          aria-controls="nav-mobile-panel"
+          onClick={() => setIsOpen((v) => !v)}
+        >
+          <span className={`burger ${isOpen ? "is-open" : ""}`} aria-hidden="true">
+            <i />
+            <i />
+            <i />
+          </span>
+        </button>
+      </nav>
+
+      {/* ✅ Panel lateral mobile (afuera del nav => GSAP intacto) */}
+      <aside
+        id="nav-mobile-panel"
+        className={`nav-mobilePanel ${isOpen ? "is-open" : ""}`}
+        aria-hidden={!isOpen}
+      >
+        <div className="nav-mobileInner">
+          <div className="nav-mobileTop">
+            <div className="nav-mobileTitle">Menu</div>
+
+            <button
+              type="button"
+              className="nav-mobileClose"
+              aria-label="Close menu"
+              onClick={() => setIsOpen(false)}
+            >
+              <span className="nav-mobileCloseX" aria-hidden="true">✕</span>
+            </button>
+          </div>
+
+          <div className="nav-mobileLinks" role="navigation" aria-label="Mobile Sections">
+            {links.map((l, i) => (
+              <a
+                key={l.href}
+                href={l.href}
+                onClick={() => setIsOpen(false)}
+                className={`nav-mobileLink ${i % 2 === 0 ? "is-square" : "is-pill"}`}
+              >
+                {l.label}
+                <span aria-hidden="true">→</span>
+              </a>
+            ))}
+
+            <a
+              className="nav-mobileCTA"
+              href={`${base}contact/`}
+              onClick={() => setIsOpen(false)}
+            >
+              GET IN TOUCH
+            </a>
+          </div>
+        </div>
+      </aside>
+    </>
   );
 }

@@ -1,9 +1,20 @@
-/* src/components/Footer.css */
 .awakeFooter{
   width: 100%;
-  background: #EBE8E3;
+  background: var(--footer-bg);
   color: #111;
   padding: clamp(22px, 4.2vw, 58px) clamp(16px, 3.6vw, 64px);
+  height: 50vh;
+}
+
+.awakeFooter--blue{
+  color: #fff;
+}
+
+.awakeFooter--blue .awakeFooter__title,
+.awakeFooter--blue .awakeFooter__block,
+.awakeFooter--blue .awakeFooter__head,
+.awakeFooter--blue .awakeFooter__link{
+  color: rgba(255,255,255,0.88);
 }
 
 .awakeFooter__inner{
@@ -11,31 +22,28 @@
   margin: 0 auto;
 }
 
-/* ===== TITLE (Figma-like) ===== */
 .awakeFooter__title{
   margin: 0;
   display: flex;
-  justify-content: center;          /* ✅ centrado real */
+  justify-content: center;
   align-items: baseline;
-  gap: clamp(22px, 9vw, 170px);     /* ✅ espacio grande entre STAY y AWAKE */
-
+  gap: clamp(22px, 9vw, 170px);
   text-transform: uppercase;
-  font-weight: 900;
+  font-weight: 700;
   line-height: 0.86;
-  letter-spacing: -0.03em;
-
-  /* tamaño tipo figma */
-  font-size: clamp(54px, 10.5vw, 150px);
-
-  /* ✅ menos negro (como la captura) */
+  font-size: 250px;
   color: rgba(0,0,0,0.88);
+  margin-bottom: 100px;
+}
+
+.awakeFooter--blue .awakeFooter__title{
+  color: rgba(0, 0, 0, 0.95);
 }
 
 .awakeFooter__word{
   display: block;
 }
 
-/* ===== BOTTOM ===== */
 .awakeFooter__bottom{
   margin-top: clamp(18px, 3.2vw, 34px);
   display: grid;
@@ -44,7 +52,6 @@
   align-items: end;
 }
 
-/* Typewriter-ish */
 .awakeFooter__block{
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   font-size: clamp(12px, 1.15vw, 16px);
@@ -64,10 +71,9 @@
 .awakeFooter__block--center{ text-align: center; }
 .awakeFooter__block--right{ text-align: right; }
 
-/* Links del medio */
 .awakeFooter__link{
   display: block;
-  color: rgba(0,0,0,0.68);
+  color: inherit;
   text-decoration: none;
   width: fit-content;
   margin: 0 auto;
@@ -78,12 +84,11 @@
   text-underline-offset: 3px;
 }
 
-
 @media (max-width: 840px){
   .awakeFooter__title{
-    justify-content: center;  
+    justify-content: center;
     gap: clamp(18px, 10vw, 90px);
-    font-size: clamp(44px, 12vw, 92px);
+    font-size: 100px;
   }
 
   .awakeFooter__bottom{
@@ -101,7 +106,8 @@
     margin: 0;
   }
 
-  /* separaciones como en figma (bloques con aire) */
-  .awakeFooter__col--mid{ margin-top: 8px; }
-  .awakeFooter__col--right{ margin-top: 8px; }
+  .awakeFooter__col--mid,
+  .awakeFooter__col--right{
+    margin-top: 8px;
+  }
 }

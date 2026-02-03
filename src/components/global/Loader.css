@@ -4,7 +4,7 @@
   z-index: 2147483647;
   display: grid;
   place-items: center;
-  background: #0b0b0b;
+  background: #121212;
   pointer-events: all;
   isolation: isolate;
 
@@ -28,15 +28,13 @@
   opacity: 0;
   visibility: hidden;
 
-  /* ✅ responsive tokens */
   --loader-size: min(62vmin, 520px);
   --loader-tight: clamp(-0.22em, -2.2vw, -0.06em);
 
   font-size: var(--loader-size);
-  letter-spacing: var(--loader-tight);
+
   color: rgba(255, 255, 255, 0.96);
 
-  /* ✅ que nunca se vaya del viewport */
   max-width: 92vw;
   justify-self: center;
 }

@@ -2,7 +2,7 @@
     height: 100vh;
     width: 100%;
     overflow: hidden;
-
+    margin-top: 100px;
     position: relative;
     overscroll-behavior: none;
     touch-action: none;

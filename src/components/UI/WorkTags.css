@@ -1,0 +1,26 @@
+.workTags{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.workTag{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  font-family: var(--font-main, system-ui);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+
+  padding: 6px 10px;
+  border-radius: 999px;
+
+  color: rgba(255,255,255,0.78);
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.14);
+
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}

@@ -176,7 +176,7 @@ export default function Hero() {
             setRootClass("is-hero-pinning", self.isActive);
 
             if (!self.isActive) {
-              setRootClass("is-hero-blue", false);
+              // setRootClass("is-hero-blue", false);
               setRootClass("is-eyes-hidden", false);
 
               // ✅ fuera del hero -> ojos OFF
@@ -193,8 +193,9 @@ export default function Hero() {
             const blue = self.progress >= BLUE_AT;
             setRootClass("is-hero-blue", blue);
             setRootClass("is-eyes-hidden", blue);
-
-            // ✅ en azul -> ojos OFF, en negro -> ojos ON (solo mientras está activo)
+            if (blue) {
+              setRootClass("is-theme-light", true);
+            }
             if (self.isActive) emitEyes(!blue);
           },
 

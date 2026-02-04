@@ -6,13 +6,13 @@
   --blog-max: 1120px;
 }
 
-/* Section */
+
 .blogSection{
-  width: 100%;
+
   background: var(--blog-bg);
   color: var(--blog-ink);
   padding: clamp(26px, 4vw, 46px) clamp(14px, 3vw, 28px);
-  margin-top: 50px;
+  margin: 50px 0;
 }
 
 .blogWrap{
@@ -20,7 +20,7 @@
   margin: 0 auto;
 }
 
-/* Top row */
+
 .blogTop{
   display:flex;
   align-items:center;
@@ -64,9 +64,8 @@
 /* Big title */
 .blogTitle{
   margin: 0 0 18px;
-  font-weight: 900;
-  letter-spacing: -0.02em;
-  font-size: clamp(58px, 8.5vw, 118px);
+  font-weight: 400;
+   font-size: 300px;
   line-height: 0.9;
 }
 
@@ -107,17 +106,18 @@
   transform: translateZ(0);
 }
 
-/* Body under image */
+
 .blogCard__body{
   position: relative;
   padding-top: 10px;
-  padding-right: 38px; /* espacio para flecha */
+  padding-right: 38px; 
 }
 
 .blogCard__title{
   margin: 0;
   color: var(--blog-blue);
-  font: 600 12px/1.25 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 26px;
+  font-family: var(--font-dm);
   white-space: pre-line;
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -138,7 +138,7 @@
   font: 700 14px/1 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
-/* Split card (text left, image right) */
+
 .blogCard--split{
   border: none;
 }
@@ -166,12 +166,12 @@
   grid-row: 1;
   padding-top: 0;
   padding-right: 38px;
-  min-height: 132px; /* para alinear con imagen */
+  min-height: 132px;
   display:flex;
   align-items:flex-end;
 }
 
-/* Hover (sutil) */
+
 @media (hover:hover){
   .blogCard:hover .blogCard__media{
     box-shadow: 0 10px 30px rgba(0,0,0,.08);
@@ -181,7 +181,7 @@
   }
 }
 
-/* Mobile: uno arriba del otro */
+
 @media (max-width: 860px){
   .blogTop{
     gap: 12px;
@@ -211,4 +211,18 @@
     min-height: unset;
     padding-top: 10px;
   }
+}
+
+
+.blogTitle{
+  margin: 0 0 18px;
+  font-weight: 400;
+  font-size: 300px;
+  line-height: 0.9;
+  display: inline-block;
+}
+
+.blogTitle__char{
+  display: inline-block;
+  will-change: transform, opacity;
 }

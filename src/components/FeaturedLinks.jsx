@@ -241,9 +241,15 @@ export default function FeaturedLinks({ className = "" }) {
       >
         <div className="awk-footer__inner">
           <div className="awk-footer__top">
-            <a className="awk-ctaLabel awk-tilt" href="#">
-              WORK TOGETHER
-            </a>
+            <div className="awk-ctaGroup ">
+              <a className="awk-ctaLabel" href="#">
+                WORK TOGETHER
+              </a>
+              <span className="awk-ctaArrow" aria-hidden="true">
+                ›
+              </span>
+            </div>
+
             <button className="awk-pill awk-tilt">INDEPENDIENTE</button>
             <button className="awk-pill awk-tilt">PYME</button>
             <button className="awk-pill awk-tilt">PYME +</button>

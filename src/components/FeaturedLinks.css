@@ -1,17 +1,14 @@
-/* =========================
-   FEATURED LINKS (RESPONSIVE)
-========================= */
 
 .awkLinks{
   width: 100%;
   background: #121212;
   box-sizing: border-box;
 
-  /* padding responsive (en vez de 200px fijo) */
+
   padding: clamp(40px, 8vw, 140px) clamp(16px, 4vw, 64px);
 }
 
-/* Grid que se adapta solo */
+
 .awkLinks__row{
   width: min(1400px, 100%);
   margin: 0 auto;
@@ -19,13 +16,10 @@
   display: grid;
   gap: clamp(14px, 2.2vw, 22px);
 
-  /* ✅ magia: columnas fluidas que se acomodan */
   grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
 }
 
-/* =========================
-   CARD
-========================= */
+
 
 .awkLinkCard{
   position: relative;
@@ -69,7 +63,7 @@
   flex-direction: column;
 }
 
-/* Título: controla ancho + legibilidad */
+
 .awkLinkCard__title{
   white-space: pre-line;
   font-family: var(--font-dm);
@@ -78,15 +72,15 @@
   letter-spacing: 0.1px;
   color: rgba(255,255,255,0.82);
 
-  max-width: 42ch; /* ✅ consistente en desktop */
+  max-width: 42ch; 
 }
 
-/* ✅ en mobile, no limites el ancho */
+
 @media (max-width: 520px){
   .awkLinkCard__title{ max-width: 100%; }
 }
 
-/* Flecha: simple + estable */
+
 .awkLinkCard__arrowWrap{
   position: absolute;
   right: clamp(12px, 1.6vw, 18px);
@@ -113,4 +107,137 @@
   line-height: 1;
   transform: translateY(-1px);
   color: rgba(0,0,0,0.85);
+}
+
+
+
+.awk-footer{
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: clamp(14px, 2.2vw, 22px);
+}
+
+.awk-footer--black{
+  background: transparent;
+  padding: 0;
+}
+
+
+.awk-footer__inner{
+  /* width: min(1400px, 100%); */
+  margin: 0 auto;
+  padding: 0;
+}
+
+.awk-footer__top{
+  display: grid;
+  grid-template-columns: auto repeat(4, 1fr);
+  gap: clamp(12px, 1.6vw, 18px);
+  align-items: center;
+}
+
+
+.awk-ctaGroup{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+
+.awk-ctaLabel{
+  height: 40px;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: #E9E6E0;
+  color: #111;
+
+  /* font-family: var(--font-dm, system-ui); */
+  font-weight: 700;
+  font-size: 45px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+
+  box-shadow:
+    0 10px 26px rgba(0,0,0,0.35),
+    inset 0 0 0 1px rgba(0,0,0,0.12);
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+/* CTA circle arrow (separado) */
+.awk-ctaArrow{
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.92);
+  color: rgba(0,0,0,0.85);
+
+  display: grid;
+  place-items: center;
+
+  font-size: 18px;
+  line-height: 1;
+
+  box-shadow:
+    0 10px 26px rgba(0,0,0,0.35),
+    inset 0 0 0 1px rgba(0,0,0,0.12);
+}
+
+/* Pills */
+.awk-pill{
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+
+  height: 40px;
+  width: 100%;
+  padding: 0 18px;
+  border-radius: 999px;
+
+  background: #0A25FF;
+  color: #fff;
+
+  /* font-family: var(--font-dm, system-ui); */
+  font-weight: 700;
+    font-size: 45px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+
+  box-shadow:
+    0 10px 26px rgba(0,0,0,0.35),
+    inset 0 0 0 1px rgba(255,255,255,0.14);
+
+  white-space: nowrap;
+}
+
+/* focus */
+.awk-pill:focus-visible,
+.awk-ctaLabel:focus-visible{
+  outline: none;
+  box-shadow:
+    0 0 0 3px rgba(255,255,255,0.14),
+    0 10px 26px rgba(0,0,0,0.35),
+    inset 0 0 0 1px rgba(255,255,255,0.16);
+}
+
+/* =========================
+   RESPONSIVE: uno abajo del otro
+========================= */
+@media (max-width: 720px){
+  .awk-footer__top{
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .awk-ctaGroup{
+    justify-content: center;
+  }
+
+  .awk-pill{
+    width: 100%;
+  }
 }

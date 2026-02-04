@@ -359,11 +359,11 @@ export default function Hero() {
                 bottom: "auto",
                 right: "auto",
                 width: () => Math.round(measureTarget().width),
-                height: () => Math.round(measureTarget().height),
+                // height: () => Math.round(measureTarget().height),
 
                 backgroundColor: "#fff",
                 color: "#000",
-                padding: 24,
+                height: "70vh",
                 // borderRadius: 22,
                 boxShadow: "0 18px 50px rgba(0,0,0,0.18)",
 

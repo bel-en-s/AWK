@@ -323,7 +323,7 @@ html.nav-lock body{
   display: flex;
   align-items: center;
   justify-content: center;
-
+  padding: 15px 14px;
   border: 1px solid #000;
   border-radius: 999px;
   background: #000;
@@ -422,16 +422,12 @@ html.nav-lock body{
     overflow: auto;
   }
 }
-/* =========================
-   MOBILE: hide desktop links/cta
-   (PEGAR AL FINAL)
-========================= */
+
 @media (max-width: 820px){
-  /* en tu screenshot se ven chips + burger => esto lo corrige */
+
   .nav-center{ display: none !important; }
   .nav-cta{ display: none !important; }
 
-  /* burger a la derecha (opcional, por si se te va a la izq) */
   .nav{
     grid-template-columns: auto 1fr auto;
   }

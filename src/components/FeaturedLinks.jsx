@@ -98,24 +98,14 @@ export default function FeaturedLinks({ className = "" }) {
     const cleanups = [];
 
     const intro = () => {
-      if (prefersReduced) {
-        gsap.set(root, { autoAlpha: 1 });
-        return;
-      }
-
       gsap.set(root, { autoAlpha: 1 });
+      if (prefersReduced) return;
 
       const tl = gsap.timeline();
       tl.fromTo(
         root.querySelector(".awk-footer__top"),
         { y: 18, autoAlpha: 0, filter: "blur(10px)" },
         { y: 0, autoAlpha: 1, filter: "blur(0px)", duration: 0.7, ease: "expo.out" }
-      );
-      tl.fromTo(
-        root.querySelector(".awk-footer__bottom"),
-        { y: 14, autoAlpha: 0, filter: "blur(10px)" },
-        { y: 0, autoAlpha: 1, filter: "blur(0px)", duration: 0.7, ease: "expo.out" },
-        0.12
       );
     };
 
@@ -130,8 +120,6 @@ export default function FeaturedLinks({ className = "" }) {
 
       gsap.set(el, {
         rotateZ: 0,
-        rotateX: 0,
-        rotateY: 0,
         scale: 1,
         transformOrigin: "50% 50%",
         willChange: "transform",
@@ -191,23 +179,32 @@ export default function FeaturedLinks({ className = "" }) {
     return () => cleanups.forEach((fn) => fn());
   }, []);
 
+  // ----------------------------
+  // Data
+  // ----------------------------
   const items = [
     {
       title: "¿Cómo la IA está\ntransformando\nel Marketing y la\nPublicidad?",
-      href: "#",
+      href: "https://www.iae.edu.ar/2024/11/como-la-ia-esta-transformando-el-marketing-y-la-publicidad/",
+      target: "_blank",
     },
     {
       title:
         "IDNTITY / Sebastián Linck\ny Diego Cuervo:\nCreando el Uber de la\nagencia de medios",
-      href: "#",
+      href: "https://www.circulocreativo.org/more-news/2023/11/19/latinspots-revista-176-especiales-estados-unidos",
+      target: "_blank",
     },
     {
       title:
         "La guerra de los clicks:\nQué cambió en la\npublicidad con el análisis\nde datos",
-      href: "#",
+      href: "https://www.forbesargentina.com/negocios/la-guerra-clicks-cambio-publicidad-analisis-datos-n25646",
+      target: "_blank",
     },
   ];
 
+  // ----------------------------
+  // Render
+  // ----------------------------
   return (
     <section
       ref={wrapRef}
@@ -220,6 +217,8 @@ export default function FeaturedLinks({ className = "" }) {
             key={idx}
             className="awkLinkCard"
             href={it.href}
+            target={it.target}
+            rel="noopener noreferrer"
             data-cursor="blue"
           >
             <div className="awkLinkCard__inner">

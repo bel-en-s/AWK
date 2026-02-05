@@ -1,4 +1,9 @@
+import { useLayoutEffect, useRef } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import "./Blog.css";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const BASE = import.meta.env.BASE_URL;
 const FALLBACK_IMG = "/images/blog/1.webp";
@@ -66,11 +71,93 @@ function PostCard({ variant = "vertical", title, image, href = "#" }) {
   );
 }
 
+function splitWords(text) {
+  const safe = String(text || "");
+  const tokens = safe.replace(/\n/g, " \n ").split(/(\s+)/).filter((t) => t.length);
+  const out = [];
+  let wi = 0;
+  for (const t of tokens) {
+    if (t === "\n") {
+      out.push({ type: "br", key: `br-${wi++}` });
+    } else if (/^\s+$/.test(t)) {
+      out.push({ type: "space", value: t, key: `sp-${wi++}` });
+    } else {
+      out.push({ type: "word", value: t, key: `w-${wi++}` });
+    }
+  }
+  return out;
+}
+
 export default function Blog() {
+  const rootRef = useRef(null);
+  const titleRef = useRef(null);
+
+  useLayoutEffect(() => {
+    const root = rootRef.current;
+    const title = titleRef.current;
+    if (!root || !title) return;
+
+    const prefersReduced =
+      window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+
+    const ctx = gsap.context(() => {
+      const words = Array.from(title.querySelectorAll(".blogTitle__word"));
+      if (!words.length) return;
+
+      if (prefersReduced) {
+        gsap.set(words, { autoAlpha: 1, y: 0, rotateX: 0, filter: "none" });
+        return;
+      }
+
+      gsap.set(words, {
+        autoAlpha: 0,
+        y: -90,
+        rotateX: 65,
+        filter: "blur(12px)",
+        transformPerspective: 1000,
+        transformOrigin: "50% 70%",
+        willChange: "transform, opacity, filter",
+      });
+
+      gsap.to(words, {
+        autoAlpha: 1,
+        y: 0,
+        rotateX: 0,
+        filter: "blur(0px)",
+        ease: "none",
+        stagger: { each: 0.08, from: "start" },
+        scrollTrigger: {
+          id: "BLOG_NEWS_WORDS",
+          trigger: root,
+          start: "top 88%",
+          end: "top 55%",
+          scrub: 0.9,
+          once: true,
+          invalidateOnRefresh: true,
+        },
+        onComplete: () => gsap.set(words, { clearProps: "filter" }),
+      });
+    }, root);
+
+    return () => ctx.revert();
+  }, []);
+
+  const titleTokens = splitWords("NEWS");
+
   return (
-    <section className="blogSection" id="blog">
+    <section ref={rootRef} className="blogSection" id="blog">
       <div className="blogWrap">
-        <h2 className="blogTitle">NEWS</h2>
+        <h2 ref={titleRef} className="blogTitle" aria-label="NEWS">
+          {titleTokens.map((t) => {
+            if (t.type === "br") return <br key={t.key} />;
+            if (t.type === "space") return <span key={t.key}>{t.value}</span>;
+            return (
+              <span key={t.key} className="blogTitle__word">
+                {t.value}
+              </span>
+            );
+          })}
+        </h2>
 
         <div className="blogGrid">
           <div className="blogCol blogCol--left">

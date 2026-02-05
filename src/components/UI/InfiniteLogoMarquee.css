@@ -1,62 +1,40 @@
 .ilm{
-  width: 100%;
+  width:100%;
   background: var(--ilm-bg);
-  position: relative;
-  overflow: hidden;
-  padding: 100px 0;
 }
 
 .ilm__viewport{
-  width: 100%;
-  height: var(--ilm-h);
-  position: relative;
-  overflow: hidden;
+  width:100%;
+  overflow:hidden;
+  background: var(--ilm-bg);
+  min-height: var(--ilm-h);
 }
 
-.ilm__inner{
-  height: 100%;
-  display: flex;
-  align-items: center;
-  will-change: transform;
-}
-
-.ilm__set{
-  height: 100%;
-  display: flex;
-  align-items: center;
+.ilm__track{
+  display:flex;
+  align-items:center;
   gap: var(--ilm-gap);
+  will-change: transform;
+  transform: translate3d(0,0,0);
 }
 
-.ilm__tile{
-  height: 100%;
-  display: flex;
-  align-items: center;
+.ilm__item{
   flex: 0 0 auto;
+  height: var(--ilm-h);
+  display:flex;
+  align-items:center;
 }
 
 .ilm__img{
-  height: 100%;
-  width: auto;
-  display: block;
-  user-select: none;
-  pointer-events: none;
-}
-
-.ilm--light .ilm__img{
-  filter: invert(1);
-}
-
-.ilm__probe{
-  height: var(--ilm-h);
-  width: auto;
-  position: absolute;
-  left: -9999px;
-  top: 0;
-  opacity: 0;
-  pointer-events: none;
+  height:100%;
+  width:auto;
+  display:block;
+  user-select:none;
+  -webkit-user-drag:none;
+  pointer-events:none;
 }
 
 .ilm--fade .ilm__viewport{
-  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 10%, #000 90%, transparent 100%);
-  mask-image: linear-gradient(90deg, transparent 0%, #000 10%, #000 90%, transparent 100%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 9%, #000 91%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 9%, #000 91%, transparent 100%);
 }

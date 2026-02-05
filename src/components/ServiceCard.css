@@ -113,3 +113,17 @@
   font-weight: 600;
   border: 1px solid rgba(0,0,0,0.12);
 }
+
+
+/* Services.css (agregar al final, sin borrar nada) */
+.svc-track{
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  contain: layout paint;
+  will-change: transform;
+}
+
+.svc-row{
+  width: max-content;
+}

@@ -1,4 +1,3 @@
-
 // Hero.jsx
 import { useLayoutEffect, useMemo, useRef } from "react";
 import gsap from "gsap";
@@ -8,6 +7,7 @@ import CursorLanding from "./global/CursorLanding";
 import Services from "./Services";
 import "./Hero.css";
 import FeaturedLinks from "./FeaturedLinks";
+
 gsap.registerPlugin(ScrollTrigger);
 
 if (typeof window !== "undefined") {
@@ -17,10 +17,8 @@ if (typeof window !== "undefined") {
 export default function Hero() {
   const heroRef = useRef(null);
   const cursorWrapRef = useRef(null);
-
   const copyBgRef = useRef(null);
   const copyCardRef = useRef(null);
-
   const titleRef = useRef(null);
   const midRef = useRef(null);
   const talkRef = useRef(null);
@@ -31,7 +29,6 @@ export default function Hero() {
     const heroEl = heroRef.current;
     const bg = copyBgRef.current;
     const card = copyCardRef.current;
-
     if (!heroEl || !bg || !card) return;
 
     const ua = navigator.userAgent || "";
@@ -52,7 +49,6 @@ export default function Hero() {
     const ctx = gsap.context(() => {
       ScrollTrigger.config({ ignoreMobileResize: true });
 
-      // ✅ helper: avisar a CursorLanding si los ojos deben verse o no
       let lastEyesShow = null;
       const emitEyes = (show) => {
         const v = !!show;
@@ -66,29 +62,39 @@ export default function Hero() {
         ? Array.from(title.querySelectorAll(".hero-title-letter"))
         : [];
 
+      const midEl = midRef.current;
+      const talkEl = talkRef.current;
+
       if (title && titleLetters.length) {
         title.classList.add("is-ready");
 
-        gsap.set(titleLetters, { transformPerspective: 900 });
-        gsap.fromTo(
-          titleLetters,
-          { autoAlpha: 0, yPercent: 60, rotateX: -60, filter: "blur(10px)" },
-          {
-            autoAlpha: 1,
-            yPercent: 0,
-            rotateX: 0,
-            filter: "blur(0px)",
-            duration: 0.75,
-            ease: "expo.out",
-            stagger: 0.06,
-            clearProps: "filter",
-          }
-        );
+        gsap.set(titleLetters, {
+          autoAlpha: 1,
+          yPercent: 0,
+          rotateX: 0,
+          filter: "blur(0px)",
+          transformPerspective: 900,
+          transformOrigin: "50% 60%",
+          willChange: "transform, opacity, filter",
+        });
+
+        gsap.to(titleLetters, {
+          yPercent: -140,
+          autoAlpha: 0,
+          rotateX: 55,
+          filter: "blur(12px)",
+          stagger: { each: 0.04, from: "start" },
+          ease: "none",
+          scrollTrigger: {
+            trigger: heroEl,
+            start: "top top",
+            end: () => `+=${Math.round(window.innerHeight * 0.7)}`,
+            scrub: true,
+            invalidateOnRefresh: true,
+          },
+        });
       }
 
-      // ----------------------------
-      // Base geometry
-      // ----------------------------
       const PAD = 10;
       const RECT_H = 180;
       const RECT_PAD = 20;
@@ -96,7 +102,6 @@ export default function Hero() {
       const rectW = () => Math.min(340, window.innerWidth - PAD * 2);
       const rectH = () => RECT_H;
 
-      // ✅ altura estable (iOS address bar safe)
       const vhStable = () =>
         Math.round(
           window.visualViewport?.height ||
@@ -104,7 +109,6 @@ export default function Hero() {
             window.innerHeight
         );
 
-      // BG fixed
       gsap.set(bg, {
         position: "fixed",
         left: PAD,
@@ -118,17 +122,13 @@ export default function Hero() {
         willChange: "left, bottom, width, height, transform, background-color",
       });
 
-      // CARD fixed (copy)
       gsap.set(card, {
         position: "fixed",
         left: PAD,
         bottom: PAD,
-        top: "auto",
-        right: "auto",
         width: rectW(),
         height: rectH(),
         zIndex: 7,
-        borderRadius: 0,
         backgroundColor: "transparent",
         color: "#fff",
         padding: RECT_PAD,
@@ -137,14 +137,10 @@ export default function Hero() {
           "left, top, bottom, width, height, border-radius, background-color, color, padding, box-shadow, opacity, transform",
       });
 
-      // Cursor arriba
       if (cursorWrapRef.current) gsap.set(cursorWrapRef.current, { autoAlpha: 1 });
 
-      // ----------------------------
-      // Services optional
-      // ----------------------------
       const svc = heroEl.querySelector(".svc");
-      const svcIntroCard = heroEl.querySelector(".svc-introCard"); // ✅ target
+      const svcIntroCard = heroEl.querySelector(".svc-introCard");
       const svcTrack = heroEl.querySelector(".svc-track");
       const svcRow = heroEl.querySelector(".svc-row");
       const hasServices = !!(svc && svcTrack && svcRow);
@@ -154,14 +150,10 @@ export default function Hero() {
         return Math.max(0, svcRow.scrollWidth - svcTrack.clientWidth);
       };
 
-      // ----------------------------
-      // Main timeline (pin)
-      // ----------------------------
       const BLUE_AT = 0.32;
       const tl = gsap.timeline({
         defaults: { ease: "none" },
         scrollTrigger: {
-          id: "HERO_MAIN",
           trigger: heroEl,
           start: "top top",
           end: () => `+=${Math.round(vhStable() * 1.35 + getDist())}`,
@@ -171,68 +163,45 @@ export default function Hero() {
           anticipatePin: 1,
           invalidateOnRefresh: true,
           pinType: isIOS ? "fixed" : "transform",
-
           onToggle: (self) => {
             setRootClass("is-hero-pinning", self.isActive);
-
             if (!self.isActive) {
-              // setRootClass("is-hero-blue", false);
               setRootClass("is-eyes-hidden", false);
-
-              // ✅ fuera del hero -> ojos OFF
               emitEyes(false);
               return;
             }
-
-            // ✅ si entra activo, decide según progreso actual
             const blueNow = self.progress >= BLUE_AT;
             emitEyes(!blueNow);
           },
-
           onUpdate: (self) => {
             const blue = self.progress >= BLUE_AT;
             setRootClass("is-hero-blue", blue);
             setRootClass("is-eyes-hidden", blue);
-            if (blue) {
-              setRootClass("is-theme-light", true);
-            }
             if (self.isActive) emitEyes(!blue);
           },
-
           onRefreshInit: () => {
-            // reset base antes de medir
             gsap.set(bg, {
               left: PAD,
               bottom: PAD,
               width: rectW(),
               height: rectH(),
-              scaleX: 1,
-              scaleY: 1,
-              borderRadius: 0,
             });
-
             gsap.set(card, {
               left: PAD,
               bottom: PAD,
-              top: "auto",
-              right: "auto",
               width: rectW(),
               height: rectH(),
-              borderRadius: 0,
               backgroundColor: "transparent",
               color: "#fff",
               padding: RECT_PAD,
-              boxShadow: "none",
               autoAlpha: 1,
               transform: "none",
             });
-
             if (hasServices) gsap.set(svcRow, { x: 0 });
           },
         },
       });
 
-      // 1) expand BG fullscreen (✅ sin PAD: pega a 0,0)
       tl.to(
         bg,
         {
@@ -240,48 +209,28 @@ export default function Hero() {
           bottom: 0,
           width: () => window.innerWidth,
           height: () => vhStable(),
-          scaleX: 1,
-          scaleY: 1,
-          borderRadius: 0,
-          boxShadow: "none",
           duration: 0.55,
         },
         0
       );
 
-      // 2) ocultar UI del hero (title + type + talk)
-      const midEl = midRef.current;
-      const talkEl = talkRef.current;
       if (title || midEl || talkEl) {
-        tl.to(
-          [title, midEl, talkEl].filter(Boolean),
-          { autoAlpha: 0, duration: 0.2 },
-          0.25
-        );
+        tl.to([title, midEl, talkEl].filter(Boolean), { autoAlpha: 0, duration: 0.2 }, 0.25);
       }
 
-      // ----------------------------
-      // LET'S TALK hover tilt (refactor: igual a nav items)
-      // ----------------------------
       const prefersReducedTalk =
         window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
       const isCoarseTalk = window.matchMedia?.("(pointer: coarse)")?.matches;
 
-      let talkEnter = null;
-      let talkLeave = null;
-      let talkFocus = null;
-      let talkBlur = null;
-      let talkWiggle = null;
+      let talkEnter, talkLeave, talkFocus, talkBlur, talkWiggle;
 
       if (talkEl && !prefersReducedTalk && !isCoarseTalk) {
-        const dir = 1; // poné -1 si lo querés al otro lado
         const BASE = 8;
-        const baseRot = dir * BASE;
+        const baseRot = -BASE;
+        const hoverRot = BASE;
 
         gsap.set(talkEl, {
-          rotateZ: 0,
-          rotateX: 0,
-          rotateY: 0,
+          rotateZ: baseRot,
           scale: 1,
           y: 0,
           transformOrigin: "50% 50%",
@@ -291,7 +240,7 @@ export default function Hero() {
 
         const enter = () => {
           gsap.to(talkEl, {
-            rotateZ: baseRot,
+            rotateZ: hoverRot,
             scale: 1.03,
             y: -1,
             duration: 0.32,
@@ -301,7 +250,7 @@ export default function Hero() {
 
           talkWiggle?.kill();
           talkWiggle = gsap.to(talkEl, {
-            rotateZ: baseRot + dir * 2,
+            rotateZ: hoverRot + 2,
             duration: 0.85,
             ease: "sine.inOut",
             yoyo: true,
@@ -315,9 +264,7 @@ export default function Hero() {
           talkWiggle = null;
 
           gsap.to(talkEl, {
-            rotateZ: 0,
-            rotateX: 0,
-            rotateY: 0,
+            rotateZ: baseRot,
             scale: 1,
             y: 0,
             duration: 0.55,
@@ -340,86 +287,44 @@ export default function Hero() {
       if (hasServices) {
         gsap.set(svc, { autoAlpha: 0, pointerEvents: "none" });
 
-        // BG to blue
         tl.to(bg, { backgroundColor: "var(--svc-blue, #0A25FF)", duration: 0.14 }, 0.32);
-
-        // Services on
-        tl.to(svc, { autoAlpha: 1, duration: 0.12 }, 0.40);
+        tl.to(svc, { autoAlpha: 1, duration: 0.12 }, 0.4);
         tl.set(svc, { pointerEvents: "auto" }, 0.42);
 
-        if (!isMobile) {
-          if (svcIntroCard) {
-            const measureTarget = () => svcIntroCard.getBoundingClientRect();
-
-            tl.to(
-              card,
-              {
-                left: () => Math.round(measureTarget().left),
-                top: () => Math.round(measureTarget().top),
-                bottom: "auto",
-                right: "auto",
-                width: () => Math.round(measureTarget().width),
-                // height: () => Math.round(measureTarget().height),
-
-                backgroundColor: "#fff",
-                color: "#000",
-                height: "70vh",
-                // borderRadius: 22,
-                boxShadow: "0 18px 50px rgba(0,0,0,0.18)",
-
-                duration: 0.34,
-              },
-              0.18
-            );
-          } else {
-            tl.to(
-              card,
-              {
-                backgroundColor: "#fff",
-                color: "#000",
-                padding: 24,
-                borderRadius: 22,
-                boxShadow: "0 18px 50px rgba(0,0,0,0.18)",
-                duration: 0.22,
-              },
-              0.18
-            );
-          }
-        } else {
+        if (!isMobile && svcIntroCard) {
+          const measureTarget = () => svcIntroCard.getBoundingClientRect();
           tl.to(
             card,
             {
-              y: -20,
-              scale: 0.98,
-              autoAlpha: 0,
-              duration: 0.18,
-              onComplete: () => {
-                card.style.pointerEvents = "none";
-              },
+              left: () => Math.round(measureTarget().left),
+              top: () => Math.round(measureTarget().top),
+              width: () => Math.round(measureTarget().width),
+              backgroundColor: "#fff",
+              color: "#000",
+              height: "70vh",
+              boxShadow: "0 18px 50px rgba(0,0,0,0.18)",
+              duration: 0.34,
             },
             0.18
           );
         }
 
-        // Horizontal scroll
         tl.to(
           svcRow,
           {
             x: () => -getDist(),
             duration: 0.75,
           },
-          0.60
+          0.6
         );
       }
 
-      // ----------------------------
-      // Resize -> refresh (throttled)
-      // ----------------------------
       let raf = 0;
       const onResize = () => {
         cancelAnimationFrame(raf);
         raf = requestAnimationFrame(() => ScrollTrigger.refresh(true));
       };
+
       window.addEventListener("resize", onResize);
       ScrollTrigger.refresh(true);
 
@@ -427,18 +332,15 @@ export default function Hero() {
         window.removeEventListener("resize", onResize);
         cancelAnimationFrame(raf);
 
-        if (talkRef.current && talkEnter && talkLeave) {
-          const el = talkRef.current;
-          el.removeEventListener("pointerenter", talkEnter);
-          el.removeEventListener("pointerleave", talkLeave);
-          if (talkFocus) el.removeEventListener("focus", talkFocus);
-          if (talkBlur) el.removeEventListener("blur", talkBlur);
+        if (talkEl && talkEnter && talkLeave) {
+          talkEl.removeEventListener("pointerenter", talkEnter);
+          talkEl.removeEventListener("pointerleave", talkLeave);
+          talkEl.removeEventListener("focus", talkFocus);
+          talkEl.removeEventListener("blur", talkBlur);
           talkWiggle?.kill();
         }
 
-        // ✅ al desmontar Hero -> ojos OFF
         emitEyes(false);
-
         setRootClass("is-hero-blue", false);
         setRootClass("is-eyes-hidden", false);
         setRootClass("is-hero-pinning", false);
@@ -454,8 +356,8 @@ export default function Hero() {
         <CursorLanding activeAreaRef={heroRef} />
       </div>
 
-      <div className="hero-content"  data-cursor="blue" >
-        <h1 ref={titleRef} className="hero-title" aria-label="AWAKE"  data-cursor="blue" >
+      <div className="hero-content" data-cursor="blue">
+        <h1 ref={titleRef} className="hero-title" aria-label="AWAKE" data-cursor="blue">
           {"AWAKE".split("").map((ch, i) => (
             <span key={i} className="hero-title-letter" aria-hidden="true">
               {ch}
@@ -466,8 +368,7 @@ export default function Hero() {
 
       <div ref={copyBgRef} className="hero-copy-bg" aria-hidden="true" />
 
-      {/* ESTE ES EL COPY QUE MORPHEA A CARD BLANCA (desktop), y se oculta en mobile */}
-      <div ref={copyCardRef} className="hero-copy-card" role="note" tabIndex={0}  data-cursor="blue" >
+      <div ref={copyCardRef} className="hero-copy-card" role="note" tabIndex={0} data-cursor="blue">
         <p className="hero-copy-text">
           Awake™ is a digital product studio crafting memorable customer experiences.
         </p>
@@ -476,21 +377,13 @@ export default function Hero() {
       <div ref={midRef} className="hero-mid" aria-label={TYPE_TEXT}>
         <p className="hero-mid-text" aria-hidden="true">
           {TYPE_TEXT.split("").map((ch, i) =>
-            ch === "\n" ? (
-              <br key={`br-${i}`} />
-            ) : (
-              <span key={i} className="type-letter">
-                {ch === " " ? "\u00A0" : ch}
-              </span>
-            )
+            ch === "\n" ? <br key={i} /> : <span key={i} className="type-letter">{ch === " " ? "\u00A0" : ch}</span>
           )}
-          <span className="type-caret" aria-hidden="true">
-            |
-          </span>
+          <span className="type-caret" aria-hidden="true">|</span>
         </p>
       </div>
 
-      <a ref={talkRef} className="hero-talk" href="#contact" aria-label="Let's talk" >
+      <a ref={talkRef} className="hero-talk" href="#contact" aria-label="Let's talk">
         LET&apos;S TALK
       </a>
 
@@ -498,4 +391,3 @@ export default function Hero() {
     </section>
   );
 }
-

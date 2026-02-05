@@ -318,7 +318,7 @@ body.is-hero-blue .hero-copy-text{
   text-transform: uppercase;
   text-align: center;
 
-  transform: translateZ(0) rotateZ(-8deg);
+  /* transform: translateZ(0) rotateZ(-8deg); */
   transform-origin: 50% 50%;
   will-change: transform, opacity;
   backface-visibility: hidden;

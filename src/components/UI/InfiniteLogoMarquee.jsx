@@ -1,5 +1,4 @@
 import { useLayoutEffect, useRef } from "react";
-import gsap from "gsap";
 import "./InfiniteLogoMarquee.css";
 
 const BG_MAP = { light: "#e9e8e3", dark: "#121212" };
@@ -9,122 +8,147 @@ export default function InfiniteLogoMarquee({
   alt = "Logo strip",
   height = "clamp(46px, 6vw, 76px)",
   bg = "light",
-  speed = 90,
+  speed = 40,           // segundos por vuelta (como el ejemplo)
   gap = 56,
-  direction = "left",
+  direction = "left",   // left | right
   fade = false,
   pauseOnHover = false,
   className = "",
 }) {
   const rootRef = useRef(null);
   const viewportRef = useRef(null);
-  const innerRef = useRef(null);
-  const setARef = useRef(null);
-  const setBRef = useRef(null);
-  const imgProbeRef = useRef(null);
+  const trackRef = useRef(null);
 
   useLayoutEffect(() => {
     const root = rootRef.current;
     const viewport = viewportRef.current;
-    const inner = innerRef.current;
-    const setA = setARef.current;
-    const setB = setBRef.current;
-    const probe = imgProbeRef.current;
-
-    if (!root || !viewport || !inner || !setA || !setB || !probe) return;
+    const track = trackRef.current;
+    if (!root || !viewport || !track) return;
 
     const prefersReduced =
       window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
     if (prefersReduced) return;
 
-    let tween = null;
-    let ro = null;
-    let raf = 0;
+    let rafId = 0;
+    let last = performance.now();
+    let x = 0;
+    let singleWidth = 0;
+    let paused = false;
 
-    const wrapX = (x, w) => gsap.utils.wrap(-w, 0, x);
+    const cleanupClones = () => {
+      track.querySelectorAll('[data-clone="true"]').forEach((n) => n.remove());
+    };
 
-    const fillSet = (setEl, count) => {
-      setEl.innerHTML = "";
-      for (let i = 0; i < count; i++) {
-        const tile = document.createElement("div");
-        tile.className = "ilm__tile";
-        tile.innerHTML = `<img class="ilm__img" src="${src}" alt="" draggable="false" />`;
-        setEl.appendChild(tile);
+    const computeWidth = (nodes) =>
+      nodes.reduce((acc, n) => {
+        const r = n.getBoundingClientRect();
+        const cs = getComputedStyle(n);
+        return (
+          acc +
+          Math.round(
+            r.width +
+              parseFloat(cs.marginLeft || 0) +
+              parseFloat(cs.marginRight || 0)
+          )
+        );
+      }, 0);
+
+    const build = () => {
+      cancelAnimationFrame(rafId);
+      cleanupClones();
+
+      const originals = [...track.querySelectorAll(".ilm__item")].filter(
+        (n) => n.getAttribute("data-clone") !== "true"
+      );
+
+      if (!originals.length) return;
+
+      // medir 1 set (originales)
+      singleWidth = computeWidth(originals);
+      if (!singleWidth) return;
+
+      // clonar hasta cubrir ~2x viewport + 1 set extra
+      const target = viewport.clientWidth * 2 + singleWidth;
+
+      let safety = 0;
+      while (track.scrollWidth < target && safety++ < 80) {
+        originals.forEach((s) => {
+          const cl = s.cloneNode(true);
+          cl.setAttribute("data-clone", "true");
+          track.appendChild(cl);
+        });
       }
+
+      // reset transform sin “salto visual”
+      x = 0;
+      track.style.transform = "translate3d(0px,0,0)";
+      last = performance.now();
+
+      step(last);
     };
 
-    const rebuild = () => {
-      const currentX = Number(gsap.getProperty(inner, "x")) || 0;
+    const dirSign = direction === "right" ? 1 : -1;
 
-      tween?.kill();
-      tween = null;
+    const step = (now) => {
+      rafId = requestAnimationFrame(step);
+      if (paused) return;
 
-      const tileRect = probe.getBoundingClientRect();
-      const tileW = Math.max(1, Math.round(tileRect.width));
-      const viewW = Math.max(1, Math.round(viewport.clientWidth));
+      const dt = now - last;
+      last = now;
 
-      const perTile = tileW + gap;
-      const needed = Math.ceil((viewW + tileW * 2) / Math.max(1, perTile));
+      // px per sec: ancho del set / segundos
+      const duration = Math.max(5, Number(speed) || 40);
+      const pxPerSec = singleWidth / duration;
 
-      fillSet(setA, needed);
-      fillSet(setB, needed);
+      x += dirSign * pxPerSec * (dt / 1000);
 
-      const setW = Math.max(1, Math.round(setA.scrollWidth));
+      // wrap cuando completás 1 set
+      if (Math.abs(x) >= singleWidth) {
+        x += x < 0 ? singleWidth : -singleWidth;
+      }
 
-      gsap.set(setA, { x: 0 });
-      gsap.set(setB, { x: setW });
-
-      const startX = wrapX(currentX || gsap.utils.random(-setW, 0), setW);
-      gsap.set(inner, { x: startX });
-
-      const dir = direction === "right" ? 1 : -1;
-      const pxps = Math.max(20, Number(speed) || 90);
-      const duration = setW / pxps;
-
-      tween = gsap.to(inner, {
-        x: startX + dir * -setW,
-        duration,
-        ease: "none",
-        repeat: -1,
-        modifiers: {
-          x: (x) => `${wrapX(parseFloat(x), setW)}px`,
-        },
-      });
+      track.style.transform = `translate3d(${x}px,0,0)`;
     };
 
-    const scheduleRebuild = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(rebuild);
+    const onEnter = () => {
+      if (!pauseOnHover) return;
+      paused = true;
     };
-
-    const onEnter = () => pauseOnHover && tween?.pause();
-    const onLeave = () => pauseOnHover && tween?.resume();
+    const onLeave = () => {
+      if (!pauseOnHover) return;
+      paused = false;
+      last = performance.now();
+    };
 
     if (pauseOnHover) {
       root.addEventListener("pointerenter", onEnter);
       root.addEventListener("pointerleave", onLeave);
     }
 
-    const start = () => {
-      rebuild();
-      ro = new ResizeObserver(scheduleRebuild);
-      ro.observe(viewport);
-    };
+    // esperar a que cargue la imagen original para medir bien
+    const img = track.querySelector("img");
+    const start = () => requestAnimationFrame(() => requestAnimationFrame(build));
 
-    const img = probe;
-    if (!img.complete) img.addEventListener("load", start, { once: true });
+    if (img && !img.complete) img.addEventListener("load", start, { once: true });
     else start();
 
+    let to = 0;
+    const onResize = () => {
+      clearTimeout(to);
+      to = window.setTimeout(() => build(), 150);
+    };
+    window.addEventListener("resize", onResize);
+
     return () => {
-      cancelAnimationFrame(raf);
-      ro?.disconnect();
-      tween?.kill();
+      cancelAnimationFrame(rafId);
+      window.removeEventListener("resize", onResize);
       if (pauseOnHover) {
         root.removeEventListener("pointerenter", onEnter);
         root.removeEventListener("pointerleave", onLeave);
       }
+      cleanupClones();
     };
-  }, [src, speed, gap, direction, pauseOnHover, height]);
+  }, [src, gap, speed, direction, pauseOnHover, height]);
 
   const resolvedBg = BG_MAP[bg] ?? BG_MAP.light;
 
@@ -139,18 +163,14 @@ export default function InfiniteLogoMarquee({
       }}
       aria-label="Infinite logos marquee"
     >
-      <div ref={viewportRef} className="ilm__viewport">
-        <img
-          ref={imgProbeRef}
-          className="ilm__probe"
-          src={src}
-          alt=""
-          draggable="false"
-        />
-
-        <div ref={innerRef} className="ilm__inner" aria-label={alt}>
-          <div ref={setARef} className="ilm__set" aria-hidden="true" />
-          <div ref={setBRef} className="ilm__set" aria-hidden="true" />
+      <div ref={viewportRef} className="ilm__viewport" aria-label={alt}>
+        <div ref={trackRef} className="ilm__track">
+          <div className="ilm__item">
+            <img className="ilm__img" src={src} alt="" draggable="false" />
+          </div>
+          <div className="ilm__item">
+            <img className="ilm__img" src={src} alt="" draggable="false" />
+          </div>
         </div>
       </div>
     </section>

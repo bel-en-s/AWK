@@ -1,3 +1,4 @@
+// ServiceCard.jsx
 import "./ServiceCard.css";
 
 function ArrowIcon() {
@@ -48,23 +49,22 @@ export default function ServiceCard({
 
   return (
     <a className="svcCard" href={href || "#"} aria-label={title}>
-    <div className="svcCardHead">
-  <div className="svcCardIcon">
-    <ArrowIcon />
-  </div>
+      <div className="svcCardHead">
+        <div className="svcCardIcon">
+          <ArrowIcon />
+        </div>
 
-  <h4 className="svcCardTitle">
-    {String(title)
-      .split("\n")
-      .map((line, i) => (
-        <span key={i}>
-          {line}
-          {i !== String(title).split("\n").length - 1 && <br />}
-        </span>
-      ))}
-  </h4>
-</div>
-
+        <h4 className="svcCardTitle">
+          {String(title)
+            .split("\n")
+            .map((line, i) => (
+              <span key={i}>
+                {line}
+                {i !== String(title).split("\n").length - 1 && <br />}
+              </span>
+            ))}
+        </h4>
+      </div>
 
       <div className="svcCardBottom">
         <ul className="svcCardList">

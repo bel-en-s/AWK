@@ -41,6 +41,27 @@ const { title = "AWK", desc = "" } = Astro.props;
       document.addEventListener("astro:after-swap", () => {
         try { sessionStorage.setItem(KEY, "spa"); } catch(e) {}
       });
+
+      // ✅ HARD REFRESH: siempre arrancar arriba (evita que se "rompa" el pin/ScrollTrigger)
+      try {
+        if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+      } catch(e) {}
+
+      const forceTop = () => {
+        try {
+          // doble rAF: le gana a restauraciones tardías del browser/paint
+          requestAnimationFrame(() => {
+            window.scrollTo(0, 0);
+            requestAnimationFrame(() => window.scrollTo(0, 0));
+          });
+        } catch(e) {}
+      };
+
+      // pageshow cubre BFCache + reloads en algunos browsers
+      window.addEventListener("pageshow", forceTop);
+
+      // astro:page-load ocurre después de mount; lo reforzamos igual
+      document.addEventListener("astro:page-load", forceTop);
     </script>
   </body>
 </html>

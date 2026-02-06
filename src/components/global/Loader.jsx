@@ -63,9 +63,17 @@ export default function Loader({
     const finish = () => {
       gsap.set(root, { autoAlpha: 0, pointerEvents: "none" });
       cleanupUnlock();
-      window.__AWK_LOADED__ = true;
-      window.dispatchEvent(new CustomEvent("awk:loaded"));
       setDone(true);
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          window.__AWK_LOADED__ = true;
+          try {
+            window.ScrollTrigger?.refresh?.(true);
+          } catch (_) {}
+          window.dispatchEvent(new CustomEvent("awk:loaded"));
+        });
+      });
     };
 
     const navKind = sessionStorage.getItem(AWK_NAV_KIND) || "hard";

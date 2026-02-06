@@ -1,4 +1,4 @@
-// Hero.jsx
+
 import { useLayoutEffect, useMemo, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -22,9 +22,9 @@ export default function Hero() {
   const titleRef = useRef(null);
   const midRef = useRef(null);
   const talkRef = useRef(null);
+  const typeIntroPlayedRef = useRef(false);
 
-const TYPE_TEXT = useMemo(() => "Creative Digital Experiences", []);
-
+  const TYPE_TEXT = useMemo(() => "Creative Digital Experiences", []);
 
   useLayoutEffect(() => {
     const heroEl = heroRef.current;
@@ -66,6 +66,55 @@ const TYPE_TEXT = useMemo(() => "Creative Digital Experiences", []);
       const midEl = midRef.current;
       const talkEl = talkRef.current;
 
+      const prefersReducedType =
+        window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+
+      if (midEl && !prefersReducedType && !typeIntroPlayedRef.current) {
+        const letters = Array.from(midEl.querySelectorAll(".type-letter"));
+        const caret = midEl.querySelector(".type-caret");
+
+        if (letters.length) {
+          gsap.set(midEl, { autoAlpha: 1 });
+          gsap.set(letters, { autoAlpha: 0 });
+          if (caret) gsap.set(caret, { autoAlpha: 1 });
+
+          const runType = () => {
+            if (typeIntroPlayedRef.current) return;
+            typeIntroPlayedRef.current = true;
+
+            gsap.to(letters, {
+              autoAlpha: 1,
+              duration: 0,
+              stagger: 0.035,
+              ease: "none",
+              overwrite: "auto",
+            });
+
+            if (caret) {
+              gsap.to(caret, {
+                autoAlpha: 0,
+                duration: 0,
+                repeat: -1,
+                yoyo: true,
+                repeatDelay: 0.45,
+                delay: 0.1,
+                ease: "none",
+              });
+            }
+          };
+
+          if (window.__AWK_LOADED__ === true) {
+            runType();
+          } else {
+            const onLoaded = () => {
+              window.removeEventListener("awk:loaded", onLoaded);
+              requestAnimationFrame(() => requestAnimationFrame(runType));
+            };
+            window.addEventListener("awk:loaded", onLoaded, { once: true });
+          }
+        }
+      }
+
       if (title && titleLetters.length) {
         title.classList.add("is-ready");
 
@@ -97,14 +146,12 @@ const TYPE_TEXT = useMemo(() => "Creative Digital Experiences", []);
       }
 
       const PAD = 10;
-
       const RECT_PAD = 20;
 
- const RECT_H = isMobile ? 150 : 180;
+      const RECT_H = isMobile ? 150 : 180;
 
-const rectW = () => Math.min(isMobile ? 320 : 340, window.innerWidth - PAD * 2);
-const rectH = () => RECT_H;
-
+      const rectW = () => Math.min(isMobile ? 320 : 340, window.innerWidth - PAD * 2);
+      const rectH = () => RECT_H;
 
       const vhStable = () =>
         Math.round(
@@ -295,10 +342,9 @@ const rectH = () => RECT_H;
         tl.to(svc, { autoAlpha: 1, duration: 0.12 }, 0.4);
         tl.set(svc, { pointerEvents: "auto" }, 0.42);
         if (isMobile) {
-      tl.to([card, bg], { autoAlpha: 0, duration: 0.18 }, 0.44);
-      tl.set([card, bg], { pointerEvents: "none" }, 0.44);
-    }
-
+          tl.to([card, bg], { autoAlpha: 0, duration: 0.18 }, 0.44);
+          tl.set([card, bg], { pointerEvents: "none" }, 0.44);
+        }
 
         if (!isMobile && svcIntroCard) {
           const measureTarget = () => svcIntroCard.getBoundingClientRect();
@@ -317,7 +363,6 @@ const rectH = () => RECT_H;
             0.18
           );
         }
-        
 
         tl.to(
           svcRow,
@@ -387,9 +432,17 @@ const rectH = () => RECT_H;
       <div ref={midRef} className="hero-mid" aria-label={TYPE_TEXT}>
         <p className="hero-mid-text" aria-hidden="true">
           {TYPE_TEXT.split("").map((ch, i) =>
-            ch === "\n" ? <br key={i} /> : <span key={i} className="type-letter">{ch === " " ? "\u00A0" : ch}</span>
+            ch === "\n" ? (
+              <br key={i} />
+            ) : (
+              <span key={i} className="type-letter">
+                {ch === " " ? "\u00A0" : ch}
+              </span>
+            )
           )}
-          <span className="type-caret" aria-hidden="true">|</span>
+          <span className="type-caret" aria-hidden="true">
+            |
+          </span>
         </p>
       </div>
 
@@ -401,3 +454,4 @@ const rectH = () => RECT_H;
     </section>
   );
 }
+

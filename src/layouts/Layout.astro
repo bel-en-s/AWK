@@ -3,20 +3,44 @@ import "../styles/global.css";
 import LenisSmoothScroll from "../scripts/lenis.jsx";
 import TransitionBlocks from "../components/global/TransitionBlocks.jsx";
 import NavBar from "../components/global/Navbar.jsx";
+import Loader from "../components/global/Loader.jsx";
 import { ClientRouter } from "astro:transitions";
+
+const { title = "AWK", desc = "" } = Astro.props;
 ---
 
 <html lang="es">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>{title}</title>
+    {desc ? <meta name="description" content={desc} /> : null}
+
     <ClientRouter />
   </head>
 
   <body>
     <TransitionBlocks client:load transition:persist="trb" />
     <LenisSmoothScroll client:load transition:persist="lenis" />
+
+    <Loader client:load transition:persist="loader" />
+
     <NavBar client:load transition:persist="nav" />
+
     <slot />
+
+    <script is:inline>
+      const KEY = "AWK_NAV_KIND";
+      try { sessionStorage.setItem(KEY, sessionStorage.getItem(KEY) || "hard"); } catch(e) {}
+
+      document.addEventListener("astro:before-swap", () => {
+        try { sessionStorage.setItem(KEY, "spa"); } catch(e) {}
+      });
+
+      document.addEventListener("astro:after-swap", () => {
+        try { sessionStorage.setItem(KEY, "spa"); } catch(e) {}
+      });
+    </script>
   </body>
 </html>

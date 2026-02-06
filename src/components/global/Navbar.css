@@ -24,6 +24,15 @@ html.is-hero-blue{
   --nav-backdrop: rgba(0,0,0,0.28);
 }
 
+html.is-nav-blue{
+  --nav-ink: #fff;
+  --nav-surface: transparent;
+  --nav-cta-ink: #fff;
+  --nav-cta-blend: normal;
+  --nav-burger-surface: rgba(0,0,0,0.12);
+  --nav-backdrop: rgba(0,0,0,0.28);
+}
+
 
 .nav{
   position: fixed;

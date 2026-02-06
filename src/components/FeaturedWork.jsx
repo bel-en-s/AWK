@@ -1,13 +1,11 @@
+// src/components/FeaturedWork.jsx
 import { useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import "./FeaturedWork.css";
 
-gsap.registerPlugin(ScrollTrigger);
-
 const withBase = (p) =>
-  `${import.meta.env.BASE_URL}${String(p).replace(/^\/+/, "")}`;
-const isExternal = (href) => /^https?:\/\//i.test(String(href));
+  `${import.meta.env.BASE_URL}${String(p || "").replace(/^\/+/, "")}`;
+const isExternal = (href) => /^https?:\/\//i.test(String(href || ""));
 
 const WORKS = [
   {
@@ -33,12 +31,13 @@ const WORKS = [
   },
 ];
 
-export default function WorksPreview({
+export default function FeaturedWork({
   works = WORKS,
   allWorkHref = "work",
   className = "",
 }) {
   const rootRef = useRef(null);
+  const allWorkResolved = isExternal(allWorkHref) ? allWorkHref : withBase(allWorkHref);
 
   useLayoutEffect(() => {
     const root = rootRef.current;
@@ -46,200 +45,168 @@ export default function WorksPreview({
 
     const prefersReduced =
       window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    if (prefersReduced) return;
 
-    const ctx = gsap.context(() => {
-      const items = Array.from(root.querySelectorAll(".awk-work"));
-      if (!items.length) return;
+    const items = Array.from(root.querySelectorAll(".awk-work"));
 
-      const played = new WeakSet();
-      let queueDelay = 0;
-      let queueRaf = 0;
-
-      const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
-
-      const prime = (el) => {
-        const card = el.querySelector(".awk-work__card");
+    const setOut = () => {
+      items.forEach((el) => {
         const media = el.querySelector(".awk-work__media");
         const img = el.querySelector(".awk-work__media img");
-        const tags = Array.from(el.querySelectorAll(".awk-work__tag"));
+        const tags = el.querySelector(".awk-work__tags");
 
-        if (card) {
-          gsap.set(card, {
-            autoAlpha: 0,
-            y: 26,
-            rotateX: 10,
-            transformPerspective: 900,
-            transformOrigin: "50% 70%",
-            willChange: "transform, opacity",
-          });
-        }
+        gsap.killTweensOf([el, media, img, tags].filter(Boolean));
 
-        if (media) {
-          gsap.set(media, {
-            clipPath: "inset(12% 0% 0% 0% round 18px)",
-            willChange: "clip-path",
-          });
-        }
+        gsap.set(el, {
+          y: 42,
+          rotateX: 10,
+          transformPerspective: 900,
+          transformOrigin: "50% 60%",
+          filter: "blur(6px)",
+          autoAlpha: 0,
+        });
 
-        if (img) {
-          gsap.set(img, { scale: 1.06, willChange: "transform" });
-        }
+        if (media) gsap.set(media, { y: 18, autoAlpha: 0 });
+        if (img) gsap.set(img, { scale: 1.09 });
+        if (tags) gsap.set(tags, { y: 14, autoAlpha: 0 });
+      });
+    };
 
-        if (tags.length) {
-          gsap.set(tags, {
-            autoAlpha: 0,
-            y: 10,
-            filter: "blur(7px)",
-            willChange: "transform, opacity, filter",
-          });
-        }
+    const playIn = () => {
+      const tl = gsap.timeline({ defaults: { ease: "expo.out" } });
 
-        return { card, media, img, tags };
-      };
+      tl.to(items, {
+        autoAlpha: 1,
+        y: 0,
+        rotateX: 0,
+        filter: "blur(0px)",
+        duration: 0.95,
+        stagger: 0.12,
+        overwrite: "auto",
+        clearProps: "transform,filter,opacity,visibility",
+      }, 0);
 
-      const buildTL = (el, i) => {
-        const { card, media, img, tags } = prime(el);
-
-        if (!card) return null;
-
-        const easeCard =
-          i % 3 === 0 ? "expo.out" : i % 3 === 1 ? "power3.out" : "power4.out";
-        const durCard = i % 3 === 0 ? 0.82 : i % 3 === 1 ? 0.68 : 0.74;
-        const durReveal = i % 2 === 0 ? 0.74 : 0.62;
-        const durImg = i % 2 === 0 ? 0.96 : 0.84;
-
-        const tl = gsap.timeline({ paused: true });
-
-        tl.to(
-          card,
-          { autoAlpha: 1, y: 0, rotateX: 0, duration: durCard, ease: easeCard },
-          0
-        );
+      items.forEach((el, i) => {
+        const media = el.querySelector(".awk-work__media");
+        const img = el.querySelector(".awk-work__media img");
+        const tags = el.querySelector(".awk-work__tags");
 
         if (media) {
           tl.to(
             media,
             {
-              clipPath: "inset(0% 0% 0% 0% round 18px)",
-              duration: durReveal,
-              ease: "power3.out",
+              autoAlpha: 1,
+              y: 0,
+              duration: 0.85,
+              overwrite: "auto",
+              clearProps: "transform,opacity,visibility",
             },
-            0
+            0.08 + i * 0.12
           );
         }
 
         if (img) {
-          tl.to(img, { scale: 1, duration: durImg, ease: "expo.out" }, 0);
+          tl.to(
+            img,
+            {
+              scale: 1,
+              duration: 1.15,
+              ease: "expo.out",
+              overwrite: "auto",
+              clearProps: "transform",
+            },
+            0.06 + i * 0.12
+          );
         }
 
-        if (tags?.length) {
+        if (tags) {
           tl.to(
             tags,
             {
               autoAlpha: 1,
               y: 0,
-              filter: "blur(0px)",
-              duration: 0.44,
-              ease: "power3.out",
-              stagger: 0.055,
-              onComplete: () => gsap.set(tags, { clearProps: "filter" }),
+              duration: 0.75,
+              overwrite: "auto",
+              clearProps: "transform,opacity,visibility",
             },
-            0.18 + (i % 3) * 0.04
+            0.18 + i * 0.12
           );
         }
-
-        return tl;
-      };
-
-      const tls = items.map((el, i) => buildTL(el, i));
-
-      if (prefersReduced) {
-        items.forEach((el) => {
-          const card = el.querySelector(".awk-work__card");
-          const media = el.querySelector(".awk-work__media");
-          const img = el.querySelector(".awk-work__media img");
-          const tags = Array.from(el.querySelectorAll(".awk-work__tag"));
-
-          if (card) gsap.set(card, { autoAlpha: 1, y: 0, rotateX: 0 });
-          if (media) gsap.set(media, { clipPath: "inset(0% 0% 0% 0% round 18px)" });
-          if (img) gsap.set(img, { scale: 1 });
-          if (tags.length) gsap.set(tags, { autoAlpha: 1, y: 0, filter: "none" });
-        });
-        return;
-      }
-
-      const schedulePlay = (el, i) => {
-        if (played.has(el)) return;
-        const tl = tls[i];
-        if (!tl) return;
-
-        const rect = el.getBoundingClientRect();
-        const vh = window.innerHeight || 1;
-        const t = clamp((rect.top - vh * 0.55) / (vh * 0.45), 0, 1);
-        const baseGap = 0.14;
-        const extra = 0.08 * (i % 2) + 0.05 * (i % 3) + 0.10 * t;
-
-        const delay = queueDelay + extra;
-
-        gsap.delayedCall(delay, () => {
-          if (played.has(el)) return;
-          played.add(el);
-          tl.play(0);
-        });
-
-        queueDelay = delay + baseGap;
-        cancelAnimationFrame(queueRaf);
-        queueRaf = requestAnimationFrame(() => {
-          queueDelay = 0;
-        });
-      };
-
-      ScrollTrigger.batch(items, {
-        start: "top 86%",
-        once: true,
-        onEnter: (batch) => {
-          batch
-            .slice()
-            .sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top)
-            .forEach((el) => {
-              const i = items.indexOf(el);
-              if (i >= 0) schedulePlay(el, i);
-            });
-        },
       });
 
-      const r = requestAnimationFrame(() => ScrollTrigger.refresh());
-      return () => cancelAnimationFrame(r);
-    }, root);
+      return tl;
+    };
 
-    return () => ctx.revert();
-  }, []);
+    const playOut = () => {
+      const tl = gsap.timeline({ defaults: { ease: "power2.inOut" } });
 
-  const allWorkResolved = isExternal(allWorkHref)
-    ? allWorkHref
-    : withBase(allWorkHref);
+      tl.to(items, {
+        autoAlpha: 0,
+        y: 42,
+        rotateX: 10,
+        filter: "blur(6px)",
+        duration: 0.35,
+        stagger: 0.06,
+        overwrite: "auto",
+      }, 0);
+
+      items.forEach((el) => {
+        const media = el.querySelector(".awk-work__media");
+        const img = el.querySelector(".awk-work__media img");
+        const tags = el.querySelector(".awk-work__tags");
+
+        if (media) gsap.to(media, { autoAlpha: 0, y: 18, duration: 0.28, overwrite: "auto" });
+        if (img) gsap.to(img, { scale: 1.09, duration: 0.35, overwrite: "auto" });
+        if (tags) gsap.to(tags, { autoAlpha: 0, y: 14, duration: 0.28, overwrite: "auto" });
+      });
+
+      return tl;
+    };
+
+    setOut();
+
+    let inTl = null;
+    let outTl = null;
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (!entry) return;
+
+        if (entry.isIntersecting) {
+          outTl?.kill();
+          outTl = null;
+          inTl?.kill();
+          inTl = playIn();
+        } else {
+          inTl?.kill();
+          inTl = null;
+          outTl?.kill();
+          outTl = playOut();
+        }
+      },
+      { root: null, threshold: 0.22, rootMargin: "0px 0px -12% 0px" }
+    );
+
+    io.observe(root);
+
+    return () => {
+      inTl?.kill();
+      outTl?.kill();
+      io.disconnect();
+    };
+  }, [works]);
 
   return (
-    <section
-      ref={rootRef}
-      className={`awk-works ${className}`}
-      aria-label="Works preview"
-    >
+    <section ref={rootRef} className={`awk-works ${className}`} aria-label="Works preview">
       <div className="awk-works__inner">
         <div className="awk-works__grid">
           {works.map((work) => {
-            const hrefResolved = isExternal(work.href)
-              ? work.href
-              : withBase(work.href);
+            const hrefResolved = isExternal(work.href) ? work.href : withBase(work.href);
 
             return (
               <article key={work.id} className="awk-work">
-                <a
-                  className="awk-work__card"
-                  href={hrefResolved}
-                  aria-label={work.title}
-                  data-cursor="blue"
-                >
+                <a className="awk-work__card" href={hrefResolved} aria-label={work.title} data-cursor="blue">
                   <div className="awk-work__media">
                     <img src={withBase(work.image)} alt="" loading="lazy" />
                     <span className="awk-work__arrowBtn" aria-hidden="true">
@@ -261,12 +228,7 @@ export default function WorksPreview({
         </div>
 
         <div className="awk-works__footer">
-          <a
-            className="awk-allWork"
-            href={allWorkResolved}
-            aria-label="All work"
-            data-cursor="blue"
-          >
+          <a className="awk-allWork" href={allWorkResolved} aria-label="All work" data-cursor="blue">
             <span className="awk-allWork__label">SEE ALL WORK</span>
             <span className="awk-allWork__circle" aria-hidden="true">
               <span className="awk-allWork__chev">›</span>

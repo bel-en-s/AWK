@@ -1,9 +1,6 @@
 import { useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import "./Blog.css";
-
-gsap.registerPlugin(ScrollTrigger);
 
 const BASE = import.meta.env.BASE_URL;
 const FALLBACK_IMG = "/images/blog/1.webp";
@@ -71,21 +68,19 @@ function PostCard({ variant = "vertical", title, image, href = "#" }) {
   );
 }
 
-function splitWords(text) {
-  const safe = String(text || "");
-  const tokens = safe.replace(/\n/g, " \n ").split(/(\s+)/).filter((t) => t.length);
-  const out = [];
-  let wi = 0;
-  for (const t of tokens) {
-    if (t === "\n") {
-      out.push({ type: "br", key: `br-${wi++}` });
-    } else if (/^\s+$/.test(t)) {
-      out.push({ type: "space", value: t, key: `sp-${wi++}` });
-    } else {
-      out.push({ type: "word", value: t, key: `w-${wi++}` });
-    }
+function splitChars(text) {
+  return String(text || "").split("").map((ch, i) => ({ ch, key: `c-${i}` }));
+}
+
+function whenAwkLoaded(cb) {
+  if (typeof window === "undefined") return () => {};
+  if (window.__AWK_LOADED__ === true) {
+    cb();
+    return () => {};
   }
-  return out;
+  const on = () => cb();
+  window.addEventListener("awk:loaded", on, { once: true });
+  return () => window.removeEventListener("awk:loaded", on);
 }
 
 export default function Blog() {
@@ -100,60 +95,132 @@ export default function Blog() {
     const prefersReduced =
       window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
 
-    const ctx = gsap.context(() => {
-      const words = Array.from(title.querySelectorAll(".blogTitle__word"));
-      if (!words.length) return;
+    const run = () => {
+      const ctx = gsap.context(() => {
+        const chars = Array.from(title.querySelectorAll(".blogTitle__char"));
+        const cards = Array.from(root.querySelectorAll(".blogCard"));
 
-      if (prefersReduced) {
-        gsap.set(words, { autoAlpha: 1, y: 0, rotateX: 0, filter: "none" });
-        return;
-      }
+        const medias = cards
+          .map((c) => c.querySelector(".blogCard__media"))
+          .filter(Boolean);
+        const bodies = cards
+          .map((c) => c.querySelector(".blogCard__body"))
+          .filter(Boolean);
+        const imgs = cards
+          .map((c) => c.querySelector(".blogCard__media img"))
+          .filter(Boolean);
 
-      gsap.set(words, {
-        autoAlpha: 0,
-        y: -90,
-        rotateX: 65,
-        filter: "blur(12px)",
-        transformPerspective: 1000,
-        transformOrigin: "50% 70%",
-        willChange: "transform, opacity, filter",
-      });
+        gsap.killTweensOf([chars, cards, medias, bodies, imgs]);
 
-      gsap.to(words, {
-        autoAlpha: 1,
-        y: 0,
-        rotateX: 0,
-        filter: "blur(0px)",
-        ease: "none",
-        stagger: { each: 0.08, from: "start" },
-        scrollTrigger: {
-          id: "BLOG_NEWS_WORDS",
-          trigger: root,
-          start: "top 88%",
-          end: "top 55%",
-          scrub: 0.9,
-          once: true,
-          invalidateOnRefresh: true,
-        },
-        onComplete: () => gsap.set(words, { clearProps: "filter" }),
-      });
-    }, root);
+        if (prefersReduced) {
+          gsap.set(chars, { yPercent: 0 });
+          gsap.set(cards, { autoAlpha: 1 });
+          gsap.set([medias, bodies], { y: 0 });
+          gsap.set(imgs, { scale: 1 });
+          return;
+        }
 
-    return () => ctx.revert();
+        gsap.set(title, { autoAlpha: 1 });
+        gsap.set(chars, { yPercent: 120, willChange: "transform" });
+        gsap.set(cards, { autoAlpha: 1 });
+
+        const mediaOffsets = medias.map((el) => el.offsetHeight + 140);
+        const bodyOffsets = bodies.map((el) => el.offsetHeight + 120);
+
+        gsap.set(medias, {
+          y: (i) => mediaOffsets[i],
+          willChange: "transform",
+        });
+
+        gsap.set(bodies, {
+          y: (i) => bodyOffsets[i],
+          willChange: "transform",
+        });
+
+        gsap.set(imgs, { scale: 1.08, willChange: "transform" });
+
+        const tl = gsap.timeline({ defaults: { ease: "expo.out" } });
+
+        tl.to(chars, {
+          yPercent: 0,
+          duration: 0.85,
+          stagger: 0.06,
+          onComplete: () => gsap.set(chars, { clearProps: "willChange" }),
+        });
+
+        tl.to(
+          medias,
+          {
+            y: 0,
+            duration: 0.95,
+            stagger: 0.08,
+            ease: "expo.out",
+            onComplete: () => gsap.set(medias, { clearProps: "willChange" }),
+          },
+          "-=0.35"
+        );
+
+        tl.to(
+          imgs,
+          {
+            scale: 1,
+            duration: 1.05,
+            stagger: 0.08,
+            ease: "expo.out",
+            onComplete: () => gsap.set(imgs, { clearProps: "willChange" }),
+          },
+          "<"
+        );
+
+        tl.to(
+          bodies,
+          {
+            y: 0,
+            duration: 0.9,
+            stagger: 0.08,
+            ease: "expo.out",
+            onComplete: () => gsap.set(bodies, { clearProps: "willChange" }),
+          },
+          "-=0.7"
+        );
+      }, root);
+
+      return () => ctx.revert();
+    };
+
+    let cleanupRun = () => {};
+    const start = () => {
+      cleanupRun();
+      cleanupRun = run();
+    };
+
+    const offLoaded = whenAwkLoaded(start);
+
+    const onSwap = () => start();
+    document.addEventListener("astro:after-swap", onSwap);
+
+    return () => {
+      offLoaded?.();
+      document.removeEventListener("astro:after-swap", onSwap);
+      cleanupRun?.();
+    };
   }, []);
 
-  const titleTokens = splitWords("NEWS");
+  const chars = splitChars("NEWS");
 
   return (
     <section ref={rootRef} className="blogSection" id="blog">
       <div className="blogWrap">
         <h2 ref={titleRef} className="blogTitle" aria-label="NEWS">
-          {titleTokens.map((t) => {
-            if (t.type === "br") return <br key={t.key} />;
-            if (t.type === "space") return <span key={t.key}>{t.value}</span>;
+          {chars.map(({ ch, key }) => {
+            const isSpace = ch === " ";
             return (
-              <span key={t.key} className="blogTitle__word">
-                {t.value}
+              <span
+                key={key}
+                className={`blogTitle__charWrap${isSpace ? " is-space" : ""}`}
+                aria-hidden="true"
+              >
+                <span className="blogTitle__char">{isSpace ? "\u00A0" : ch}</span>
               </span>
             );
           })}
@@ -161,33 +228,13 @@ export default function Blog() {
 
         <div className="blogGrid">
           <div className="blogCol blogCol--left">
-            <PostCard
-              variant="vertical"
-              title={POSTS.leftTop.title}
-              image={POSTS.leftTop.image}
-              href={POSTS.leftTop.href}
-            />
-            <PostCard
-              variant="vertical"
-              title={POSTS.leftBottom.title}
-              image={POSTS.leftBottom.image}
-              href={POSTS.leftBottom.href}
-            />
+            <PostCard variant="vertical" {...POSTS.leftTop} />
+            <PostCard variant="vertical" {...POSTS.leftBottom} />
           </div>
 
           <div className="blogCol blogCol--right">
-            <PostCard
-              variant="vertical"
-              title={POSTS.rightTop.title}
-              image={POSTS.rightTop.image}
-              href={POSTS.rightTop.href}
-            />
-            <PostCard
-              variant="vertical"
-              title={POSTS.rightBottom.title}
-              image={POSTS.rightBottom.image}
-              href={POSTS.rightBottom.href}
-            />
+            <PostCard variant="vertical" {...POSTS.rightTop} />
+            <PostCard variant="vertical" {...POSTS.rightBottom} />
           </div>
         </div>
       </div>

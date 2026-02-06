@@ -1,4 +1,3 @@
-
 import { useLayoutEffect, useMemo, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -45,7 +44,7 @@ export default function Footer({ bg = "light" }) {
         willChange: "transform, opacity, filter",
       });
 
-      gsap.to(letters, {
+      const st = gsap.to(letters, {
         autoAlpha: 1,
         y: 0,
         rotateX: 0,
@@ -62,6 +61,28 @@ export default function Footer({ bg = "light" }) {
         },
         onComplete: () => gsap.set(letters, { clearProps: "filter" }),
       });
+
+      const refreshNow = () => {
+        ScrollTrigger.sort();
+        ScrollTrigger.refresh(true);
+      };
+
+      let raf1 = 0;
+      let raf2 = 0;
+
+      raf1 = requestAnimationFrame(() => {
+        raf2 = requestAnimationFrame(() => refreshNow());
+      });
+
+      const onAstroAfterSwap = () => refreshNow();
+      window.addEventListener("astro:after-swap", onAstroAfterSwap);
+
+      return () => {
+        cancelAnimationFrame(raf1);
+        cancelAnimationFrame(raf2);
+        window.removeEventListener("astro:after-swap", onAstroAfterSwap);
+        st?.scrollTrigger?.kill(false);
+      };
     }, root);
 
     return () => ctx.revert();
@@ -125,4 +146,3 @@ export default function Footer({ bg = "light" }) {
     </footer>
   );
 }
-

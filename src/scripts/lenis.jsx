@@ -1,6 +1,6 @@
+// src/scripts/lenis.jsx
 import { useEffect } from "react";
-import Lenis from "lenis";
-import "lenis/dist/lenis.css";
+import Lenis from "@studio-freight/lenis";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -8,57 +8,52 @@ gsap.registerPlugin(ScrollTrigger);
 
 export default function LenisSmoothScroll() {
   useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const prefersReduced =
-      window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
-    if (prefersReduced) return;
-
-    const isCoarse = window.matchMedia?.("(pointer: coarse)")?.matches;
-    const isNarrow = window.matchMedia?.("(max-width: 920px)")?.matches;
-    const ua = navigator.userAgent || "";
-    const isIOS = /iPad|iPhone|iPod/.test(ua);
-
-    // ✅ en mobile/iOS: scroll nativo (mucho más estable con pin)
-    if (isCoarse || isNarrow || isIOS) return;
-
-    // ✅ exposé para tu código
-    window.ScrollTrigger = ScrollTrigger;
-
-    if (window.__LENIS__) return;
-
     const lenis = new Lenis({
-      smoothWheel: true,
-      smoothTouch: false,
-      duration: 1.05,
+      smooth: true,
+      lerp: 0.08,
       wheelMultiplier: 1,
+      touchMultiplier: 1,
     });
 
-    window.__LENIS__ = lenis;
+    window.lenis = lenis;
+    window.ScrollTrigger = ScrollTrigger;
 
-    // ✅ integración pro: gsap ticker
-    const raf = (time) => lenis.raf(time * 1000);
-    gsap.ticker.add(raf);
-    gsap.ticker.lagSmoothing(0);
+    const scroller = document.documentElement;
 
-    lenis.on("scroll", () => ScrollTrigger.update());
+    ScrollTrigger.scrollerProxy(scroller, {
+      scrollTop(value) {
+        if (arguments.length) {
+          lenis.scrollTo(value, { immediate: true });
+        }
+        return lenis.scroll;
+      },
+      getBoundingClientRect() {
+        return {
+          top: 0,
+          left: 0,
+          width: window.innerWidth,
+          height: window.innerHeight,
+        };
+      },
+      pinType: scroller.style.transform ? "transform" : "fixed",
+    });
 
-    const onAfterSwap = () => {
-      lenis.resize?.();
-      requestAnimationFrame(() => ScrollTrigger.refresh(true));
+    ScrollTrigger.defaults({ scroller });
+
+    const onTick = (time) => {
+      lenis.raf(time * 1000);
     };
 
-    document.addEventListener("astro:after-swap", onAfterSwap);
-    document.addEventListener("astro:page-load", onAfterSwap);
+    lenis.on("scroll", () => ScrollTrigger.update());
+    gsap.ticker.add(onTick);
+    gsap.ticker.lagSmoothing(0);
 
-    // primer refresh
     ScrollTrigger.refresh(true);
 
     return () => {
-      document.removeEventListener("astro:after-swap", onAfterSwap);
-      document.removeEventListener("astro:page-load", onAfterSwap);
-      gsap.ticker.remove(raf);
-      // no destroy en SPA
+      gsap.ticker.remove(onTick);
+      lenis.destroy();
+      if (window.lenis === lenis) delete window.lenis;
     };
   }, []);
 

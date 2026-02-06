@@ -23,7 +23,8 @@ export default function Hero() {
   const midRef = useRef(null);
   const talkRef = useRef(null);
 
-  const TYPE_TEXT = useMemo(() => "Creative Digital\nExperiences", []);
+const TYPE_TEXT = useMemo(() => "Creative Digital Experiences", []);
+
 
   useLayoutEffect(() => {
     const heroEl = heroRef.current;
@@ -96,11 +97,14 @@ export default function Hero() {
       }
 
       const PAD = 10;
-      const RECT_H = 180;
+
       const RECT_PAD = 20;
 
-      const rectW = () => Math.min(340, window.innerWidth - PAD * 2);
-      const rectH = () => RECT_H;
+ const RECT_H = isMobile ? 150 : 180;
+
+const rectW = () => Math.min(isMobile ? 320 : 340, window.innerWidth - PAD * 2);
+const rectH = () => RECT_H;
+
 
       const vhStable = () =>
         Math.round(
@@ -290,6 +294,11 @@ export default function Hero() {
         tl.to(bg, { backgroundColor: "var(--svc-blue, #0A25FF)", duration: 0.14 }, 0.32);
         tl.to(svc, { autoAlpha: 1, duration: 0.12 }, 0.4);
         tl.set(svc, { pointerEvents: "auto" }, 0.42);
+        if (isMobile) {
+      tl.to([card, bg], { autoAlpha: 0, duration: 0.18 }, 0.44);
+      tl.set([card, bg], { pointerEvents: "none" }, 0.44);
+    }
+
 
         if (!isMobile && svcIntroCard) {
           const measureTarget = () => svcIntroCard.getBoundingClientRect();
@@ -308,6 +317,7 @@ export default function Hero() {
             0.18
           );
         }
+        
 
         tl.to(
           svcRow,

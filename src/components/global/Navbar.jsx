@@ -6,10 +6,8 @@ import "./Navbar.css";
 export default function NavBar({ show = true }) {
   const rootRef = useRef(null);
 
-  // ✅ mobile menu state (NO afecta GSAP porque el useLayoutEffect depende solo de show)
   const [isOpen, setIsOpen] = useState(false);
 
-  // ✅ Scroll lock + ESC + close on astro navigation
   useEffect(() => {
     const html = document.documentElement;
 
@@ -322,7 +320,7 @@ export default function NavBar({ show = true }) {
   const links = [
     { href: `${base}`, label: "HOME" },
     { href: `${base}work/`, label: "WORK" },
-    { href: `${base}people/`, label: "PEOPLE" },
+    { href: "https://www.linkedin.com/company/stayawk/posts/?feedView=all", label: "PEOPLE" },
     { href: `${base}blog/`, label: "BLOG" },
   ];
 
@@ -349,15 +347,22 @@ export default function NavBar({ show = true }) {
         </a>
 
         <div className="nav-center" role="navigation" aria-label="Sections">
-          {links.map((l, i) => (
-            <a
-              key={l.href}
-              href={l.href}
-              className={`nav-chip nav-anim ${i % 2 === 0 ? "is-square" : "is-pill"}`}
-            >
-              {l.label}
-            </a>
-          ))}
+         {links.map((l, i) => {
+  const isExternal = l.href.startsWith("http");
+
+  return (
+    <a
+      key={l.href}
+      href={l.href}
+      className={`nav-chip nav-anim ${i % 2 === 0 ? "is-square" : "is-pill"}`}
+      target={isExternal ? "_blank" : "_self"}
+      rel={isExternal ? "noopener noreferrer" : undefined}
+    >
+      {l.label}
+    </a>
+  );
+})}
+
         </div>
 
         <a className="nav-cta nav-anim invert" href={`${base}contact/`}>

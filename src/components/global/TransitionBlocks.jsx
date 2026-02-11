@@ -64,7 +64,7 @@ export default function TransitionBlocks() {
         scaleX: 1,
         filter: "blur(0px)",
         rotateZ: 0,
-        duration: 0.55,
+        duration: 0.5,
         ease: "power3.out",
         stagger: { amount: 0.28, from: "start" },
         onComplete: resolve,
@@ -86,7 +86,7 @@ export default function TransitionBlocks() {
         scaleX: 0,
         filter: "blur(12px)",
         rotateZ: -0.25,
-        duration: 0.55,
+        duration: 0.25,
         ease: "power3.out",
         stagger: { amount: 0.28, from: "start" },
         onComplete: () => {

@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@astrojs/react": "^4.4.2",
+    "@emailjs/browser": "^4.4.1",
     "@studio-freight/lenis": "^1.0.42",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",

@@ -1,23 +1,19 @@
-/* =========================
-   NAV COLOR TOKENS
-========================= */
+
 :root{
-  --nav-ink: #000;                 /* texto/borde default */
-  --nav-surface: transparent;      /* fondo botones/panel */
+  --nav-ink: #000;   
+  --nav-surface: transparent;    
   --nav-cta-ink: #000;
-  --nav-cta-blend: difference;     /* tu look actual */
+  --nav-cta-blend: difference; 
   --nav-burger-surface: #fff;
   --nav-backdrop: rgba(0,0,0,0.22);
 }
 
-/* Cuando el hero entra en modo azul */
+
 html.is-hero-blue{
-  --nav-ink: #fff;                 /* ✅ bordes y texto en blanco */
-  --nav-surface: transparent;      /* o rgba(0,0,0,0.06) si querés */
+  --nav-ink: #fff;               
+  --nav-surface: transparent;      
   --nav-cta-ink: #fff;
 
-  /* con fondo azul, 'difference' a veces da colores raros:
-     mejor normal para que sea estable */
   --nav-cta-blend: normal;
 
   --nav-burger-surface: rgba(0,0,0,0.12);
@@ -54,7 +50,6 @@ html.is-nav-blue{
   pointer-events: auto;
   will-change: opacity;
 
-  /* ✅ clave con mix-blend-mode y overlays */
   isolation: isolate;
 }
 
@@ -72,7 +67,6 @@ html.is-nav-blue{
   pointer-events: auto;
 }
 
-/* Logo */
 .nav-logo{
   justify-self: start;
   display: flex;
@@ -100,7 +94,7 @@ html.is-nav-blue{
   gap: 0;
 }
 
-/* chips */
+
 .nav-chip{
   font-family: "WorkSansSemiBold","WorkSans",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
   font-weight: 600;
@@ -139,7 +133,6 @@ html.is-nav-blue{
 }
 
 
-/* CTA */
 .nav-cta{
   justify-self: end;
 
@@ -397,11 +390,9 @@ html.nav-lock body{
 }
 .nav-mobileCloseX{ font-size: 16px; line-height: 1; }
 
-/* override panel a lateral */
+
 @media (max-width: 820px){
-  .nav{
-    /* tu grid ya cambia; dejamos todo igual */
-  }
+
 
   /* panel lateral */
   .nav-mobilePanel{
@@ -409,13 +400,13 @@ html.nav-lock body{
     left: auto;
     right: 0;
 
-    /* width: min(86vw, 380px); */
+
     height: 100vh;
     padding: 12px;
 
     transform: translateX(105%);
-    opacity: 1;          /* lo manejamos por transform */
-    visibility: visible; /* lo manejamos por pointer-events */
+    opacity: 1;   
+    visibility: visible;
     pointer-events: none;
 
     transition: transform 320ms cubic-bezier(.2,.9,.2,1);

@@ -8,7 +8,7 @@ export default function InfiniteLogoMarquee({
   alt = "Logo strip",
   height = "clamp(46px, 6vw, 76px)",
   bg = "light",
-  speed = 10,           // segundos por vuelta (como el ejemplo)
+  speed = 10,           // segundos por vuelta 
   gap = 56,
   direction = "left",   // left | right
   fade = false,

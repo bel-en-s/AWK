@@ -1,19 +1,18 @@
 :root {
   --svc-blue: #0A25FF;
-
   --hero-copy-min: 340px;
   --hero-copy-min-mobile: 300px;
-  --copy-fs-closed: 26px;            
+  --copy-fs-closed: 36px;
   --copy-fs-open: 46px;
 }
 
-@media (max-width: 920px){
-  :root{
-    --copy-fs-closed: 40px;
-    --copy-fs-open: 30px;
+@media (max-width: 920px) {
+  :root {
+    --copy-fs-closed: 20px;
+    --copy-fs-open: 26px;
+    --hero-copy-min-mobile: 280px;
   }
 }
-
 
 html,
 body {
@@ -23,22 +22,16 @@ body {
   overflow-x: hidden;
 }
 
-/* =========================
-   HERO BASE
-========================= */
 .hero {
   position: relative;
   min-height: 100svh;
   overflow: hidden;
   background: #ebe8e3;
-
-  /* ✅ FULL BLEED aunque esté adentro de un container */
   width: 100vw;
   margin-left: calc(50% - 50vw);
   margin-right: calc(50% - 50vw);
 }
 
-/* Cursor overlay */
 .cursor-landing-wrap {
   position: absolute;
   inset: 0;
@@ -46,42 +39,35 @@ body {
   pointer-events: none;
 }
 
-/* =========================
-   HERO TITLE / TOP CONTENT
-========================= */
 .hero-content {
   position: absolute;
-  top: clamp(12px, 3.2vh, 142px);
+  top: clamp(12px, 3.2vh, 12px);
   left: var(--hero-center-x, 50%);
   transform: translateX(-50%);
   z-index: 7;
-
-  width: min(1400px, calc(100vw - 2 * clamp(16px, 3.6vw, 56px)));
-  max-width: 100%;
+  /* width: min(1400px, calc(100vw - 2 * clamp(16px, 3.6vw, 56px))); */
 
   display: flex;
   justify-content: center;
   pointer-events: none;
-
   padding: 0 !important;
 }
 
 .hero-title {
   margin: 0 !important;
   padding: 0 !important;
-
   font-weight: 200;
   line-height: 0.86;
-  letter-spacing: -26px;
   white-space: nowrap;
   color: #000;
   pointer-events: auto;
-
-  --title-size: 500px;
-  font-size: var(--title-size);
-
   visibility: hidden;
+
+
+  font-size: clamp(140px, 22vw, 500px);
+  letter-spacing: -0.07em; 
 }
+
 .hero-title.is-ready {
   visibility: visible;
 }
@@ -94,147 +80,56 @@ body {
   transform: translateZ(0);
 }
 
-@media (max-width: 680px) {
-  .hero-content {
-    top: 350px;
-  }
-}
-
-@media (max-width: 1040px) {
-  .hero-title {
-    padding: 0 !important;
-    font-weight: 200;
-    line-height: 0.86;
-    letter-spacing: -0.035em;
-    white-space: nowrap;
-    color: #000;
-    pointer-events: auto;
-    font-size: 500px;
-    visibility: hidden;
-  }
-}
-
-@media (max-width: 920px) {
-  .hero-title {
-    font-weight: 200;
-    line-height: 0.86;
-    letter-spacing: -0.035em;
-    white-space: nowrap;
-    color: #000;
-    pointer-events: auto;
-
-    font-size: 190px;
-    position: absolute;
-    bottom: 100px;
-    visibility: hidden;
-  }
-
-  .hero-talk {
-    left: 190px;
-    top: 30%;
-    margin-bottom: 30vh;
-    z-index:10000;
-  }
-
-  .hero-mid {
-    position: absolute;
-  }
-
-  .hero-mid-text {
-    margin: 0;
-    color: #000;
-    font-family: var(--font-dm);
-    font-weight: 800;
-    font-size: 50px;
-    opacity: 0.9;
-    white-space: nowrap;
-  }
-}
-
-/* =========================
-   EXPANDING BG (BLACK -> BLUE)
-========================= */
 .hero-copy-bg {
   position: absolute;
   left: 10px;
   bottom: 10px;
-
   width: var(--hero-copy-min);
   height: var(--hero-copy-min);
-
   background: #000;
   box-shadow: 0 18px 60px rgba(0, 0, 0, 0.18);
-
   z-index: 4;
   pointer-events: none;
-
   overflow: hidden;
   will-change: left, right, top, bottom, width, height, border-radius, background-color;
-
   opacity: 1;
   visibility: visible;
 }
 
-@media (max-width: 680px) {
-  .hero-copy-bg {
-    width: var(--hero-copy-min-mobile);
-    height: var(--hero-copy-min-mobile);
-  }
-}
-
-/* =========================
-   MORPH CARD (TEXT)
-========================= */
 .hero-copy-card {
   position: absolute;
   left: 10px;
   bottom: 10px;
-
   width: var(--hero-copy-min);
   max-width: calc(100vw - 20px);
   height: auto;
-
   padding: 20px;
-
   color: #ebe8e3;
   background: transparent;
-
   z-index: 7;
   pointer-events: auto;
-
   box-sizing: border-box;
   will-change: left, right, top, bottom, width, height, border-radius, padding, background-color, color, box-shadow, opacity, transform;
-
   opacity: 1;
   visibility: visible;
   font-family: var(--font-dm);
 }
 
-@media (max-width: 680px) {
-  .hero-copy-card {
-    width: var(--hero-copy-min-mobile);
-  }
-}
-
-.hero-copy-text{
+.hero-copy-text {
   margin: 0;
   font-family: var(--font-dm);
   font-weight: 500;
   font-size: var(--copy-fs-closed);
   opacity: 0.92;
-
   text-decoration: underline;
   text-decoration-thickness: 2px;
-
-  /* opcional: que no “salte” seco cuando cambia de estado */
   transition: font-size 220ms ease, letter-spacing 220ms ease;
 }
 
 html.is-hero-blue .hero-copy-text,
-body.is-hero-blue .hero-copy-text{
+body.is-hero-blue .hero-copy-text {
   font-size: var(--copy-fs-open);
 }
-
 
 .svc--inHero {
   position: absolute;
@@ -249,29 +144,9 @@ body.is-hero-blue .hero-copy-text{
   transition: none !important;
 }
 
-@media (max-width: 920px) {
-  .svc--inHero .svc-introCard {
-    opacity: 0 !important;
-    pointer-events: none !important;
-    transform: translateY(8px);
-    transition: opacity 180ms ease, transform 220ms ease;
-  }
-
-  html.is-hero-blue .svc--inHero .svc-introCard,
-  body.is-hero-blue .svc--inHero .svc-introCard {
-    opacity: 1 !important;
-    pointer-events: auto !important;
-    transform: translateY(0);
-  }
-}
-
-
-/* =========================
-   HERO MID (TYPE)
-========================= */
 .hero-mid {
   position: absolute;
-  left: 33% !important;
+  left: 40% !important;
   bottom: 50px;
   z-index: 7;
   pointer-events: none;
@@ -294,92 +169,78 @@ body.is-hero-blue .hero-copy-text{
 .type-letter {
   display: inline-block;
 }
+
 .type-caret {
   display: inline-block;
   margin-left: 2px;
   transform: translateY(-1px);
 }
 
-/* =========================
-   CTA
-========================= */
 .hero-talk {
   position: absolute;
   right: 200px;
-  top: 50%;
-
+  top: 56%;
   width: clamp(160px, 18vw, 220px);
   height: 30px;
-
   display: grid;
   place-items: center;
-
   background: var(--blue, #1d4ed8);
   color: #fff;
   text-decoration: none;
   padding: 10px;
   box-shadow: 0 18px 60px rgba(0, 0, 0, 0.22);
   font-family: var(--font-dm);
-  font-size: clamp(18px, 1.4vw, 22px);
+  font-size: 30px;
   letter-spacing: 0.16em;
   line-height: 1.05;
   text-transform: uppercase;
   text-align: center;
-
-  /* transform: translateZ(0) rotateZ(-8deg); */
   transform-origin: 50% 50%;
   will-change: transform, opacity;
   backface-visibility: hidden;
-
   margin-bottom: 20vh;
   transition: transform 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
   z-index: 9;
-
 }
 
-/* =========================
-   SCROLL LOCK (si lo usás)
-========================= */
 html.is-scroll-locked,
 body.is-scroll-locked {
   overscroll-behavior: none;
 }
 
-
-
-
-/* =========================
-   MOBILE FIXES (paste at end)
-========================= */
-
-
-@media (max-width: 920px){
-  :root{
-    --copy-fs-closed: 20px;
-    --copy-fs-open: 26px;
-    --hero-copy-min-mobile: 280px;
+@media (max-width: 1040px) {
+  .hero-title {
+    letter-spacing: -0.035em;
   }
 }
 
-@media (max-width: 680px){
-  .hero-content{
+@media (max-width: 920px) {
+  .hero-content {
     top: 80px;
   }
-}
 
-
-@media (max-width: 920px){
-  .hero-title{
+  .hero-title {
     position: relative;
     bottom: auto;
     font-size: clamp(170px, 30vw, 250px);
     letter-spacing: -0.04em;
   }
-}
 
+  .svc--inHero .svc-introCard {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transform: translateY(8px);
+    transition: opacity 180ms ease, transform 220ms ease;
+  }
 
-@media (max-width: 920px){
-  .hero-mid{
+  html.is-hero-blue .svc--inHero .svc-introCard,
+  body.is-hero-blue .svc--inHero .svc-introCard {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    transform: translateY(0);
+  }
+
+  .hero-mid {
     left: 50% !important;
     top: 65vh;
     bottom: auto;
@@ -388,42 +249,49 @@ body.is-scroll-locked {
     z-index: 7;
   }
 
-  .hero-mid-text{
+  .hero-mid-text {
     font-size: clamp(20px, 5.2vw, 34px);
     white-space: nowrap !important;
     line-height: 1;
     letter-spacing: -0.02em;
   }
-}
 
-
-@media (max-width: 920px){
-  .hero-talk{
+  .hero-talk {
     right: auto;
     left: 50%;
-    top: 36svh;
-    transform: translateX(-50%);
+    top: calc(34svh + 26px);
+    transform: translateX(-50%) rotate(-8deg);
     width: min(240px, calc(100vw - 48px));
     height: auto;
     padding: 12px 14px;
     margin-bottom: 0;
   }
-}
 
-/* ✅ copy card: más aire y no tan enorme */
-@media (max-width: 920px){
-  .hero-copy-card{
+  .hero-copy-card {
     padding: 16px;
   }
-  .hero-copy-text{
+
+  .hero-copy-text {
     text-decoration-thickness: 2px;
   }
 }
 
-/* ✅ MOBILE: más margen arriba + tilted fijo */
-@media (max-width: 920px){
-  .hero-talk{
-    top: calc(34svh + 26px);           /* ✅ baja un toque para no pisar el header */
-    transform: translateX(-50%) rotate(-8deg); /* ✅ tilted en mobile */
+@media (max-width: 680px) {
+  .hero-copy-bg {
+    width: var(--hero-copy-min-mobile);
+    height: var(--hero-copy-min-mobile);
+  }
+
+  .hero-copy-card {
+    width: var(--hero-copy-min-mobile);
+  }
+}
+
+
+
+@media (min-width: 921px) {
+  .hero-title {
+     font-size: clamp(300px, 38vw, 900px);
+  
   }
 }

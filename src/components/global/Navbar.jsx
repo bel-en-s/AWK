@@ -328,14 +328,14 @@ export default function NavBar({ show = true }) {
 
   return (
     <>
-      {/* ✅ backdrop mobile (no es hijo del nav => no afecta GSAP) */}
+   
       <div
         className={`nav-backdrop ${isOpen ? "is-open" : ""}`}
         onClick={() => setIsOpen(false)}
         aria-hidden={!isOpen}
       />
 
-      {/* ✅ TU NAV (idéntico) + SOLO agrego el burger dentro */}
+
       <nav
         ref={rootRef}
         className="nav"
@@ -369,7 +369,7 @@ export default function NavBar({ show = true }) {
           GET IN TOUCH
         </a>
 
-        {/* ✅ Burger (no tiene nav-chip/nav-cta => no entra en tiltEls) */}
+
         <button
           type="button"
           className="nav-burger nav-mobile"
@@ -386,7 +386,6 @@ export default function NavBar({ show = true }) {
         </button>
       </nav>
 
-      {/* ✅ Panel lateral mobile (afuera del nav => GSAP intacto) */}
       <aside
         id="nav-mobile-panel"
         className={`nav-mobilePanel ${isOpen ? "is-open" : ""}`}

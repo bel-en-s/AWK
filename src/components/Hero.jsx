@@ -43,7 +43,7 @@ export default function Hero() {
 
   const typeIntroPlayedRef = useRef(false);
 
-  const TYPE_TEXT = useMemo(() => "Creative Digital Experiences", []);
+ const TYPE_TEXT = useMemo(() => "Creative Digital\nExperiences", []);
 
   useLayoutEffect(() => {
     const heroEl = heroRef.current;
@@ -87,9 +87,9 @@ export default function Hero() {
 
     const PAD = 10;
     const RECT_PAD = 20;
-    const RECT_H = isMobile ? 150 : 180;
+    const RECT_H = isMobile ? 150 : 280;
 
-    const rectW = () => Math.min(isMobile ? 320 : 340, window.innerWidth - PAD * 2);
+    const rectW = () => Math.min(isMobile ? 320 : 380, window.innerWidth - PAD * 2);
     const rectH = () => RECT_H;
 
     // services refs
@@ -125,6 +125,7 @@ export default function Hero() {
       zIndex: 4,
       transformOrigin: "0% 100%",
       scaleX: 1,
+      backgroundColor: "#000", 
       scaleY: 1,
       willChange: "left, bottom, width, height, transform, background-color",
     });
@@ -367,6 +368,7 @@ export default function Hero() {
               height: rectH(),
               backgroundColor: "transparent",
               clearProps: "top",
+              backgroundColor: "#000)",
             });
 
             gsap.set(card, {
@@ -538,13 +540,22 @@ export default function Hero() {
         </p>
       </div>
 
-      <div ref={midRef} className="hero-mid" aria-label={TYPE_TEXT}>
+     <div ref={midRef} className="hero-mid" aria-label={TYPE_TEXT}>
         <p className="hero-mid-text" aria-hidden="true">
-          {TYPE_TEXT.split("").map((ch, i) => (
-            <span key={i} className="type-letter">
-              {ch === " " ? "\u00A0" : ch}
+          {TYPE_TEXT.split("\n").map((line, lineIndex) => (
+            <span key={lineIndex} className="type-line">
+              {line.split("").map((ch, i) => (
+                <span
+                  key={`${lineIndex}-${i}`}
+                  className="type-letter"
+                >
+                  {ch === " " ? "\u00A0" : ch}
+                </span>
+              ))}
+              {lineIndex === 0 && <br />}
             </span>
           ))}
+
           <span className="type-caret" aria-hidden="true">
             |
           </span>

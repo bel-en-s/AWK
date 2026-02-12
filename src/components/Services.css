@@ -43,6 +43,7 @@
 .svc-introCard {
   position: relative;
   flex: 0 0 auto;
+  margin-right: 30px;
   width: clamp(240px, 22vw, 320px);
   background: #f3efe6;
   color: #111;

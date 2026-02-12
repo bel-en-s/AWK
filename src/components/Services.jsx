@@ -1,55 +1,101 @@
 import ServiceCard from "./ServiceCard";
 import "./Services.css";
 
+const base = import.meta.env.BASE_URL; // ✅ acceso estático soportado
+const CONTACT_URL = `${base}contact/`;
+
 export default function Services({ inHero = false }) {
   const cards = [
     {
       variant: "service",
       title: "Branding & Visual Identity",
-      items: ["Naming", "Sistemas visuales", "Guías de marca"],
-      href: "#content",
+      items: [
+        "Naming",
+        "Visual Systems",
+        "Brandbook",
+        "Look & Feel",
+        "Brand Architecture",
+        "Portfolio Strategy",
+      ],
+      href: CONTACT_URL,
     },
+
     {
       variant: "service",
-      title: "UX/UI & Product design",
-      items: ["Websites", "Apps", "Dashboards", "Interfaces Completas"],
-      href: "#prototypes",
+      title: "UX/UI & Product Design",
+      items: [
+        "Websites",
+        "Apps",
+        "Dashboards",
+        "Complex Interfaces",
+        "Rush Webs",
+      ],
+      href: CONTACT_URL,
     },
+
     {
       variant: "service",
       title: "Creative Direction & Campaigns",
-      items: ["Posicionamiento", "Narrativa de marca", "Estrategia"],
-      href: "#consultoria",
+      items: [
+        "Positioning & Perception",
+        "Storytelling",
+        "Creative Expression",
+      ],
+      href: CONTACT_URL,
     },
+
     {
       variant: "service",
       title: "Social Content & Motion",
-      items: ["Creatividad para paid", "Social", "Banners", "y +"],
-      href: "#ads",
+      items: [
+        "Digital Assets",
+        "Banners",
+        "Social Content",
+        "Fancy Content",
+      ],
+      href: CONTACT_URL,
     },
+
     {
       variant: "service",
       title: "Prototypes & Interactive Experiences",
-      items: ["Renders", "Escena", "Producto digital"],
-      href: "#3d",
+      items: [
+        "Renders",
+        "Scenes",
+        "Digital Products",
+        "Bring your idea — we make it possible",
+      ],
+      href: CONTACT_URL,
     },
+
     {
       variant: "service",
       title: "Media & Performance",
-      items: ["Renders", "Escena", "Producto digital"],
-      href: "#3d",
+      items: [
+        "Appear on Google (yeap!)",
+        "On Meta too",
+        "Paid Media Strategy",
+        "Audience Builder",
+      ],
+      href: CONTACT_URL,
     },
-        {
+
+    {
       variant: "service",
       title: "3D Visual Craft",
-      items: ["Renders", "Escena", "Producto digital"],
-      href: "#3d",
+      items: [
+        "Renders",
+        "Scenes",
+        "Digital Products",
+      ],
+      href: CONTACT_URL,
     },
+
     {
       variant: "cta",
       title: "Start\na project",
       ctaLabel: "LET'S TALK",
-      ctaHref: "#contact",
+      ctaHref: CONTACT_URL,
     },
   ];
 
@@ -59,25 +105,31 @@ export default function Services({ inHero = false }) {
       id="service"
       aria-label="Services"
       style={
-        inHero ? { opacity: 0, visibility: "hidden", pointerEvents: "none" } : undefined
+        inHero
+          ? { opacity: 0, visibility: "hidden", pointerEvents: "none" }
+          : undefined
       }
     >
       <div className="svc-inner">
         <div className="svc-track" aria-label="Services horizontal track">
-                
           <div className="svc-row">
-                  <div className="mask"></div>
-            <div className="svc-introCard" data-intro-card aria-label="Intro card">
-  
+
+            <div className="mask"></div>
+
+            <div
+              className="svc-introCard"
+              data-intro-card
+              aria-label="Intro card"
+            >
               <p className="svc-introText">
                 Awake™ is a digital
-               
+                <br />
                 product studio
-       
+                <br />
                 crafting memorable
-     
+                <br />
                 customer
-   
+                <br />
                 experiences.
               </p>
             </div>
@@ -85,6 +137,7 @@ export default function Services({ inHero = false }) {
             {cards.map((c) => (
               <ServiceCard key={c.title} {...c} />
             ))}
+
           </div>
         </div>
       </div>

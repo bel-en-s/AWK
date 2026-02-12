@@ -1,4 +1,3 @@
-// ServiceCard.jsx
 import "./ServiceCard.css";
 
 function ArrowIcon() {
@@ -16,6 +15,15 @@ function ArrowIcon() {
   );
 }
 
+// arma URLs correctamente incluso si estás parado en /AWK/contact/
+function withBase(path) {
+  const base = (import.meta.env.BASE_URL || "/").replace(/\/+$/, "/"); // "/AWK/"
+  const clean = String(path || "").replace(/^\/+/, ""); // "contact/"
+  return `/${base}${clean}`.replace(/\/{2,}/g, "/"); // "/AWK/contact/"
+}
+
+const CONTACT_URL = withBase("contact/");
+
 export default function ServiceCard({
   variant = "service",
   title,
@@ -31,21 +39,27 @@ export default function ServiceCard({
           <p className="svcCardCtaTitle">
             {String(title)
               .split("\n")
-              .map((line, i) => (
+              .map((line, i, arr) => (
                 <span key={i}>
                   {line}
-                  {i !== String(title).split("\n").length - 1 && <br />}
+                  {i !== arr.length - 1 && <br />}
                 </span>
               ))}
           </p>
         </div>
 
-        <a className="svcCardCtaBtn" href={ctaHref || "#contact"}>
+        <a className="svcCardCtaBtn" href={ctaHref || CONTACT_URL}>
           {ctaLabel || "LET'S TALK"}
         </a>
       </div>
     );
   }
+
+  const onPillClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    window.location.href = CONTACT_URL;
+  };
 
   return (
     <a className="svcCard" href={href || "#"} aria-label={title}>
@@ -57,10 +71,10 @@ export default function ServiceCard({
         <h4 className="svcCardTitle">
           {String(title)
             .split("\n")
-            .map((line, i) => (
+            .map((line, i, arr) => (
               <span key={i}>
                 {line}
-                {i !== String(title).split("\n").length - 1 && <br />}
+                {i !== arr.length - 1 && <br />}
               </span>
             ))}
         </h4>
@@ -73,7 +87,14 @@ export default function ServiceCard({
           ))}
         </ul>
 
-        <span className="svcCardPill">take a look</span>
+        <button
+          type="button"
+          className="svcCardPill"
+          onClick={onPillClick}
+          aria-label="Go to contact"
+        >
+          I need this
+        </button>
       </div>
     </a>
   );

@@ -10,7 +10,7 @@
   position: absolute;
   inset: 0;
   z-index: 2;
-  background: transparent; /* el azul viene del panel morph */
+  background: transparent;
 }
 
 .svc-inner {
@@ -23,31 +23,27 @@
   position: absolute;
   left: 0;
   right: 0;
-
   top: 50%;
   transform: translateY(-50%);
-
-
   padding: 0 clamp(16px, 3vw, 44px);
-
-  overflow: hidden;
+  overflow: visible;
   display: flex;
-  align-items: center; 
+  align-items: center;
 }
 
 .svc-row {
+  position: relative;
   display: flex;
   gap: clamp(14px, 2vw, 22px);
   align-items: stretch;
   will-change: transform;
-   padding-right: clamp(32px, 6vw, 120px);
+  padding-right: 20vw;
 }
 
-
 .svc-introCard {
+  position: relative;
   flex: 0 0 auto;
   width: clamp(240px, 22vw, 320px);
-  /* height: clamp(320px, 48vh, 460px); */
   background: #f3efe6;
   color: #111;
   font-family: var(--font-dm);
@@ -56,6 +52,8 @@
   padding: 22px 20px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.22);
   border: 1px solid rgba(0,0,0,0.12);
+  overflow: visible;
+  z-index: 10;
 }
 
 .svc-introText {
@@ -64,4 +62,29 @@
   line-height: 1.25;
   text-decoration: underline;
   text-underline-offset: 4px;
+  position: relative;
+  z-index: 1;
+}
+
+.svc-introCard .mask {
+  position: absolute;
+  inset-block: 0;
+  right: 100%;
+  width: calc(100vw + 300px);
+  background: var(--svc-blue, #acb0cf);
+  transform-origin: 100% 50%;
+  transform: scaleX(0);
+  z-index: 20vw;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.svc-row > :not(.svc-introCard) {
+  position: relative;
+  z-index: 1;
+}
+
+.mask {
+background-color: red;
+z-index: 100000000000000000;
 }

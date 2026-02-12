@@ -1,7 +1,7 @@
 .svcCard{
   flex: 0 0 auto;
   width: clamp(320px, 28vw, 400px);
-  height: 600px;
+  height: 70vh;
   padding: 18px 18px 16px;
   border: 1px solid rgba(255,255,255,0.28);
   color: #fff;
@@ -23,8 +23,8 @@
 
 .svcCardIcon{
   flex: 0 0 30px;
-  width: 30px;
-  height: 30px;
+  width: 50px;
+  height: 50px;
   aspect-ratio: 1 / 1;
   border-radius: 999px;
   background: rgba(255,255,255,0.9);
@@ -44,7 +44,7 @@
 
 .svcCardTitle{
   margin: 0;
-  font-size: 30px;
+  font-size: 35px;
   line-height: 1.05;
   letter-spacing: -0.01em;
   font-family: var(--font-dm);
@@ -115,7 +115,6 @@
 }
 
 
-/* Services.css (agregar al final, sin borrar nada) */
 .svc-track{
   position: relative;
   overflow: hidden;
@@ -123,6 +122,29 @@
   contain: layout paint;
   will-change: transform;
 }
+
+.svc-track::before,
+.svc-track::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  height: 100%;
+  z-index: 50;           /* arriba de las cards */
+  pointer-events: none;
+}
+
+/* IZQUIERDA: suaviza la salida */
+.svc-track::before {
+  left: 0;
+  width: clamp(36px, 8vw, 140px);
+  background: linear-gradient(
+    90deg,
+    rgba(10, 37, 255, 1) 100%,
+    rgba(10, 37, 255, 0.85) 35%,
+    rgba(10, 37, 255, 0) 100%
+  );
+}
+
 
 .svc-row{
   width: max-content;

@@ -20,7 +20,7 @@
 
 .ilm__item{
   flex: 0 0 auto;
-  height: var(--ilm-h);
+  height: 35px;
   display:flex;
   align-items:center;
 }

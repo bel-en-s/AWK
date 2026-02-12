@@ -95,6 +95,8 @@ export default function Hero() {
     // services refs
     const svc = heroEl.querySelector(".svc");
     const svcIntroCard = heroEl.querySelector(".svc-introCard");
+    const svcMask = svcIntroCard?.querySelector(".mask");
+
     const svcTrack = heroEl.querySelector(".svc-track");
     const svcRow = heroEl.querySelector(".svc-row");
     const hasServices = !!(svc && svcTrack && svcRow);
@@ -319,10 +321,11 @@ export default function Hero() {
       const BLUE_AT = 0.32;
 
       // estado inicial
-      if (hasServices) {
-        gsap.set(svc, { autoAlpha: 0, pointerEvents: "none" });
-        gsap.set(svcRow, { x: 0 });
-      }
+if (hasServices) {
+  gsap.set(svc, { autoAlpha: 0, pointerEvents: "none" });
+  gsap.set(svcRow, { x: 0 });
+  if (svcMask) gsap.set(svcMask, { scaleX: 0 });
+}
 
       // timeline principal
       tl = gsap.timeline({
@@ -387,6 +390,7 @@ export default function Hero() {
             if (hasServices) {
               gsap.set(svc, { autoAlpha: 0, pointerEvents: "none" });
               gsap.set(svcRow, { x: 0 });
+              if (svcMask) gsap.set(svcMask, { scaleX: 0 });
             }
           },
         },
@@ -414,6 +418,7 @@ export default function Hero() {
       if (hasServices) {
         tl.to(bg, { backgroundColor: "var(--svc-blue, #0A25FF)", duration: 0.14 }, 0.32);
         tl.to(svc, { autoAlpha: 1, duration: 0.12 }, 0.4);
+        
         tl.set(svc, { pointerEvents: "auto" }, 0.42);
 
         if (isMobile) {
@@ -422,23 +427,37 @@ export default function Hero() {
         }
 
         // move card to intro card (desktop)
-        if (!isMobile && svcIntroCard) {
-          const measureTarget = () => svcIntroCard.getBoundingClientRect();
-          tl.to(
-            card,
-            {
-              left: () => Math.round(measureTarget().left),
-              top: () => Math.round(measureTarget().top),
-              width: () => Math.round(measureTarget().width),
-              height: "70vh",
-              backgroundColor: "#fff",
-              color: "#000",
-              boxShadow: "0 18px 50px rgba(0,0,0,0.18)",
-              duration: 0.34,
-            },
-            0.18
-          );
-        }
+// move card to intro card (desktop)
+if (!isMobile && svcIntroCard) {
+  const measureTarget = () => svcIntroCard.getBoundingClientRect();
+
+  tl.to(
+    card,
+    {
+      left: () => Math.round(measureTarget().left),
+      top: () => Math.round(measureTarget().top),
+      width: "clamp(320px, 28vw, 400px)",
+      height: "70vh",
+      backgroundColor: "#fff",
+      color: "#000",
+      boxShadow: "0 18px 50px rgba(0,0,0,0.18)",
+      duration: 0.34,
+    },
+    0.18
+  );
+
+  if (svcMask) {
+    tl.to(
+      svcMask,
+      {
+        scaleX: 1,
+        duration: 0.34,
+      },
+      0.18
+    );
+  }
+}
+
 
         // horizontal scroll
         tl.to(

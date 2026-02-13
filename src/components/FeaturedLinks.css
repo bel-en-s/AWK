@@ -40,7 +40,7 @@
 .awkLinkCard__title{
   white-space:pre-line;
   font-family:var(--font-dm);
-  font-size:clamp(14px,1.1vw,16px);
+  font-size:clamp(28px,1.1vw,36px);
   line-height:1.25;
   max-width:44ch;
 }

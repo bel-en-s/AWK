@@ -10,56 +10,58 @@ const BG_MAP = {
   blue: "#0000fe",
 };
 
+const withBase = (p) =>
+  `${import.meta.env.BASE_URL}${String(p || "").replace(/^\/+/, "")}`;
+
 export default function Footer({ bg = "light" }) {
   const resolvedBg = BG_MAP[bg] ?? BG_MAP.light;
 
   const footerRef = useRef(null);
-  const titleRef = useRef(null);
-  const WORDS = useMemo(() => ["STAY", "AWAKE"], []);
+  const gifRef = useRef(null);
+
+  const gifSrc = useMemo(() => withBase("images/footer.gif"), []);
 
   useLayoutEffect(() => {
     const root = footerRef.current;
-    const title = titleRef.current;
-    if (!root || !title) return;
+    const gif = gifRef.current;
+    if (!root || !gif) return;
 
     const prefersReduced =
       window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
 
     const ctx = gsap.context(() => {
-      const letters = Array.from(title.querySelectorAll(".awakeFooter__letter"));
-      if (!letters.length) return;
-
       if (prefersReduced) {
-        gsap.set(letters, { autoAlpha: 1, y: 0, rotateX: 0, filter: "none" });
+        gsap.set(gif, { clearProps: "all" });
         return;
       }
 
-      gsap.set(letters, {
+      // Estado inicial (sutil)
+      gsap.set(gif, {
         autoAlpha: 0,
-        y: -120,
-        rotateX: 70,
-        filter: "blur(14px)",
-        transformPerspective: 1000,
-        transformOrigin: "50% 60%",
-        willChange: "transform, opacity, filter",
+        y: -18,
+        scale: 0.995,
+        filter: "blur(6px)",
+        transformOrigin: "50% 50%",
+        willChange: "transform,opacity,filter",
       });
 
-      const st = gsap.to(letters, {
-        autoAlpha: 1,
-        y: 0,
-        rotateX: 0,
-        filter: "blur(0px)",
-        stagger: { each: 0.06, from: "start" },
-        ease: "none",
+      // Entrada + micro parallax integrado (no mecánico)
+      const tl = gsap.timeline({
         scrollTrigger: {
-          id: "FOOTER_STAYAWAKE_SCRUB",
           trigger: root,
           start: "top 92%",
           end: "top 55%",
-          scrub: 0.9,
+          scrub: 0.7,
           invalidateOnRefresh: true,
         },
-        onComplete: () => gsap.set(letters, { clearProps: "filter" }),
+        defaults: { ease: "none" },
+      });
+
+      tl.to(gif, {
+        autoAlpha: 1,
+        y: 0,
+        scale: 1,
+        filter: "blur(0px)",
       });
 
       const refreshNow = () => {
@@ -81,22 +83,13 @@ export default function Footer({ bg = "light" }) {
         cancelAnimationFrame(raf1);
         cancelAnimationFrame(raf2);
         window.removeEventListener("astro:after-swap", onAstroAfterSwap);
-        st?.scrollTrigger?.kill(false);
+        tl.scrollTrigger?.kill(false);
+        tl.kill();
       };
     }, root);
 
     return () => ctx.revert();
   }, []);
-
-  const renderWord = (word) => (
-    <span className="awakeFooter__word" aria-hidden="true">
-      {word.split("").map((ch, i) => (
-        <span key={`${word}-${i}`} className="awakeFooter__letter">
-          {ch}
-        </span>
-      ))}
-    </span>
-  );
 
   return (
     <footer
@@ -106,10 +99,17 @@ export default function Footer({ bg = "light" }) {
       role="contentinfo"
     >
       <div className="awakeFooter__inner">
-        <h2 ref={titleRef} className="awakeFooter__title" aria-label="Stay Awake">
-          {renderWord(WORDS[0])}
-          {renderWord(WORDS[1])}
-        </h2>
+        {/* ✅ Reemplaza al H2: GIF responsive */}
+        <div className="awakeFooter__hero" aria-label="Stay Awake">
+          <img
+            ref={gifRef}
+            className="awakeFooter__heroGif"
+            src={gifSrc}
+            alt="Stay Awake"
+            loading="eager"
+            decoding="async"
+          />
+        </div>
 
         <div className="awakeFooter__bottom">
           <div className="awakeFooter__col awakeFooter__col--left">

@@ -4,7 +4,7 @@ import "./InfiniteLogoMarquee.css";
 const BG_MAP = { light: "#e9e8e3", dark: "#121212" };
 
 export default function InfiniteLogoMarquee({
-  src = `${import.meta.env.BASE_URL}images/tira.png`,
+  src = `${import.meta.env.BASE_URL}images/tira_2.png`,
   alt = "Logo strip",
   height = "clamp(46px, 6vw, 76px)",
   bg = "light",

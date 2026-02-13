@@ -1,7 +1,10 @@
 // src/components/FeaturedWork.jsx
-import { useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useMemo, useRef } from "react";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import "./FeaturedWork.css";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const withBase = (p) =>
   `${import.meta.env.BASE_URL}${String(p || "").replace(/^\/+/, "")}`;
@@ -12,21 +15,30 @@ const WORKS = [
     id: "work-1",
     title: "The Perfect Surgery",
     image: "images/workPreview/1.png",
-    tags: ["Branding", "Web", "UI/UX"],
+    tags: [
+      "Branding",
+      "Naming",
+      "Web Front",
+      "UX/UI & Backend",
+      "Documental",
+      "Paid Media + SEO",
+      "Content AO",
+      "Mobile First",
+    ],
     href: "work",
   },
   {
     id: "work-2",
     title: "CRAFT",
     image: "images/workPreview/2.jpg",
-    tags: ["Art Direction", "Motion"],
+    tags: ["Branding", "Concept", "Content AO", "Retail Branding", "Illustration", "Motion"],
     href: "work",
   },
   {
     id: "work-3",
-    title: "Experiment 03",
+    title: "Husqvarna",
     image: "images/workPreview/3.jpg",
-    tags: ["Experiment", "Creative Dev"],
+    tags: ["Branding", "Concept + Idea", "Digital Assets", "Documental"],
     href: "work",
   },
 ];
@@ -39,169 +51,111 @@ export default function FeaturedWork({
   const rootRef = useRef(null);
   const allWorkResolved = isExternal(allWorkHref) ? allWorkHref : withBase(allWorkHref);
 
+  const safeWorks = useMemo(() => {
+    const arr = Array.isArray(works) && works.length ? works : WORKS;
+    return arr.map((w, i) => ({
+      ...w,
+      id: w.id || `work-${i + 1}`,
+      title: String(w.title || "").trim(),
+      image: String(w.image || "").trim(),
+      tags: Array.isArray(w.tags) ? w.tags.filter(Boolean).map(String) : [],
+      href: String(w.href || "work"),
+    }));
+  }, [works]);
+
   useLayoutEffect(() => {
     const root = rootRef.current;
     if (!root) return;
 
-    const prefersReduced =
-      window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    const prefersReduced = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
     if (prefersReduced) return;
 
-    const items = Array.from(root.querySelectorAll(".awk-work"));
+    const ctx = gsap.context(() => {
+      const cards = gsap.utils.toArray(".awk-work__card");
+      const medias = gsap.utils.toArray(".awk-work__media");
+      const imgs = gsap.utils.toArray(".awk-work__media img");
+      const tagsLists = gsap.utils.toArray(".awk-work__tags");
+      const tagItems = gsap.utils.toArray(".awk-work__tag");
 
-    const setOut = () => {
-      items.forEach((el) => {
-        const media = el.querySelector(".awk-work__media");
-        const img = el.querySelector(".awk-work__media img");
-        const tags = el.querySelector(".awk-work__tags");
-
-        gsap.killTweensOf([el, media, img, tags].filter(Boolean));
-
-        gsap.set(el, {
-          y: 42,
-          rotateX: 10,
-          transformPerspective: 900,
-          transformOrigin: "50% 60%",
-          filter: "blur(6px)",
-          autoAlpha: 0,
-        });
-
-        if (media) gsap.set(media, { y: 18, autoAlpha: 0 });
-        if (img) gsap.set(img, { scale: 1.09 });
-        if (tags) gsap.set(tags, { y: 14, autoAlpha: 0 });
-      });
-    };
-
-    const playIn = () => {
-      const tl = gsap.timeline({ defaults: { ease: "expo.out" } });
-
-      tl.to(items, {
-        autoAlpha: 1,
-        y: 0,
-        rotateX: 0,
-        filter: "blur(0px)",
-        duration: 0.95,
-        stagger: 0.12,
-        overwrite: "auto",
-        clearProps: "transform,filter,opacity,visibility",
-      }, 0);
-
-      items.forEach((el, i) => {
-        const media = el.querySelector(".awk-work__media");
-        const img = el.querySelector(".awk-work__media img");
-        const tags = el.querySelector(".awk-work__tags");
-
-        if (media) {
-          tl.to(
-            media,
-            {
-              autoAlpha: 1,
-              y: 0,
-              duration: 0.85,
-              overwrite: "auto",
-              clearProps: "transform,opacity,visibility",
-            },
-            0.08 + i * 0.12
-          );
-        }
-
-        if (img) {
-          tl.to(
-            img,
-            {
-              scale: 1,
-              duration: 1.15,
-              ease: "expo.out",
-              overwrite: "auto",
-              clearProps: "transform",
-            },
-            0.06 + i * 0.12
-          );
-        }
-
-        if (tags) {
-          tl.to(
-            tags,
-            {
-              autoAlpha: 1,
-              y: 0,
-              duration: 0.75,
-              overwrite: "auto",
-              clearProps: "transform,opacity,visibility",
-            },
-            0.18 + i * 0.12
-          );
-        }
-      });
-
-      return tl;
-    };
-
-    const playOut = () => {
-      const tl = gsap.timeline({ defaults: { ease: "power2.inOut" } });
-
-      tl.to(items, {
+      // estado inicial sutil
+      gsap.set(cards, {
+        y: 18,
         autoAlpha: 0,
-        y: 42,
-        rotateX: 10,
-        filter: "blur(6px)",
-        duration: 0.35,
-        stagger: 0.06,
-        overwrite: "auto",
-      }, 0);
-
-      items.forEach((el) => {
-        const media = el.querySelector(".awk-work__media");
-        const img = el.querySelector(".awk-work__media img");
-        const tags = el.querySelector(".awk-work__tags");
-
-        if (media) gsap.to(media, { autoAlpha: 0, y: 18, duration: 0.28, overwrite: "auto" });
-        if (img) gsap.to(img, { scale: 1.09, duration: 0.35, overwrite: "auto" });
-        if (tags) gsap.to(tags, { autoAlpha: 0, y: 14, duration: 0.28, overwrite: "auto" });
+        rotateX: 6,
+        transformPerspective: 900,
+        transformOrigin: "50% 65%",
       });
 
-      return tl;
-    };
+      gsap.set(medias, { clipPath: "inset(10% 0% 10% 0%)" });
+      gsap.set(imgs, { scale: 1.06, yPercent: 6, transformOrigin: "50% 50%" });
+      gsap.set(tagsLists, { y: 10, autoAlpha: 0 });
+      gsap.set(tagItems, { y: 6, autoAlpha: 0 });
 
-    setOut();
+      // entrada integrada (one-shot trigger + stagger)
+      const master = gsap.timeline({ paused: true, defaults: { ease: "power3.out" } });
 
-    let inTl = null;
-    let outTl = null;
+      cards.forEach((card, i) => {
+        const media = card.querySelector(".awk-work__media");
+        const img = card.querySelector(".awk-work__media img");
+        const tags = card.querySelector(".awk-work__tags");
+        const chips = card.querySelectorAll(".awk-work__tag");
 
-    const io = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0];
-        if (!entry) return;
+        const tl = gsap.timeline();
 
-        if (entry.isIntersecting) {
-          outTl?.kill();
-          outTl = null;
-          inTl?.kill();
-          inTl = playIn();
-        } else {
-          inTl?.kill();
-          inTl = null;
-          outTl?.kill();
-          outTl = playOut();
+        tl.to(card, { autoAlpha: 1, y: 0, rotateX: 0, duration: 0.75 }, 0);
+
+        if (media) tl.to(media, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.85, ease: "power2.out" }, 0);
+        if (img) tl.to(img, { scale: 1, yPercent: 0, duration: 0.95, ease: "power2.out" }, 0);
+
+        if (tags) tl.to(tags, { autoAlpha: 1, y: 0, duration: 0.6 }, 0.1);
+
+        if (chips?.length) {
+          tl.to(chips, { autoAlpha: 1, y: 0, duration: 0.45, stagger: 0.04, ease: "power2.out" }, 0.18);
         }
-      },
-      { root: null, threshold: 0.22, rootMargin: "0px 0px -12% 0px" }
-    );
 
-    io.observe(root);
+        master.add(tl, i * 0.14);
+      });
 
-    return () => {
-      inTl?.kill();
-      outTl?.kill();
-      io.disconnect();
-    };
-  }, [works]);
+      const st = ScrollTrigger.create({
+        trigger: root,
+        start: "top 75%",
+        onEnter: () => master.play(0),
+        onEnterBack: () => master.play(0),
+      });
+
+      // parallax muy leve
+      imgs.forEach((img) => {
+        const media = img.closest(".awk-work__media");
+        if (!media) return;
+        gsap.to(img, {
+          yPercent: -4,
+          ease: "none",
+          scrollTrigger: {
+            trigger: media,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: 0.35,
+          },
+        });
+      });
+
+      return () => {
+        st.kill();
+        master.kill();
+        ScrollTrigger.getAll().forEach((t) => {
+          // no mato todo global, solo lo de este ctx (ctx.revert ya lo limpia)
+        });
+      };
+    }, root);
+
+    return () => ctx.revert();
+  }, [safeWorks]);
 
   return (
     <section ref={rootRef} className={`awk-works ${className}`} aria-label="Works preview">
       <div className="awk-works__inner">
         <div className="awk-works__grid">
-          {works.map((work) => {
+          {safeWorks.map((work) => {
             const hrefResolved = isExternal(work.href) ? work.href : withBase(work.href);
 
             return (
@@ -214,9 +168,9 @@ export default function FeaturedWork({
                     </span>
                   </div>
 
-                  <ul className="awk-work__tags" aria-label="Tags">
+                  <ul className="awk-work__tags" aria-label={`Tags ${work.title}`}>
                     {work.tags.map((tag) => (
-                      <li key={tag} className="awk-work__tag">
+                      <li key={`${work.id}-${tag}`} className="awk-work__tag">
                         {tag}
                       </li>
                     ))}
@@ -225,15 +179,16 @@ export default function FeaturedWork({
               </article>
             );
           })}
-        </div>
 
-        <div className="awk-works__footer">
-          <a className="awk-allWork" href={allWorkResolved} aria-label="All work" data-cursor="blue">
-            <span className="awk-allWork__label">SEE ALL WORK</span>
-            <span className="awk-allWork__circle" aria-hidden="true">
-              <span className="awk-allWork__chev">›</span>
-            </span>
-          </a>
+          {/* ✅ AHORA ES UN ITEM DEL GRID (debajo de CRAFT, col 2) */}
+          <div className="awk-allWorkCell">
+            <a className="awk-allWork" href={allWorkResolved} aria-label="All work" data-cursor="blue">
+              <span className="awk-allWork__label">SEE ALL WORK</span>
+              <span className="awk-allWork__circle" aria-hidden="true">
+                <span className="awk-allWork__chev">›</span>
+              </span>
+            </a>
+          </div>
         </div>
       </div>
     </section>

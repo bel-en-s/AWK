@@ -452,23 +452,24 @@ export default function FeaturedLinks({ className = "" }) {
 
   const items = [
     {
-      title: "¿Cómo la IA está\ntransformando\nel Marketing y la\nPublicidad?",
+      title: "How is AI transforming marketing & vertising??",
       href: "https://www.iae.edu.ar/2024/11/como-la-ia-esta-transformando-el-marketing-y-la-publicidad/",
     },
     {
       title:
-        "IDNTITY / Sebastián Linck\ny Diego Cuervo:\nCreando el Uber de la\nagencia de medios",
+        "Creating the Uber of Advertising, Brandformance.",
       href: "https://www.circulocreativo.org/more-news/2023/11/19/latinspots-revista-176-especiales-estados-unidos",
     },
     {
       title:
-        "La guerra de los clicks:\nQué cambió en la\npublicidad con el análisis\nde datos",
+        "The battle for clicks. What changes in advertising have come with data analysis?",
       href: "https://www.forbesargentina.com/negocios/la-guerra-clicks-cambio-publicidad-analisis-datos-n25646",
     },
   ];
 
   return (
     <section ref={wrapRef} className={`awkLinks ${className}`}>
+              <h2 className="awkLinks__title">Press</h2>
       <div className="awkLinks__row">
         {items.map((it, i) => (
           <a

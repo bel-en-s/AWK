@@ -37,29 +37,27 @@ export default function CursorLanding({
   cursorOpacity = 1,
   eyesOpacity = 1,
 
-  // ✅ zona activa para ojos/trail (cursor siempre)
   activeAreaRef = null,
   eyesOnlyInside = false,
   eyesFade = 0.22,
 
-  // ✅ MOBILE
   mobileMode = "auto", // "auto" | "touch" | "gyro"
-  idleMs = 700, // tiempo sin input para autopilot
+  idleMs = 700,
   autoEnabled = true,
   autoSpeed = 0.35,
   autoRadiusX = 90,
   autoRadiusY = 55,
-  autoCenter = { x: 0.5, y: 0.45 }, // % viewport
+  autoCenter = { x: 0.5, y: 0.45 },
   autoTrailEveryMs = 55,
 
-  // ✅ “primer trail pegado a ojos” al entrar al área
   enterTrail = true,
 
-  // ✅ cursor modes por data-attribute
   cursorAttr = "data-cursor",
 
-  // ✅ NUEVO: evento global para ocultar/mostrar ojos (desde Hero)
-  eyesEventName = "awk:eyes", // dispatch: window.dispatchEvent(new CustomEvent("awk:eyes",{detail:{show:false}}))
+  eyesEventName = "awk:eyes",
+
+  // ✅ NUEVO: ocultar ojitos (y trail) en mobile
+  hideEyesOnMobile = true,
 }) {
   const rafRef = useRef(null);
   const overlayRef = useRef(null);
@@ -101,7 +99,7 @@ export default function CursorLanding({
 
     let lastInputAt = performance.now();
 
-    // ✅ NUEVO: flag global para forzar oculto (Services)
+    // ✅ flag global para forzar oculto (Services / Mobile / etc)
     let eyesForceHidden = false;
 
     // -------------------------
@@ -191,7 +189,6 @@ export default function CursorLanding({
       lastInside = inside;
       enteredInside = inside;
 
-      // ✅ si estás en services, siempre oculto aunque “inside”
       setEyesVisible(inside);
 
       if (inside && !eyesForceHidden) {
@@ -302,7 +299,6 @@ export default function CursorLanding({
     };
 
     const makeTrail = (x, y) => {
-      // ✅ si ojos están forzados ocultos, NO trail
       if (eyesForceHidden) return;
       if (!gsap || !overlay) return;
 
@@ -372,21 +368,18 @@ export default function CursorLanding({
     };
 
     // -------------------------
-    // ✅ NUEVO: evento externo para ocultar/mostrar ojos
+    // External hide/show (Hero)
     // -------------------------
     const setEyesForcedHidden = (hidden) => {
       eyesForceHidden = !!hidden;
 
-      // si los ocultás, además reseteá “inside” para que al volver aparezcan limpios
       if (eyesForceHidden) {
         setEyesVisible(false);
       } else {
-        // re-sincroniza instant con estado actual
         const inside = computeInside(mouse.x, mouse.y);
         lastInside = inside;
         setEyesVisible(inside);
 
-        // reengancha posición para que no “salten”
         eyes.x = mouse.x;
         eyes.y = mouse.y;
         prevEyes.x = eyes.x;
@@ -396,8 +389,21 @@ export default function CursorLanding({
       }
     };
 
+    // ✅ MOBILE RULE
+    const shouldHideEyesNow = () => hideEyesOnMobile && isTouchDevice;
+
+    const syncMobileHide = () => {
+      if (shouldHideEyesNow()) setEyesForcedHidden(true);
+      else setEyesForcedHidden(false);
+    };
+
     const onEyesEvent = (e) => {
-      // soporta: detail.show (boolean) o detail.hidden
+      // si estás en mobile con hideEyesOnMobile, ignorá show=true
+      if (shouldHideEyesNow()) {
+        setEyesForcedHidden(true);
+        return;
+      }
+
       const d = e?.detail || {};
       if (typeof d.show === "boolean") setEyesForcedHidden(!d.show);
       else if (typeof d.hidden === "boolean") setEyesForcedHidden(d.hidden);
@@ -416,12 +422,13 @@ export default function CursorLanding({
       createEyes();
       createCursor();
 
-      // ✅ escucha data-cursor global
       document.addEventListener("pointerover", onOver, true);
       document.addEventListener("pointerout", onOut, true);
 
-      // ✅ escucha toggle ojos desde Hero
       window.addEventListener(eyesEventName, onEyesEvent);
+
+      // ✅ aplica regla mobile al iniciar
+      syncMobileHide();
 
       lastInside = computeInside(mouse.x, mouse.y);
       setEyesVisible(lastInside);
@@ -442,8 +449,14 @@ export default function CursorLanding({
         window.addEventListener("deviceorientation", onDeviceOrientation, true);
       }
 
+      const onResize = () => {
+        // ✅ por si rota / cambia coarse
+        syncMobileHide();
+        updateInside();
+      };
+
       window.addEventListener("scroll", updateInside, { passive: true });
-      window.addEventListener("resize", updateInside);
+      window.addEventListener("resize", onResize);
 
       let lastStamp = 0;
 
@@ -470,7 +483,6 @@ export default function CursorLanding({
         const cy = cursor.y - cursorSize * cursorAnchor.y;
         if (cursorEl) cursorEl.style.transform = `translate3d(${cx}px, ${cy}px, 0)`;
 
-        // ✅ si ojos están forzados ocultos, no proceses física ni trails
         if (eyesForceHidden) {
           rafRef.current = requestAnimationFrame(animate);
           return;
@@ -534,6 +546,9 @@ export default function CursorLanding({
       };
 
       rafRef.current = requestAnimationFrame(animate);
+
+      // guardo handler para cleanup
+      start._onResize = onResize;
     };
 
     start();
@@ -553,7 +568,8 @@ export default function CursorLanding({
       window.removeEventListener("deviceorientation", onDeviceOrientation, true);
 
       window.removeEventListener("scroll", updateInside);
-      window.removeEventListener("resize", updateInside);
+      // si start llegó a setearlo:
+      if (start._onResize) window.removeEventListener("resize", start._onResize);
 
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       if (overlayRef.current) overlayRef.current.remove();
@@ -601,6 +617,7 @@ export default function CursorLanding({
     enterTrail,
     cursorAttr,
     eyesEventName,
+    hideEyesOnMobile, 
   ]);
 
   return null;

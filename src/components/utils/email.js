@@ -35,13 +35,13 @@ export async function sendContactEmail(payload) {
   };
 
   // 👇 DEBUG: te muestra si env está realmente cargado
-  console.log("[EmailJS] sending with:", {
-    SERVICE_ID,
-    TEMPLATE_ID,
-    PUBLIC_KEY: PUBLIC_KEY ? `${PUBLIC_KEY.slice(0, 4)}…` : "",
-    TO_EMAIL,
-    templateParams,
-  });
+  // console.log("[EmailJS] sending with:", {
+  //   SERVICE_ID,
+  //   TEMPLATE_ID,
+  //   PUBLIC_KEY: PUBLIC_KEY ? `${PUBLIC_KEY.slice(0, 4)}…` : "",
+  //   TO_EMAIL,
+  //   templateParams,
+  // });
 
   try {
     const res = await emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams, {

@@ -265,7 +265,7 @@ export default function Contact() {
           </div>
 
           {/* Row 2 - Right */}
-          <div className="ctc__cell ctc__cell--rightBottom">
+          <aside className="ctc__cell ctc__cell--rightBottom">
             <form className="ctc__form" onSubmit={onSubmit}>
               <label className="ctc__field">
                 <span className="ctc__label">Name</span>
@@ -330,7 +330,7 @@ export default function Contact() {
                 )}
               </div>
             </form>
-          </div>
+          </aside>
         </div>
       </div>
     </section>

@@ -8,9 +8,9 @@ import InfiniteLogoMarquee from "../components/UI/InfiniteLogoMarquee.jsx";
 ---
 
 <Layout title="Landing AWK" desc="Landing animada con Astro + React + GSAP">
-  <Hero client:load />
-  <FeaturedWork client:load />
-  <InfiniteLogoMarquee client:load bg="dark" fade />
-  <FeaturedLinks client:load />
-  <Footer client:load />
+  <Hero client:visible />
+  <FeaturedWork client:visible />
+  <InfiniteLogoMarquee client:visible bg="dark" fade />
+  <FeaturedLinks client:visible />
+  <Footer client:visible />
 </Layout>

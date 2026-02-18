@@ -159,3 +159,16 @@
     text-align:center;
   }
 }
+
+
+.awkLinks__title {
+  display: inline-block;
+  line-height: 1;
+  transform: translateY(0.02em);
+  font-size: 40px;
+    font-family: var(--font-dm, system-ui);
+    font-weight: 200;
+    color: white;
+    text-decoration: underline;
+    margin-left: 10px;
+    }

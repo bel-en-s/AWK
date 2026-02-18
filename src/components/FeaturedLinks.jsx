@@ -469,7 +469,7 @@ export default function FeaturedLinks({ className = "" }) {
 
   return (
     <section ref={wrapRef} className={`awkLinks ${className}`}>
-              <h2 className="awkLinks__title">Press</h2>
+              <h2 className="awkLinks__title">PRESS</h2>
       <div className="awkLinks__row">
         {items.map((it, i) => (
           <a

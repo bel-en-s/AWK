@@ -44,10 +44,7 @@ export default function Work({ projects = PROJECTS }) {
     // =============================
     // NAV THEME FOR THIS PAGE
     // =============================
-    // Blanco (texto/blordes blancos) => is-nav-blue
-    // Azul (si lo quisieras distinto) => cambiá la clase
-    const NAV_THEME = "is-nav-blue"; // <-- cambiar a "is-hero-blue" si preferís esa variante
-
+    const NAV_THEME = "is-nav-blue"; // o "is-hero-blue"
     document.documentElement.classList.add(NAV_THEME);
     return () => document.documentElement.classList.remove(NAV_THEME);
   }, []);
@@ -71,11 +68,19 @@ export default function Work({ projects = PROJECTS }) {
     let totalH = 1;
     let stepPx = 90;
 
-    let snapTimer = 0;
     let snapTween = null;
 
+    // ✅ control discreto por índice
+    let idx = 0;
+
+    // wheel/trackpad
+    let wheelAcc = 0;
+    let wheelCooldown = 0;
+
+    // touch
     let touching = false;
     let lastY = 0;
+    let touchAcc = 0;
 
     const setY = gsap.quickSetter(track, "y", "px");
     const wrap = (v) => gsap.utils.wrap(-totalH, 0, v);
@@ -89,7 +94,9 @@ export default function Work({ projects = PROJECTS }) {
       if (a && b) {
         const ra = a.getBoundingClientRect();
         const rb = b.getBoundingClientRect();
-        const d = Math.abs((rb.top + rb.height / 2) - (ra.top + ra.height / 2));
+        const d = Math.abs(
+          (rb.top + rb.height / 2) - (ra.top + ra.height / 2)
+        );
         if (d > 10) stepPx = d;
       }
     };
@@ -97,18 +104,18 @@ export default function Work({ projects = PROJECTS }) {
     const pxToIndex = (px) => -px / stepPx;
     const indexToPx = (index) => -index * stepPx;
 
-    const setActive = (idx) => {
-      if (idx === activeIndexRef.current) return;
-      activeIndexRef.current = idx;
+    const setActive = (i) => {
+      if (i === activeIndexRef.current) return;
+      activeIndexRef.current = i;
 
-      const project = data[idx];
+      const project = data[i];
       if (!project) return;
 
       // Active clear, others subtle blur
       if (!prefersReduced) {
-        itemRefs.current.forEach((el, i) => {
+        itemRefs.current.forEach((el, k) => {
           if (!el) return;
-          const isActive = i === idx;
+          const isActive = k === i;
 
           gsap.to(el, {
             duration: 0.28,
@@ -181,16 +188,24 @@ export default function Work({ projects = PROJECTS }) {
       if (best !== -1) setActive(best);
     };
 
-    const snapToNearest = () => {
-      const idx = Math.round(pxToIndex(target));
+    // ✅ snap real a índice
+    const goToIndex = (nextIdx, { immediate = false } = {}) => {
+      idx = nextIdx;
       const snapped = indexToPx(idx);
 
       snapTween?.kill();
+      snapTween = null;
+
+      if (immediate || prefersReduced) {
+        target = snapped;
+        return;
+      }
+
       snapTween = gsap.to(
         { v: target },
         {
           v: snapped,
-          duration: 0.18,
+          duration: 0.22,
           ease: "expo.out",
           onUpdate() {
             target = this.targets()[0].v;
@@ -203,11 +218,8 @@ export default function Work({ projects = PROJECTS }) {
       );
     };
 
-    const scheduleSnap = () => {
-      window.clearTimeout(snapTimer);
-      snapTimer = window.setTimeout(() => {
-        if (!touching) snapToNearest();
-      }, 70);
+    const syncIndexFromTarget = () => {
+      idx = Math.round(pxToIndex(target));
     };
 
     let frames = 0;
@@ -227,6 +239,7 @@ export default function Work({ projects = PROJECTS }) {
 
       current = 0;
       target = 0;
+      idx = 0;
       setY(0);
 
       if (!prefersReduced) {
@@ -243,31 +256,56 @@ export default function Work({ projects = PROJECTS }) {
 
     start();
 
-    // Desktop wheel: step + snap
+    // =============================
+    // ✅ WHEEL / TRACKPAD: pasos discretos
+    // =============================
+    const TRACKPAD_THRESHOLD = 42; // ajustá 32–55
+    const COOLDOWN_MS = 90; // ajustá 80–140
+
     const onWheel = (e) => {
       e.preventDefault();
 
-      const dir = e.deltaY > 0 ? 1 : -1;
-      const intensity = Math.min(3, Math.max(1, Math.round(Math.abs(e.deltaY) / 90)));
-      const steps = dir * intensity;
+      const mode = e.deltaMode || 0; // 0 px, 1 lines, 2 pages
+      const linePx = stepPx;
+      const deltaPx =
+        mode === 1
+          ? e.deltaY * linePx
+          : mode === 2
+          ? e.deltaY * viewport.clientHeight
+          : e.deltaY;
 
-      snapTween?.kill();
-      snapTween = null;
+      const now = performance.now();
+      if (now < wheelCooldown) return;
 
-      target += -steps * stepPx;
-      scheduleSnap();
+      wheelAcc += deltaPx;
+
+      if (Math.abs(wheelAcc) >= TRACKPAD_THRESHOLD) {
+        const dir = wheelAcc > 0 ? 1 : -1;
+
+        // trackpad -> normalmente 1 paso; rueda grande puede hacer 2–3
+        const steps = Math.min(3, Math.max(1, Math.round(Math.abs(wheelAcc) / 120)));
+
+        goToIndex(idx + dir * steps);
+
+        wheelAcc = 0;
+        wheelCooldown = now + COOLDOWN_MS;
+      }
     };
 
     viewport.addEventListener("wheel", onWheel, { passive: false });
 
-    // Mobile drag + snap on release
+    // =============================
+    // ✅ TOUCH: también discreto
+    // =============================
+    const TOUCH_THRESHOLD = () => Math.max(18, stepPx * 0.33);
+
     const onTouchStart = (e) => {
       touching = true;
       lastY = e.touches[0].clientY;
+      touchAcc = 0;
 
       snapTween?.kill();
       snapTween = null;
-      window.clearTimeout(snapTimer);
     };
 
     const onTouchMove = (e) => {
@@ -277,13 +315,24 @@ export default function Work({ projects = PROJECTS }) {
       const dy = y - lastY;
       lastY = y;
 
-      target += dy * 1.15;
+      touchAcc += dy;
+
+      const th = TOUCH_THRESHOLD();
+      if (Math.abs(touchAcc) >= th) {
+        // dy negativo (sube dedo) -> avanzar
+        const dir = touchAcc < 0 ? 1 : -1;
+        goToIndex(idx + dir * 1);
+        touchAcc = 0;
+      }
+
       e.preventDefault();
     };
 
     const onTouchEnd = () => {
       touching = false;
-      snapToNearest();
+      touchAcc = 0;
+      syncIndexFromTarget();
+      goToIndex(idx);
     };
 
     viewport.addEventListener("touchstart", onTouchStart, { passive: true });
@@ -292,14 +341,14 @@ export default function Work({ projects = PROJECTS }) {
 
     const onResize = () => {
       measure();
-      snapToNearest();
+      syncIndexFromTarget();
+      goToIndex(idx, { immediate: true });
     };
 
     window.addEventListener("resize", onResize);
 
     return () => {
       cancelAnimationFrame(raf);
-      window.clearTimeout(snapTimer);
       snapTween?.kill();
       gsap.killTweensOf(previewImg);
 

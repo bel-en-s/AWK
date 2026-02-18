@@ -15,18 +15,18 @@ const withBase = (p) => {
 const POSTS = {
   leftTop: {
     title: "La guerra de los clicks:\nQué cambió en la\npublicidad con el análisis\nde datos",
-    image: "/images/blog/NEWS-03.png",
+    image: "/images/blog/NEWS-02.png",
     href: "#",
   },
   leftBottom: {
     title: "Cómo la IA está\ntransformando el Marketing\ny la Publicidad?",
-    image: "/images/blog/NEWS-02.png",
+    image: "/images/blog/NEWS-05.png",
     href: "#",
   },
   rightTop: {
     title:
       "IDNTITY / Sebastián Linck\ny Diego Cuervo: Creando\nel Uber de la agencia de\nmedios",
-    image: "/images/blog/NEWS-05.png",
+    image: "/images/blog/NEWS-03.png",
     href: "#",
   },
   rightBottom: {

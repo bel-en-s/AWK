@@ -109,9 +109,8 @@
     gap: 18px;
   }
 
-  .awakeFooter__block--center,
-  .awakeFooter__block--right{
-    text-align: left;
+  .awakeFooter__block{
+    text-align: center;
   }
 
   .awakeFooter__link{
@@ -121,5 +120,6 @@
   .awakeFooter__col--mid,
   .awakeFooter__col--right{
     margin-top: 8px;
+      text-align: center;
   }
 }

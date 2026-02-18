@@ -1,3 +1,4 @@
+// Blog.jsx
 import { useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
 import "./Blog.css";
@@ -14,18 +15,18 @@ const withBase = (p) => {
 const POSTS = {
   leftTop: {
     title: "La guerra de los clicks:\nQué cambió en la\npublicidad con el análisis\nde datos",
-    image: "/images/blog/1.webp",
+    image: "/images/blog/NEWS-03.png",
     href: "#",
   },
   leftBottom: {
     title: "Cómo la IA está\ntransformando el Marketing\ny la Publicidad?",
-    image: "/images/blog/1.webp",
+    image: "/images/blog/NEWS-02.png",
     href: "#",
   },
   rightTop: {
     title:
       "IDNTITY / Sebastián Linck\ny Diego Cuervo: Creando\nel Uber de la agencia de\nmedios",
-    image: "/images/blog/1.webp",
+    image: "/images/blog/NEWS-05.png",
     href: "#",
   },
   rightBottom: {
@@ -113,19 +114,30 @@ export default function Blog() {
         gsap.killTweensOf([chars, cards, medias, bodies, imgs]);
 
         if (prefersReduced) {
-          gsap.set(chars, { yPercent: 0 });
-          gsap.set(cards, { autoAlpha: 1 });
+          gsap.set(title, { autoAlpha: 1 });
+          gsap.set(chars, { yPercent: 0, clearProps: "willChange" });
+          gsap.set(cards, { autoAlpha: 1, y: 0 });
           gsap.set([medias, bodies], { y: 0 });
           gsap.set(imgs, { scale: 1 });
           return;
         }
 
         gsap.set(title, { autoAlpha: 1 });
-        gsap.set(chars, { yPercent: 120, willChange: "transform" });
-        gsap.set(cards, { autoAlpha: 1 });
 
-        const mediaOffsets = medias.map((el) => el.offsetHeight + 140);
-        const bodyOffsets = bodies.map((el) => el.offsetHeight + 120);
+        // Title: entra de abajo
+        gsap.set(chars, { yPercent: 140, willChange: "transform" });
+
+        // Cards: IMPORTANTÍSIMO -> arrancan ocultas para que no se vean "ahí" antes de subir
+        gsap.set(cards, { autoAlpha: 0 });
+
+        // Offsets más grandes (mezcla elemento + viewport) para que arranquen más abajo
+        const vh = window.innerHeight || 800;
+        const mediaOffsets = medias.map((el) =>
+          Math.max(el.offsetHeight + 220, vh * 0.45)
+        );
+        const bodyOffsets = bodies.map((el) =>
+          Math.max(el.offsetHeight + 200, vh * 0.38)
+        );
 
         gsap.set(medias, {
           y: (i) => mediaOffsets[i],
@@ -137,13 +149,16 @@ export default function Blog() {
           willChange: "transform",
         });
 
-        gsap.set(imgs, { scale: 1.08, willChange: "transform" });
+        gsap.set(imgs, { scale: 1.1, willChange: "transform" });
 
         const tl = gsap.timeline({ defaults: { ease: "expo.out" } });
 
+        // Prender cards al inicio de la animación (así no se ven antes)
+        tl.set(cards, { autoAlpha: 1 }, 0);
+
         tl.to(chars, {
           yPercent: 0,
-          duration: 0.85,
+          duration: 0.9,
           stagger: 0.06,
           onComplete: () => gsap.set(chars, { clearProps: "willChange" }),
         });
@@ -152,8 +167,8 @@ export default function Blog() {
           medias,
           {
             y: 0,
-            duration: 0.95,
-            stagger: 0.08,
+            duration: 1.1,
+            stagger: 0.09,
             ease: "expo.out",
             onComplete: () => gsap.set(medias, { clearProps: "willChange" }),
           },
@@ -164,8 +179,8 @@ export default function Blog() {
           imgs,
           {
             scale: 1,
-            duration: 1.05,
-            stagger: 0.08,
+            duration: 1.15,
+            stagger: 0.09,
             ease: "expo.out",
             onComplete: () => gsap.set(imgs, { clearProps: "willChange" }),
           },
@@ -176,12 +191,12 @@ export default function Blog() {
           bodies,
           {
             y: 0,
-            duration: 0.9,
-            stagger: 0.08,
+            duration: 1.0,
+            stagger: 0.09,
             ease: "expo.out",
             onComplete: () => gsap.set(bodies, { clearProps: "willChange" }),
           },
-          "-=0.7"
+          "-=0.85"
         );
       }, root);
 
@@ -220,7 +235,9 @@ export default function Blog() {
                 className={`blogTitle__charWrap${isSpace ? " is-space" : ""}`}
                 aria-hidden="true"
               >
-                <span className="blogTitle__char">{isSpace ? "\u00A0" : ch}</span>
+                <span className="blogTitle__char">
+                  {isSpace ? "\u00A0" : ch}
+                </span>
               </span>
             );
           })}

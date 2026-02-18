@@ -10,12 +10,11 @@ export default function Services({ inHero = false }) {
       variant: "service",
       title: "Branding & Visual Identity",
       items: [
-        "Naming",
         "Visual Systems",
         "Brandbook",
         "Look & Feel",
         "Brand Architecture",
-        "Portfolio Strategy",
+        "Brand Strategy",
       ],
       href: CONTACT_URL,
     },
@@ -24,9 +23,6 @@ export default function Services({ inHero = false }) {
       variant: "service",
       title: "UX/UI & Product Design",
       items: [
-        "Websites",
-        "Apps",
-        "Dashboards",
         "Complex Interfaces",
         "Rush Webs",
       ],
@@ -50,7 +46,7 @@ export default function Services({ inHero = false }) {
       items: [
         "Digital Assets",
         "Banners",
-        "Social Content",
+        "Social",
         "Fancy Content",
       ],
       href: CONTACT_URL,
@@ -60,9 +56,6 @@ export default function Services({ inHero = false }) {
       variant: "service",
       title: "Prototypes & Interactive Experiences",
       items: [
-        "Renders",
-        "Scenes",
-        "Digital Products",
         "Bring your idea — we make it possible",
       ],
       href: CONTACT_URL,
@@ -80,16 +73,16 @@ export default function Services({ inHero = false }) {
       href: CONTACT_URL,
     },
 
-    {
-      variant: "service",
-      title: "3D Visual Craft",
-      items: [
-        "Renders",
-        "Scenes",
-        "Digital Products",
-      ],
-      href: CONTACT_URL,
-    },
+    // {
+    //   variant: "service",
+    //   title: "3D Visual Craft",
+    //   items: [
+    //     "Renders",
+    //     "Scenes",
+    //     "Digital Products",
+    //   ],
+    //   href: CONTACT_URL,
+    // },
 
     {
       variant: "cta",

@@ -34,6 +34,16 @@
   pointer-events:none;
 }
 
+/* ✅ si light no tiene fondo, hacemos que la tira se lea sobre fondo claro */
+.ilm--light .ilm__img{
+  filter: var(--ilm-light-filter, brightness(0.15) contrast(1.15));
+}
+
+/* dark no toca la imagen (se ve “igual” que ahora) */
+.ilm--dark .ilm__img{
+  filter: none;
+}
+
 .ilm--fade .ilm__viewport{
   -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 9%, #000 91%, transparent 100%);
   mask-image: linear-gradient(90deg, transparent 0%, #000 9%, #000 91%, transparent 100%);

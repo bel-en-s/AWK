@@ -1,19 +1,23 @@
 import { useLayoutEffect, useRef } from "react";
 import "./InfiniteLogoMarquee.css";
 
-const BG_MAP = { light: "#e9e8e3", dark: "#121212" };
+// light: SIN fondo
+const BG_MAP = { light: "transparent", dark: "#121212" };
 
 export default function InfiniteLogoMarquee({
   src = `${import.meta.env.BASE_URL}images/tira_2.png`,
   alt = "Logo strip",
   height = "clamp(46px, 6vw, 76px)",
   bg = "light",
-  speed = 10,           // segundos por vuelta 
+  speed = 10,            // segundos por vuelta
   gap = 56,
-  direction = "left",   // left | right
+  direction = "left",    // left | right
   fade = false,
   pauseOnHover = false,
   className = "",
+  // ✅ extra: ajustá visibilidad en light sin tocar el PNG
+  // valores razonables para que se lea sobre fondos claros
+  lightFilter = "brightness(0.15) contrast(1.15)",
 }) {
   const rootRef = useRef(null);
   const viewportRef = useRef(null);
@@ -63,11 +67,9 @@ export default function InfiniteLogoMarquee({
 
       if (!originals.length) return;
 
-      // medir 1 set (originales)
       singleWidth = computeWidth(originals);
       if (!singleWidth) return;
 
-      // clonar hasta cubrir ~2x viewport + 1 set extra
       const target = viewport.clientWidth * 2 + singleWidth;
 
       let safety = 0;
@@ -79,7 +81,6 @@ export default function InfiniteLogoMarquee({
         });
       }
 
-      // reset transform sin “salto visual”
       x = 0;
       track.style.transform = "translate3d(0px,0,0)";
       last = performance.now();
@@ -96,13 +97,11 @@ export default function InfiniteLogoMarquee({
       const dt = now - last;
       last = now;
 
-      // px per sec: ancho del set / segundos
       const duration = Math.max(5, Number(speed) || 40);
       const pxPerSec = singleWidth / duration;
 
       x += dirSign * pxPerSec * (dt / 1000);
 
-      // wrap cuando completás 1 set
       if (Math.abs(x) >= singleWidth) {
         x += x < 0 ? singleWidth : -singleWidth;
       }
@@ -125,7 +124,6 @@ export default function InfiniteLogoMarquee({
       root.addEventListener("pointerleave", onLeave);
     }
 
-    // esperar a que cargue la imagen original para medir bien
     const img = track.querySelector("img");
     const start = () => requestAnimationFrame(() => requestAnimationFrame(build));
 
@@ -160,6 +158,7 @@ export default function InfiniteLogoMarquee({
         ["--ilm-h"]: height,
         ["--ilm-gap"]: `${Math.max(0, Number(gap) || 0)}px`,
         ["--ilm-bg"]: resolvedBg,
+        ["--ilm-light-filter"]: lightFilter,
       }}
       aria-label="Infinite logos marquee"
     >

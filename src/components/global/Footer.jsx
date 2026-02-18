@@ -6,9 +6,10 @@ import "./Footer.css";
 gsap.registerPlugin(ScrollTrigger);
 
 const BG_MAP = {
-  light: "#EBE8E3",
-  blue: "#0000fe",
+  light: "transparent",
+  dark: "#121212",
 };
+
 
 const withBase = (p) =>
   `${import.meta.env.BASE_URL}${String(p || "").replace(/^\/+/, "")}`;

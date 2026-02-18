@@ -502,10 +502,10 @@ export default function FeaturedLinks({ className = "" }) {
               <span className="awk-ctaCircle">›</span>
             </div>
 
-            <button className="awk-pill awk-tilt">INDEPENDIENTE</button>
-            <button className="awk-pill awk-tilt">PYME</button>
-            <button className="awk-pill awk-tilt">PYME +</button>
-            <button className="awk-pill awk-tilt">CORPORACIÓN</button>
+            <button className="awk-pill awk-tilt">Independents & Professionals </button>
+            <button className="awk-pill awk-tilt">Growing Businesses</button>
+            <button className="awk-pill awk-tilt">Startups & Tech Products</button>
+            <button className="awk-pill awk-tilt">Marketing Teams</button>
           </div>
         </div>
       </footer>

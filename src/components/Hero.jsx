@@ -1,3 +1,4 @@
+// Hero.jsx
 import { useLayoutEffect, useMemo, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -14,7 +15,8 @@ const TITLE_ST_ID = "awk-hero-title";
 const RESIZE_DEBOUNCE = 120;
 
 function getUAFlags() {
-  if (typeof window === "undefined") return { isIOS: false, isMobile: false, isCoarse: false };
+  if (typeof window === "undefined")
+    return { isIOS: false, isMobile: false, isCoarse: false };
   const ua = navigator.userAgent || "";
   const isIOS = /iPad|iPhone|iPod/.test(ua);
   const isMobile =
@@ -42,6 +44,7 @@ export default function Hero() {
   const talkRef = useRef(null);
 
   const typeIntroPlayedRef = useRef(false);
+  const titleIntroPlayedRef = useRef(false);
 
   const TYPE_TEXT = useMemo(() => "Creative Digital\nExperiences", []);
 
@@ -61,7 +64,9 @@ export default function Hero() {
     const root = document.documentElement;
     const body = document.body;
 
-    const prefersReduced = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    const prefersReduced = window.matchMedia?.(
+      "(prefers-reduced-motion: reduce)"
+    )?.matches;
 
     const setRootClass = (name, on) => {
       root.classList.toggle(name, !!on);
@@ -106,7 +111,7 @@ export default function Hero() {
     };
 
     // =========================
-    // BLOCK 2 — initial visual setup (no timelines yet)
+    // BLOCK 2 — initial visual setup
     // =========================
     const title = titleRef.current;
     const midEl = midRef.current;
@@ -114,9 +119,9 @@ export default function Hero() {
 
     if (cursorWrapRef.current) gsap.set(cursorWrapRef.current, { autoAlpha: 1 });
 
-    // ✅ mobile perf: arrancamos con bg full-size pero “encogido” por transform (mismo look, más rápido)
     stableVH = computeStableVH();
 
+    // ✅ mobile perf: bg full-size pero “encogido” por transform
     if (isMobile) {
       const sx = rectW() / Math.max(1, window.innerWidth);
       const sy = rectH() / Math.max(1, stableVH);
@@ -223,9 +228,9 @@ export default function Hero() {
     setupTypeIntro();
 
     // =========================
-    // BLOCK 4 — title scroll-out
+    // BLOCK 4 — title intro + scroll-out
     // =========================
-    const setupTitleST = () => {
+    const setupTitleIntroAndST = () => {
       if (!title || prefersReduced) return;
 
       const letters = Array.from(title.querySelectorAll(".hero-title-letter"));
@@ -233,35 +238,76 @@ export default function Hero() {
 
       title.classList.add("is-ready");
 
+      // Estado inicial para intro real
       gsap.set(letters, {
-        autoAlpha: 1,
-        yPercent: 0,
-        rotateX: 0,
-        filter: "blur(0px)",
+        autoAlpha: 0,
+        yPercent: 90,
+        rotateX: -55,
+        filter: "blur(10px)",
         transformPerspective: 900,
-        transformOrigin: "50% 60%",
+        transformOrigin: "50% 80%",
         willChange: "transform, opacity, filter",
       });
 
-      gsap.to(letters, {
-        yPercent: -140,
-        autoAlpha: 0,
-        rotateX: 55,
-        filter: "blur(12px)",
-        stagger: { each: 0.04, from: "start" },
-        ease: "none",
-        scrollTrigger: {
-          id: TITLE_ST_ID,
-          trigger: heroEl,
-          start: "top top",
-          end: () => `+=${Math.round(window.innerHeight * 0.7)}`,
-          scrub: true,
-          invalidateOnRefresh: true,
-        },
-      });
+      const buildScrollOut = () => {
+        gsap.killTweensOf(letters);
+
+        gsap.to(letters, {
+          yPercent: -140,
+          autoAlpha: 0,
+          rotateX: 55,
+          filter: "blur(12px)",
+          stagger: { each: 0.04, from: "start" },
+          ease: "none",
+          scrollTrigger: {
+            id: TITLE_ST_ID,
+            trigger: heroEl,
+            start: "top top",
+            end: () => `+=${Math.round(window.innerHeight * 0.7)}`,
+            scrub: true,
+            invalidateOnRefresh: true,
+          },
+        });
+      };
+
+      const runIntroOnce = () => {
+        if (titleIntroPlayedRef.current) {
+          buildScrollOut();
+          return;
+        }
+        titleIntroPlayedRef.current = true;
+
+        const introTl = gsap.timeline({ defaults: { ease: "expo.out" } });
+
+        introTl.to(letters, {
+          autoAlpha: 1,
+          yPercent: 0,
+          rotateX: 0,
+          filter: "blur(0px)",
+          duration: 0.65,
+          stagger: { each: 0.06, from: "start" },
+          overwrite: "auto",
+        });
+
+        introTl.add(buildScrollOut, ">");
+      };
+
+      if (window.__AWK_LOADED__ === true) {
+        requestAnimationFrame(() =>
+          requestAnimationFrame(runIntroOnce)
+        );
+      } else {
+        const onLoaded = () => {
+          window.removeEventListener("awk:loaded", onLoaded);
+          requestAnimationFrame(() =>
+            requestAnimationFrame(runIntroOnce)
+          );
+        };
+        window.addEventListener("awk:loaded", onLoaded, { once: true });
+      }
     };
 
-    setupTitleST();
+    setupTitleIntroAndST();
 
     // =========================
     // BLOCK 5 — talk hover
@@ -437,7 +483,7 @@ export default function Hero() {
         },
       });
 
-      // ✅ expand bg full (mobile: solo transform / desktop: como estaba)
+      // ✅ expand bg full (mobile: transform / desktop: size)
       if (isMobile) {
         tl.to(
           bg,
@@ -469,15 +515,22 @@ export default function Hero() {
       }
 
       if (hasServices) {
-        tl.to(bg, { backgroundColor: "var(--svc-blue, #0A25FF)", duration: 0.14, immediateRender: false }, 0.32);
+        tl.to(
+          bg,
+          {
+            backgroundColor: "var(--svc-blue, #0A25FF)",
+            duration: 0.14,
+            immediateRender: false,
+          },
+          0.32
+        );
         tl.to(svc, { autoAlpha: 1, duration: 0.12 }, 0.4);
         tl.set(svc, { pointerEvents: "auto" }, 0.42);
 
-        // ✅ MOBILE: NO ocultamos el BG (es el fondo azul). Solo ocultamos la card si querés.
+        // ✅ MOBILE: bg queda visible (fondo azul). ocultamos card si querés.
         if (isMobile) {
           tl.to(card, { autoAlpha: 0, duration: 0.18 }, 0.44);
           tl.set(card, { pointerEvents: "none" }, 0.44);
-          // bg queda visible y en azul
         }
 
         if (!isMobile && svcIntroCard) {
@@ -549,7 +602,7 @@ export default function Hero() {
     window.addEventListener("resize", onResize);
     window.addEventListener("orientationchange", onOrientation);
 
-    // (si lo tenías, ok, pero en mobile suele stutter)
+    // (en mobile suele stutter)
     if (!isMobile) window.visualViewport?.addEventListener?.("resize", onVVResize);
 
     return () => {
@@ -588,7 +641,12 @@ export default function Hero() {
       </div>
 
       <div className="hero-content" data-cursor="blue">
-        <h1 ref={titleRef} className="hero-title" aria-label="AWAKE" data-cursor="blue">
+        <h1
+          ref={titleRef}
+          className="hero-title"
+          aria-label="AWAKE"
+          data-cursor="blue"
+        >
           {"AWAKE".split("").map((ch, i) => (
             <span key={i} className="hero-title-letter" aria-hidden="true">
               {ch}
@@ -599,9 +657,16 @@ export default function Hero() {
 
       <div ref={copyBgRef} className="hero-copy-bg" aria-hidden="true" />
 
-      <div ref={copyCardRef} className="hero-copy-card" role="note" tabIndex={0} data-cursor="blue">
+      <div
+        ref={copyCardRef}
+        className="hero-copy-card"
+        role="note"
+        tabIndex={0}
+        data-cursor="blue"
+      >
         <p className="hero-copy-text">
-          Awake™ is a digital product studio crafting memorable customer experiences.
+          Awake™ is a digital product studio crafting memorable customer
+          experiences.
         </p>
       </div>
 

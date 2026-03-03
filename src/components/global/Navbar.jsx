@@ -1,11 +1,9 @@
-// NavBar.jsx
 import { useLayoutEffect, useRef, useState, useEffect } from "react";
 import gsap from "gsap";
 import "./Navbar.css";
 
 export default function NavBar({ show = true }) {
   const rootRef = useRef(null);
-
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
@@ -320,21 +318,27 @@ export default function NavBar({ show = true }) {
   const links = [
     { href: `${base}`, label: "HOME" },
     { href: `${base}work/`, label: "WORK" },
-    { href: "https://www.linkedin.com/company/stayawk/posts/?feedView=all", label: "PEOPLE" },
+    {
+      href: "https://www.linkedin.com/company/stayawk/posts/?feedView=all",
+      label: "PEOPLE",
+    },
     { href: `${base}blog/`, label: "BLOG" },
   ];
 
   const logoSrc = `${base}images/ojos.svg`;
 
+  const onArrowDown = () => {
+    const panel = document.querySelector(".nav-mobileScroll");
+    if (panel) panel.scrollBy({ top: 220, behavior: "smooth" });
+  };
+
   return (
     <>
-   
       <div
         className={`nav-backdrop ${isOpen ? "is-open" : ""}`}
         onClick={() => setIsOpen(false)}
         aria-hidden={!isOpen}
       />
-
 
       <nav
         ref={rootRef}
@@ -347,28 +351,25 @@ export default function NavBar({ show = true }) {
         </a>
 
         <div className="nav-center" role="navigation" aria-label="Sections">
-         {links.map((l, i) => {
-  const isExternal = l.href.startsWith("http");
-
-  return (
-    <a
-      key={l.href}
-      href={l.href}
-      className={`nav-chip nav-anim ${i % 2 === 0 ? "is-square" : "is-pill"}`}
-      target={isExternal ? "_blank" : "_self"}
-      rel={isExternal ? "noopener noreferrer" : undefined}
-    >
-      {l.label}
-    </a>
-  );
-})}
-
+          {links.map((l, i) => {
+            const isExternal = l.href.startsWith("http");
+            return (
+              <a
+                key={l.href}
+                href={l.href}
+                className={`nav-chip nav-anim ${i % 2 === 0 ? "is-square" : "is-pill"}`}
+                target={isExternal ? "_blank" : "_self"}
+                rel={isExternal ? "noopener noreferrer" : undefined}
+              >
+                {l.label}
+              </a>
+            );
+          })}
         </div>
 
         <a className="nav-cta nav-anim invert" href={`${base}contact/`}>
           GET IN TOUCH
         </a>
-
 
         <button
           type="button"
@@ -393,7 +394,9 @@ export default function NavBar({ show = true }) {
       >
         <div className="nav-mobileInner">
           <div className="nav-mobileTop">
-            <div className="nav-mobileTitle">Menu</div>
+            <a className="nav-mobileLogo" href={base} aria-label="Home" onClick={() => setIsOpen(false)}>
+              <img className="nav-mobileLogoImg" src={logoSrc} alt="" aria-hidden="true" />
+            </a>
 
             <button
               type="button"
@@ -401,30 +404,42 @@ export default function NavBar({ show = true }) {
               aria-label="Close menu"
               onClick={() => setIsOpen(false)}
             >
-              <span className="nav-mobileCloseX" aria-hidden="true">✕</span>
+              <span className="nav-mobileCloseX" aria-hidden="true" />
             </button>
           </div>
 
-          <div className="nav-mobileLinks" role="navigation" aria-label="Mobile Sections">
-            {links.map((l, i) => (
-              <a
-                key={l.href}
-                href={l.href}
-                onClick={() => setIsOpen(false)}
-                className={`nav-mobileLink ${i % 2 === 0 ? "is-square" : "is-pill"}`}
-              >
-                {l.label}
-                <span aria-hidden="true">→</span>
-              </a>
-            ))}
+          <div className="nav-mobileScroll">
+            <div className="nav-mobileLinks" role="navigation" aria-label="Mobile Sections">
+              {links.map((l, i) => {
+                const isExternal = l.href.startsWith("http");
+                return (
+                  <a
+                    key={l.href}
+                    href={l.href}
+                    onClick={() => setIsOpen(false)}
+                    className={`nav-mobileLink ${i % 2 === 0 ? "is-square" : "is-pill"}`}
+                    target={isExternal ? "_blank" : "_self"}
+                    rel={isExternal ? "noopener noreferrer" : undefined}
+                  >
+                    {l.label}
+                  </a>
+                );
+              })}
+            </div>
 
-            <a
-              className="nav-mobileCTA"
-              href={`${base}contact/`}
-              onClick={() => setIsOpen(false)}
-            >
-              GET IN TOUCH
-            </a>
+            <div className="nav-mobileBottom">
+              <button type="button" className="nav-mobileDown" onClick={onArrowDown} aria-label="Scroll down">
+                <span className="nav-mobileDownIcon" aria-hidden="true" />
+              </button>
+
+              <a
+                className="nav-mobileTouch"
+                href={`${base}contact/`}
+                onClick={() => setIsOpen(false)}
+              >
+                GET IN TOUCH
+              </a>
+            </div>
           </div>
         </div>
       </aside>

@@ -46,7 +46,7 @@ export default function Hero() {
   const typeIntroPlayedRef = useRef(false);
   const titleIntroPlayedRef = useRef(false);
 
-  const TYPE_TEXT = useMemo(() => "Creative Digital\nExperiences", []);
+  const TYPE_TEXT = useMemo(() => "Creative Digital Experiences", []);
 
   useLayoutEffect(() => {
     const heroEl = heroRef.current;
@@ -138,7 +138,7 @@ export default function Hero() {
         y: -PAD,
         scaleX: sx,
         scaleY: sy,
-        backgroundColor: "#000",
+        backgroundColor: "transparent",
         willChange: "transform, background-color, opacity",
         pointerEvents: "none",
       });
@@ -152,7 +152,7 @@ export default function Hero() {
         zIndex: 4,
         transformOrigin: "0% 100%",
         scaleX: 1,
-        backgroundColor: "#000",
+        backgroundColor: "transparent",
         scaleY: 1,
         willChange: "left, bottom, width, height, transform, background-color",
         pointerEvents: "none",
@@ -443,9 +443,10 @@ export default function Hero() {
                 scaleX: sx,
                 scaleY: sy,
                 clearProps: "top",
-                backgroundColor: "#000",
+                backgroundColor: "transparent",
                 pointerEvents: "none",
                 autoAlpha: 1,
+                 boxShadow: "none",
               });
             } else {
               gsap.set(bg, {
@@ -483,7 +484,7 @@ export default function Hero() {
         },
       });
 
-      // ✅ expand bg full (mobile: transform / desktop: size)
+   
       if (isMobile) {
         tl.to(
           bg,
@@ -670,24 +671,23 @@ export default function Hero() {
         </p>
       </div>
 
-      <div ref={midRef} className="hero-mid" aria-label={TYPE_TEXT}>
-        <p className="hero-mid-text" aria-hidden="true">
-          {TYPE_TEXT.split("\n").map((line, lineIndex) => (
-            <span key={lineIndex} className="type-line">
-              {line.split("").map((ch, i) => (
-                <span key={`${lineIndex}-${i}`} className="type-letter">
-                  {ch === " " ? "\u00A0" : ch}
-                </span>
-              ))}
-              {lineIndex === 0 && <br />}
-            </span>
-          ))}
-
-          <span className="type-caret" aria-hidden="true">
-            |
+    <div ref={midRef} className="hero-mid" aria-label={TYPE_TEXT}>
+  <p className="hero-mid-text" aria-hidden="true">
+    {TYPE_TEXT.split("\n").map((line, lineIndex) => (
+      <span key={lineIndex} className="type-line">
+        {line.split("").map((ch, i) => (
+          <span key={`${lineIndex}-${i}`} className="type-letter">
+            {ch === " " ? "\u00A0" : ch}
           </span>
-        </p>
-      </div>
+        ))}
+      </span>
+    ))}
+
+    <span className="type-caret" aria-hidden="true">
+      |
+    </span>
+  </p>
+</div>
 
       <a ref={talkRef} className="hero-talk" href="#contact" aria-label="Let's talk">
         LET&apos;S TALK

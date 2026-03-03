@@ -24,7 +24,7 @@
   margin: 0 auto;
 }
 
-/* ✅ reemplazo del título */
+
 .awakeFooter__hero{
   width: 100%;
 
@@ -121,5 +121,14 @@
   .awakeFooter__col--right{
     margin-top: 8px;
       text-align: center;
+  }
+}
+
+
+@media (max-width: 768px) {
+  .awakeFooter__bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 }

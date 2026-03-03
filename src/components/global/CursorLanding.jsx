@@ -56,7 +56,6 @@ export default function CursorLanding({
 
   eyesEventName = "awk:eyes",
 
-  // ✅ NUEVO: ocultar ojitos (y trail) en mobile
   hideEyesOnMobile = true,
 }) {
   const rafRef = useRef(null);
@@ -74,7 +73,9 @@ export default function CursorLanding({
       navigator.maxTouchPoints > 0 ||
       window.matchMedia?.("(pointer: coarse)")?.matches;
 
-    if (disableOnTouch && isTouchDevice) return;
+    if (isTouchDevice) return;
+
+  if (disableOnTouch && isTouchDevice) return;
 
     let gsap = null;
     let stopped = false;

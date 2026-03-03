@@ -20,7 +20,16 @@ export default function Footer({ bg = "light" }) {
   const footerRef = useRef(null);
   const gifRef = useRef(null);
 
-  const gifSrc = useMemo(() => withBase("images/footer.gif"), []);
+  const gifSrc = useMemo(() => {
+  if (typeof window !== "undefined") {
+    const isMobile = window.matchMedia("(max-width: 768px)").matches;
+    return withBase(
+      isMobile ? "images/footer-mobile.gif" : "images/footer.gif"
+    );
+  }
+
+  return withBase("images/footer.gif");
+}, []);
 
   useLayoutEffect(() => {
     const root = footerRef.current;
@@ -100,16 +109,22 @@ export default function Footer({ bg = "light" }) {
       role="contentinfo"
     >
       <div className="awakeFooter__inner">
-        {/* ✅ Reemplaza al H2: GIF responsive */}
+    
         <div className="awakeFooter__hero" aria-label="Stay Awake">
-          <img
-            ref={gifRef}
-            className="awakeFooter__heroGif"
-            src={gifSrc}
-            alt="Stay Awake"
-            loading="eager"
-            decoding="async"
-          />
+  <picture>
+    <source
+      media="(max-width: 768px)"
+      srcSet={withBase("images/footer-mobile.gif")}
+    />
+    <img
+      ref={gifRef}
+      className="awakeFooter__heroGif"
+      src={withBase("images/footer.gif")}
+      alt="Stay Awake"
+      loading="eager"
+      decoding="async"
+    />
+  </picture>
         </div>
 
         <div className="awakeFooter__bottom">

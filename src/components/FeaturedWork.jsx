@@ -27,21 +27,28 @@ const WORKS = [
       "Content",
       "Mobile First",
     ],
-    href: "work",
+    href: "https://www.behance.net/gallery/240536097/Motion-Clinic-Creative-Code",
   },
   {
     id: "work-2",
     title: "CRAFT",
     image: "images/workPreview/2.jpg",
-    tags: ["Branding", "Concept", "Retail Branding", "Illustration", "Motion", "Content"],
-    href: "work",
+    tags: [
+      "Branding",
+      "Concept",
+      "Retail Branding",
+      "Illustration",
+      "Motion",
+      "Content",
+    ],
+    href: "https://www.behance.net/sebastianlinck",
   },
   {
     id: "work-3",
     title: "Husqvarna",
     image: "images/workPreview/3.jpg",
     tags: ["Branding", "Concept", "Digital Assets", "Documentary"],
-    href: "work",
+    href: "https://www.behance.net/gallery/190744185/Husqvarna-One-of-a-Kind",
   },
 ];
 
@@ -129,7 +136,6 @@ export default function FeaturedWork({
           });
         });
 
-        // parallax leve
         imgs.forEach((img) => {
           const media = img.closest(".awk-work__media");
           if (!media) return;
@@ -145,7 +151,6 @@ export default function FeaturedWork({
           });
         });
       } else {
-        // reduced motion: dejar todo visible
         gsap.set(cards, { clearProps: "all", autoAlpha: 1 });
         gsap.set(medias, { clearProps: "all" });
         gsap.set(imgs, { clearProps: "all" });
@@ -153,13 +158,12 @@ export default function FeaturedWork({
         gsap.set(tagItems, { clearProps: "all", autoAlpha: 1 });
       }
 
-      // ---------- HOVER: lift + tilt (tipo NavBar) ----------
       if (canHover && !prefersReduced) {
         const cleanups = [];
 
         cards.forEach((card, idx) => {
           const dir = idx % 2 === 0 ? -1 : 1;
-          const MAX_TILT = 7; // grados
+          const MAX_TILT = 7;
           const Z_BASE = dir * 1.5;
 
           gsap.set(card, {
@@ -198,8 +202,8 @@ export default function FeaturedWork({
 
           const move = (e) => {
             const r = card.getBoundingClientRect();
-            const px = (e.clientX - r.left) / r.width; // 0..1
-            const py = (e.clientY - r.top) / r.height; // 0..1
+            const px = (e.clientX - r.left) / r.width;
+            const py = (e.clientY - r.top) / r.height;
             const rotY = (px - 0.5) * (MAX_TILT * 2);
             const rotX = -(py - 0.5) * (MAX_TILT * 2);
 
@@ -255,6 +259,8 @@ export default function FeaturedWork({
                   href={hrefResolved}
                   aria-label={work.title}
                   data-cursor="blue"
+                  target={isExternal(work.href) ? "_blank" : undefined}
+                  rel={isExternal(work.href) ? "noreferrer" : undefined}
                 >
                   <div className="awk-work__media">
                     <img src={withBase(work.image)} alt="" loading="lazy" />

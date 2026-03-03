@@ -17,7 +17,7 @@
   background:var(--ctc-bg);
   color:var(--ctc-ink);
   font-family:var(--font-alt,system-ui);
-  padding:clamp(40px,6vw,80px) clamp(16px,4vw,80px);
+
 }
 
 .ctc__inner{
@@ -236,15 +236,19 @@
 }
 
 @media (max-width:980px){
+
   .ctc__grid{
     grid-template-columns:1fr;
     max-width:560px;
     row-gap:44px;
-    margin-top:48px;
+    margin:48px auto 0;
   }
 
   .ctc__cell{
     min-height:auto;
+    width:100%;
+    justify-self:center;
+    text-align:center;
   }
 
   .ctc__cell--leftTop,
@@ -252,36 +256,49 @@
   .ctc__cell--leftBottom,
   .ctc__cell--rightBottom{
     grid-column:1;
-    justify-self:stretch;
     width:100%;
+    justify-self:center;
     padding-top:0;
   }
 
   .ctc__cell--leftBottom{
     justify-content:flex-start;
     gap:14px;
+    align-items:center;
   }
 
-  .ctc__q--ready{
-    margin-top:14px;
+  .ctc__q,
+  .ctc__hint{
+    text-align:center;
+  }
+
+  .ctc__services{
+    align-items:center;
+    justify-content:center;
+  }
+
+  .ctc__svc{
+    text-align:center;
   }
 
   .ctc__form{
     align-items:center;
+    width:100%;
   }
 
   .ctc__field{
-    width:100%;
+    width:70%;
     align-items:center;
   }
 
   .ctc__label{
-    width:min(520px,100%);
+    width:100%;
     text-align:center;
   }
 
   .ctc__input{
-    width:min(520px,100%);
+    width:100%;
+    max-width:520px;
     text-align:center;
   }
 
@@ -294,34 +311,15 @@
     justify-content:center;
   }
 
+  /* botón LET’S TALK mejor centrado real */
   .ctc__letsTalk{
-    position:absolute;
-    left:20%;
-    top:88%;
-    transform:translateX(clamp(120px,22vw,320px)) rotateZ(-8deg);
-    width:clamp(160px,18vw,100px);
-    height:clamp(38px,4.2vw,26px);
-    display:grid;
-    place-items:center;
-    background:var(--ctc-blue);
-    color:#fff;
-    text-decoration:none;
-    padding:5px;
-    box-shadow:0 18px 60px rgba(0,0,0,.22);
-    font-family:var(--font-dm);
-    font-size:clamp(18px,1.4vw,2px);
-    letter-spacing:.16em;
-    line-height:1.05;
-    text-transform:uppercase;
-    text-align:center;
-    transform-origin:50% 50%;
-    will-change:transform,opacity;
-    backface-visibility:hidden;
-    z-index:9;
+    left:50%;
+    top:90%;
+    transform:translateX(-50%) rotateZ(-8deg);
+    width:clamp(140px,50vw,200px);
+    height:42px;
+    font-size:14px;
   }
-  .ctc__services{
-    gap:8px;
-  justify-content: center;}
 }
 
 @media (max-width:420px){

@@ -1,4 +1,3 @@
-// src/pages/Work/Work.jsx
 import { useLayoutEffect, useMemo, useRef } from "react";
 import gsap from "gsap";
 import "./Work.css";
@@ -7,22 +6,56 @@ const withBase = (p) =>
   `${import.meta.env.BASE_URL}${String(p || "").replace(/^\/+/, "")}`;
 
 const PROJECTS = [
-  { title: "EDDING", image: "images/portfolio/PORTADAS-01.jpg" },
-  { title: "MOTION CLINIC", image: "images/portfolio/PORTADAS-02.jpg" },
-  { title: "HUSQVARNA", image: "images/portfolio/PORTADAS-03.jpg" },
-  { title: "CRAFT", image: "images/portfolio/PORTADAS-04.jpg" },
-  { title: "UNICEF", image: "images/portfolio/PORTADAS-05.jpg" },
-  { title: "VESPA", image: "images/portfolio/PORTADAS-06.jpg" },
-  { title: "MOTOGUZZI", image: "images/portfolio/PORTADAS-07.jpg" },
-  { title: "LA SATURNALIA", image: "images/portfolio/PORTADAS-08.jpg" },
-  { title: "SIERRA DE LOS PADRES", image: "images/portfolio/PORTADAS-09.jpg" },
-  { title: "MISTER TRAPO", image: "images/portfolio/PORTADAS-10.jpg" },
-  { title: "FUNDACION PADRES", image: "images/portfolio/PORTADAS-11.jpg" },
-  { title: "SOLVAY", image: "images/portfolio/PORTADAS-12.jpg" },
-  { title: "NATURA AGD", image: "images/portfolio/PORTADAS-13.jpg" },
-  { title: "THE HIVE", image: "images/portfolio/PORTADAS-14.jpg" },
-  { title: "ROWER", image: "images/portfolio/PORTADAS-15.jpg" },
-  { title: "SEMANA DEL DESCANSO", image: "images/portfolio/PORTADAS-16.jpg" },
+  {
+    title: "EDDING",
+    image: "images/portfolio/PORTADAS work_EDDING-06.png",
+    link: "https://www.behance.net/gallery/193917203/Edding-144-La-linea-que-mas-importa",
+  },
+  {
+    title: "MOTION CLINIC",
+    image: "images/portfolio/PORTADAS work_MOTION CLINIC.png",
+    link: "https://www.behance.net/gallery/240536097/Motion-Clinic-Creative-Code",
+  },
+  {
+    title: "HUSQVARNA",
+    image: "images/portfolio/PORTADAS work_HUSQVARNA.png",
+    link: "https://www.behance.net/gallery/190744185/Husqvarna-One-of-a-Kind",
+  },
+  {
+    title: "CRAFT",
+    image: "images/portfolio/PORTADAS work_CRAFT.png",
+    link: "https://www.behance.net/sebastianlinck",
+  },
+  {
+    title: "UNICEF",
+    image: "images/portfolio/PORTADAS work_UNICEF.png",
+    link: "https://www.behance.net/gallery/213046593/UNICEF-Alimentos-Imposibles-IA",
+  },
+  {
+    title: "MOTOGUZZI",
+    image: "images/portfolio/PORTADAS work_MOTO GUZZI.png",
+    link: "https://www.behance.net/gallery/193933655/MotoGuzzi-Catering",
+  },
+  {
+    title: "LA SATURNALIA",
+    image: "images/portfolio/PORTADAS work_LA SATURNALIA.png",
+    link: "https://www.behance.net/sebastianlinck",
+  },
+  {
+    title: "MISTER TRAPO",
+    image: "images/portfolio/PORTADAS work_MISTER TRAPO.png",
+    link: "https://www.behance.net/gallery/193912869/Mr-Trapo-Paso-A-Paso",
+  },
+  {
+    title: "SOLVAY",
+    image: "images/portfolio/PORTADAS work_SOVAY.png",
+    link: "https://www.behance.net/gallery/241741629/Solvay",
+  },
+  {
+    title: "THE HIVE",
+    image: "images/portfolio/PORTADAS work_THE HIVE.png",
+    link: "https://www.behance.net/sebastianlinck",
+  },
 ];
 
 export default function Work({ projects = PROJECTS }) {
@@ -41,10 +74,7 @@ export default function Work({ projects = PROJECTS }) {
   }, [projects]);
 
   useLayoutEffect(() => {
-    // =============================
-    // NAV THEME FOR THIS PAGE
-    // =============================
-    const NAV_THEME = "is-nav-blue"; // o "is-hero-blue"
+    const NAV_THEME = "is-nav-blue";
     document.documentElement.classList.add(NAV_THEME);
     return () => document.documentElement.classList.remove(NAV_THEME);
   }, []);
@@ -70,14 +100,11 @@ export default function Work({ projects = PROJECTS }) {
 
     let snapTween = null;
 
-    // ✅ control discreto por índice
     let idx = 0;
 
-    // wheel/trackpad
     let wheelAcc = 0;
     let wheelCooldown = 0;
 
-    // touch
     let touching = false;
     let lastY = 0;
     let touchAcc = 0;
@@ -94,9 +121,7 @@ export default function Work({ projects = PROJECTS }) {
       if (a && b) {
         const ra = a.getBoundingClientRect();
         const rb = b.getBoundingClientRect();
-        const d = Math.abs(
-          (rb.top + rb.height / 2) - (ra.top + ra.height / 2)
-        );
+        const d = Math.abs((rb.top + rb.height / 2) - (ra.top + ra.height / 2));
         if (d > 10) stepPx = d;
       }
     };
@@ -111,7 +136,6 @@ export default function Work({ projects = PROJECTS }) {
       const project = data[i];
       if (!project) return;
 
-      // Active clear, others subtle blur
       if (!prefersReduced) {
         itemRefs.current.forEach((el, k) => {
           if (!el) return;
@@ -128,7 +152,6 @@ export default function Work({ projects = PROJECTS }) {
         });
       }
 
-      // Preview crossfade
       const nextSrc = withBase(project.image);
       if (previewImg.getAttribute("data-src") === nextSrc) return;
       previewImg.setAttribute("data-src", nextSrc);
@@ -188,7 +211,6 @@ export default function Work({ projects = PROJECTS }) {
       if (best !== -1) setActive(best);
     };
 
-    // ✅ snap real a índice
     const goToIndex = (nextIdx, { immediate = false } = {}) => {
       idx = nextIdx;
       const snapped = indexToPx(idx);
@@ -256,16 +278,13 @@ export default function Work({ projects = PROJECTS }) {
 
     start();
 
-    // =============================
-    // ✅ WHEEL / TRACKPAD: pasos discretos
-    // =============================
-    const TRACKPAD_THRESHOLD = 42; // ajustá 32–55
-    const COOLDOWN_MS = 90; // ajustá 80–140
+    const TRACKPAD_THRESHOLD = 42;
+    const COOLDOWN_MS = 90;
 
     const onWheel = (e) => {
       e.preventDefault();
 
-      const mode = e.deltaMode || 0; // 0 px, 1 lines, 2 pages
+      const mode = e.deltaMode || 0;
       const linePx = stepPx;
       const deltaPx =
         mode === 1
@@ -281,9 +300,10 @@ export default function Work({ projects = PROJECTS }) {
 
       if (Math.abs(wheelAcc) >= TRACKPAD_THRESHOLD) {
         const dir = wheelAcc > 0 ? 1 : -1;
-
-        // trackpad -> normalmente 1 paso; rueda grande puede hacer 2–3
-        const steps = Math.min(3, Math.max(1, Math.round(Math.abs(wheelAcc) / 120)));
+        const steps = Math.min(
+          3,
+          Math.max(1, Math.round(Math.abs(wheelAcc) / 120))
+        );
 
         goToIndex(idx + dir * steps);
 
@@ -294,9 +314,6 @@ export default function Work({ projects = PROJECTS }) {
 
     viewport.addEventListener("wheel", onWheel, { passive: false });
 
-    // =============================
-    // ✅ TOUCH: también discreto
-    // =============================
     const TOUCH_THRESHOLD = () => Math.max(18, stepPx * 0.33);
 
     const onTouchStart = (e) => {
@@ -319,7 +336,6 @@ export default function Work({ projects = PROJECTS }) {
 
       const th = TOUCH_THRESHOLD();
       if (Math.abs(touchAcc) >= th) {
-        // dy negativo (sube dedo) -> avanzar
         const dir = touchAcc < 0 ? 1 : -1;
         goToIndex(idx + dir * 1);
         touchAcc = 0;
@@ -374,12 +390,15 @@ export default function Work({ projects = PROJECTS }) {
         <ul ref={trackRef} className="workLoopTrack">
           {data.map((p, i) => (
             <li key={i} className="workLoopItem">
-              <h3
+              <a
+                href={p.link}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="workLoopTitle"
                 ref={(el) => (itemRefs.current[i] = el)}
               >
                 {p.title}
-              </h3>
+              </a>
             </li>
           ))}
         </ul>

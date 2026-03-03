@@ -6,6 +6,7 @@
   background:#121212;
   padding:clamp(40px,8vw,120px) clamp(16px,4vw,64px);
   box-sizing:border-box;
+  text-align: center;
 }
 
 .awkLinks__row{
@@ -28,6 +29,7 @@
   box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);
   overflow:hidden;
   will-change:transform,box-shadow;
+   text-align: left;
 }
 
 .awkLinkCard__inner{
@@ -68,7 +70,7 @@
 }
 
 .awk-footer{
-  margin-top:clamp(18px,3vw,28px);
+  margin-top: 200px;
 }
 
 .awk-footer--black{
@@ -171,4 +173,5 @@
     color: white;
     text-decoration: underline;
     margin-left: 10px;
+    text-align: center;
     }

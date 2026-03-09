@@ -2,6 +2,9 @@ import { useLayoutEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import "./Loader.css";
 
+import loaderDesktop from "../../assets/loader.mp4";
+import loaderMobile from "../../assets/loader-mobile.mp4";
+
 const HERO_BOOT_KEY = "AWK_HERO_BOOTED";
 const AWK_NAV_KIND = "AWK_NAV_KIND";
 
@@ -20,35 +23,15 @@ function navType() {
   }
 }
 
-async function waitFonts(timeoutMs = 1200) {
-  try {
-    if (!document.fonts?.ready) return;
-    await Promise.race([
-      document.fonts.ready,
-      new Promise((res) => setTimeout(res, timeoutMs)),
-    ]);
-  } catch (_) {}
-}
-
-export default function Loader({
-  text = "AWAKE",
-  minShowMs = 1200,
-  introStagger = 0.06,
-  introDuration = 0.55,
-  deleteDelay = 0.10,
-  deleteDuration = 0.22,
-  joinDuration = 0.45,
-  curtainDelay = 0.18,
-  curtainDuration = 0.9,
-  curtainEase = "expo.inOut",
-  fadeOut = 0.12,
-}) {
+export default function Loader() {
   const rootRef = useRef(null);
+  const videoRef = useRef(null);
   const [done, setDone] = useState(false);
 
   useLayoutEffect(() => {
     const root = rootRef.current;
-    if (!root) return;
+    const video = videoRef.current;
+    if (!root || !video) return;
 
     const html = document.documentElement;
     const body = document.body;
@@ -61,18 +44,23 @@ export default function Loader({
     };
 
     const finish = () => {
-      gsap.set(root, { autoAlpha: 0, pointerEvents: "none" });
-      cleanupUnlock();
-      setDone(true);
+      gsap.to(root, {
+        autoAlpha: 0,
+        duration: 0.2,
+        onComplete: () => {
+          cleanupUnlock();
+          setDone(true);
 
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          window.__AWK_LOADED__ = true;
-          try {
-            window.ScrollTrigger?.refresh?.(true);
-          } catch (_) {}
-          window.dispatchEvent(new CustomEvent("awk:loaded"));
-        });
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              window.__AWK_LOADED__ = true;
+              try {
+                window.ScrollTrigger?.refresh?.(true);
+              } catch (_) {}
+              window.dispatchEvent(new CustomEvent("awk:loaded"));
+            });
+          });
+        },
       });
     };
 
@@ -102,151 +90,37 @@ export default function Loader({
     body.style.overflow = "hidden";
     body.style.touchAction = "none";
 
-    const word = root.querySelector(".loader__word");
-    const letters = Array.from(root.querySelectorAll(".loader__letter"));
-    const curtain = root.querySelector(".loader__curtain");
-
-    if (!word || !letters.length || !curtain) {
+    const handleEnd = () => {
       finish();
-      return;
-    }
+    };
 
-    const midA = letters[2];
-    const lastE = letters[letters.length - 1];
+    video.addEventListener("ended", handleEnd);
 
-    const keepA = letters[0];
-    const keepW = letters[1];
-    const keepK = letters[3];
-    const keep = [keepA, keepW, keepK].filter(Boolean);
-    const remove = [midA, lastE].filter(Boolean);
-
-    const ctx = gsap.context(() => {
-      gsap.set(word, { autoAlpha: 0 });
-      gsap.set(curtain, { yPercent: 100, autoAlpha: 1 });
-
-      gsap.set(letters, {
-        autoAlpha: 0,
-        yPercent: 90,
-        rotateX: -55,
-        transformPerspective: 900,
-        transformOrigin: "50% 100%",
-        filter: "blur(10px)",
-        willChange: "transform, opacity, filter",
-      });
-
-      const startAt = performance.now();
-
-      const tl = gsap.timeline({
-        defaults: { ease: "expo.out" },
-        onComplete: finish,
-        onInterrupt: finish,
-      });
-
-      tl.add(() => {
-        waitFonts(1400).then(() => gsap.set(word, { autoAlpha: 1 }));
-      }, 0);
-
-      tl.to(
-        letters,
-        {
-          autoAlpha: 1,
-          yPercent: 0,
-          rotateX: 0,
-          filter: "blur(0px)",
-          duration: introDuration,
-          stagger: { each: introStagger, from: "start" },
-        },
-        0.02
-      );
-
-      tl.add(() => {
-        const elapsed = performance.now() - startAt;
-        const remaining = Math.max(0, minShowMs - elapsed);
-        if (remaining > 0) tl.to({}, { duration: remaining / 1000, ease: "none" });
-      }, ">");
-
-      tl.to(
-        remove,
-        {
-          autoAlpha: 0,
-          yPercent: -18,
-          filter: "blur(12px)",
-          duration: deleteDuration,
-          ease: "power2.inOut",
-        },
-        `>+=${deleteDelay}`
-      );
-
-      tl.add(() => {
-        if (keep.length !== 3) return;
-
-        const first = keep.map((el) => el.getBoundingClientRect());
-
-        remove.forEach((el) => {
-          if (!el) return;
-          el.style.display = "none";
-        });
-
-        void word.offsetWidth;
-
-        const last = keep.map((el) => el.getBoundingClientRect());
-
-        keep.forEach((el, i) => {
-          const dx = first[i].left - last[i].left;
-          const dy = first[i].top - last[i].top;
-          gsap.set(el, { x: dx, y: dy });
-        });
-
-        gsap.to(keep, {
-          x: 0,
-          y: 0,
-          duration: joinDuration,
-          ease: "expo.inOut",
-          overwrite: true,
-        });
-      }, ">-=0.02");
-
-      tl.to({}, { duration: curtainDelay, ease: "none" }, ">");
-      tl.to(curtain, { yPercent: 0, duration: curtainDuration, ease: curtainEase }, ">");
-      tl.to(root, { autoAlpha: 0, duration: fadeOut, ease: "none" }, ">-=0.06");
-
-      return () => tl.kill();
-    }, root);
+    video.play().catch(() => {
+      finish();
+    });
 
     return () => {
-      ctx.revert();
+      video.removeEventListener("ended", handleEnd);
       cleanupUnlock();
     };
-  }, [
-    text,
-    minShowMs,
-    introStagger,
-    introDuration,
-    deleteDelay,
-    deleteDuration,
-    joinDuration,
-    curtainDelay,
-    curtainDuration,
-    curtainEase,
-    fadeOut,
-  ]);
+  }, []);
 
   if (done) return null;
 
   return (
-    <div ref={rootRef} className="loader" aria-label="Loading" role="status">
-      <div className="loader__word" aria-hidden="true">
-        {String(text)
-          .toUpperCase()
-          .split("")
-          .map((ch, i) => (
-            <span key={i} className="loader__letter">
-              {ch}
-            </span>
-          ))}
-      </div>
-
-      <div className="loader__curtain" aria-hidden="true" />
+    <div ref={rootRef} className="loader">
+      <video
+        ref={videoRef}
+        className="loader__video"
+        autoPlay
+        muted
+        playsInline
+        preload="auto"
+      >
+        <source src={loaderDesktop} media="(min-width:768px)" type="video/mp4" />
+        <source src={loaderMobile} media="(max-width:767px)" type="video/mp4" />
+      </video>
     </div>
   );
 }

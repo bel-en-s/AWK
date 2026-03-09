@@ -238,7 +238,6 @@ export default function Contact() {
             <div className="ctc__hint">Choose as many as you like</div>
           </div>
 
-          {/* Row 1 - Right */}
           <div className="ctc__cell ctc__cell--rightTop">
             <div className="ctc__services" role="group" aria-label="Services">
               {services.map((s) => {
@@ -258,13 +257,12 @@ export default function Contact() {
             </div>
           </div>
 
-          {/* Row 2 - Left */}
+  
           <div className="ctc__cell ctc__cell--leftBottom">
             <div className="ctc__q">HOW CAN WE CONTACT YOU?</div>
             <div className="ctc__q ctc__q--ready">READY TO GO?</div>
           </div>
 
-          {/* Row 2 - Right */}
           <aside className="ctc__cell ctc__cell--rightBottom">
             <form className="ctc__form" onSubmit={onSubmit}>
               <label className="ctc__field">

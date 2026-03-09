@@ -10,7 +10,6 @@ const BG_MAP = {
   dark: "#121212",
 };
 
-
 const withBase = (p) =>
   `${import.meta.env.BASE_URL}${String(p || "").replace(/^\/+/, "")}`;
 
@@ -21,15 +20,14 @@ export default function Footer({ bg = "light" }) {
   const gifRef = useRef(null);
 
   const gifSrc = useMemo(() => {
-  if (typeof window !== "undefined") {
-    const isMobile = window.matchMedia("(max-width: 768px)").matches;
-    return withBase(
-      isMobile ? "images/footer-mobile.gif" : "images/footer.gif"
-    );
-  }
-
-  return withBase("images/footer.gif");
-}, []);
+    if (typeof window !== "undefined") {
+      const isMobile = window.matchMedia("(max-width: 768px)").matches;
+      return withBase(
+        isMobile ? "images/footer-mobile.gif" : "images/footer.gif"
+      );
+    }
+    return withBase("images/footer.gif");
+  }, []);
 
   useLayoutEffect(() => {
     const root = footerRef.current;
@@ -45,7 +43,6 @@ export default function Footer({ bg = "light" }) {
         return;
       }
 
-      // Estado inicial (sutil)
       gsap.set(gif, {
         autoAlpha: 0,
         y: -18,
@@ -55,16 +52,13 @@ export default function Footer({ bg = "light" }) {
         willChange: "transform,opacity,filter",
       });
 
-      // Entrada + micro parallax integrado (no mecánico)
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: root,
           start: "top 92%",
           end: "top 55%",
           scrub: 0.7,
-          invalidateOnRefresh: true,
         },
-        defaults: { ease: "none" },
       });
 
       tl.to(gif, {
@@ -73,29 +67,6 @@ export default function Footer({ bg = "light" }) {
         scale: 1,
         filter: "blur(0px)",
       });
-
-      const refreshNow = () => {
-        ScrollTrigger.sort();
-        ScrollTrigger.refresh(true);
-      };
-
-      let raf1 = 0;
-      let raf2 = 0;
-
-      raf1 = requestAnimationFrame(() => {
-        raf2 = requestAnimationFrame(() => refreshNow());
-      });
-
-      const onAstroAfterSwap = () => refreshNow();
-      window.addEventListener("astro:after-swap", onAstroAfterSwap);
-
-      return () => {
-        cancelAnimationFrame(raf1);
-        cancelAnimationFrame(raf2);
-        window.removeEventListener("astro:after-swap", onAstroAfterSwap);
-        tl.scrollTrigger?.kill(false);
-        tl.kill();
-      };
     }, root);
 
     return () => ctx.revert();
@@ -109,22 +80,21 @@ export default function Footer({ bg = "light" }) {
       role="contentinfo"
     >
       <div className="awakeFooter__inner">
-    
         <div className="awakeFooter__hero" aria-label="Stay Awake">
-  <picture>
-    <source
-      media="(max-width: 768px)"
-      srcSet={withBase("images/footer-mobile.gif")}
-    />
-    <img
-      ref={gifRef}
-      className="awakeFooter__heroGif"
-      src={withBase("images/footer.gif")}
-      alt="Stay Awake"
-      loading="eager"
-      decoding="async"
-    />
-  </picture>
+          <picture>
+            <source
+              media="(max-width: 768px)"
+              srcSet={withBase("images/footer-mobile.gif")}
+            />
+            <img
+              ref={gifRef}
+              className="awakeFooter__heroGif"
+              src={withBase("images/footer.gif")}
+              alt="Stay Awake"
+              loading="eager"
+              decoding="async"
+            />
+          </picture>
         </div>
 
         <div className="awakeFooter__bottom">

@@ -57,10 +57,10 @@
   position: absolute;
   right: clamp(10px, 1.4vw, 16px);
   bottom: clamp(10px, 1.4vw, 16px);
-  width: clamp(30px, 3.2vw, 36px);
-  height: clamp(30px, 3.2vw, 36px);
+   width: clamp(50px, 3.2vw, 36px);  /* 
+  height: clamp(30px, 3.2vw, 36px); */
   border-radius: 999px;
-  background: rgba(255,255,255,0.92);
+  /* background: rgba(255,255,255,0.92); */
   display: grid;
   place-items: center;
   box-shadow: 0 10px 24px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(0,0,0,0.10);

@@ -265,8 +265,12 @@ export default function FeaturedWork({
                   <div className="awk-work__media">
                     <img src={withBase(work.image)} alt="" loading="lazy" />
                     <span className="awk-work__arrowBtn" aria-hidden="true">
-                      <span className="awk-work__arrowIco">›</span>
-                    </span>
+  <img
+    className="awk-work__arrowIco"
+    src={withBase("images/flecha-light.png")}
+    alt=""
+  />
+</span>
                   </div>
 
                   <ul

@@ -5,13 +5,23 @@ import FeaturedWork from "../components/FeaturedWork.jsx";
 import Footer from "../components/global/Footer.jsx";
 import FeaturedLinks from "../components/FeaturedLinks.jsx";
 import InfiniteLogoMarquee from "../components/UI/InfiniteLogoMarquee.jsx";
-import Services from "../components/Services";
+import Services from "../components/Services.jsx";
+import ClientCTA from "../components/ClientCTA.jsx";
 ---
 
 <Layout title="AWK" desc="Landing animada con Astro + React + GSAP">
+
   <Hero client:visible />
+
+  <!-- Mobile services -->
+  <div class="mobile-services">
+    <Services client:visible />
+  </div>
+
   <FeaturedWork client:visible />
   <InfiniteLogoMarquee client:visible bg="dark" fade />
   <FeaturedLinks client:visible />
+  <ClientCTA />
   <Footer client:visible />
+
 </Layout>

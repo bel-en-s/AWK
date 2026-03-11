@@ -1,5 +1,5 @@
 // Hero.jsx
-import { useLayoutEffect, useMemo, useRef } from "react";
+import { useLayoutEffect, useMemo, useRef, useEffect, useState} from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -13,6 +13,8 @@ gsap.registerPlugin(ScrollTrigger);
 const ST_ID = "awk-hero-pin";
 const TITLE_ST_ID = "awk-hero-title";
 const RESIZE_DEBOUNCE = 120;
+
+
 
 function getUAFlags() {
   if (typeof window === "undefined")
@@ -42,6 +44,20 @@ export default function Hero() {
   const titleRef = useRef(null);
   const midRef = useRef(null);
   const talkRef = useRef(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+useEffect(() => {
+  const check = () => {
+    setIsMobile(
+      window.matchMedia("(max-width: 920px)").matches ||
+      window.matchMedia("(pointer: coarse)").matches
+    );
+  };
+
+  check();
+  window.addEventListener("resize", check);
+  return () => window.removeEventListener("resize", check);
+}, []);
 
   const typeIntroPlayedRef = useRef(false);
   const titleIntroPlayedRef = useRef(false);
@@ -400,7 +416,10 @@ export default function Hero() {
           id: ST_ID,
           trigger: heroEl,
           start: "top top",
-          end: () => `+=${Math.round(stableVH * 1.35 + getDist())}`,
+          end: () =>
+    isMobile
+      ? `+=${Math.round(stableVH * 0.6)}`
+      : `+=${Math.round(stableVH * 1.35 + getDist())}`,
           scrub: isMobile ? 0.35 : 0.9,
           pin: true,
           pinSpacing: true,
@@ -511,68 +530,67 @@ export default function Hero() {
         );
       }
 
-      if (title || midEl || talkEl) {
-        tl.to([title, midEl, talkEl].filter(Boolean), { autoAlpha: 0, duration: 0.2 }, 0.25);
-      }
+     if (!isMobile && (title || midEl || talkEl)) {
+  tl.to(
+    [title, midEl, talkEl].filter(Boolean),
+    { autoAlpha: 0, duration: 0.2 },
+    0.25
+  );
+}
 
-      if (hasServices) {
-        tl.to(
-          bg,
-          {
-            backgroundColor: "var(--svc-blue, #0A25FF)",
-            duration: 0.14,
-            immediateRender: false,
-          },
-          0.32
-        );
-        tl.to(svc, { autoAlpha: 1, duration: 0.12 }, 0.4);
-        tl.set(svc, { pointerEvents: "auto" }, 0.42);
+    if (hasServices && !isMobile) {
+  tl.to(
+    bg,
+    {
+      backgroundColor: "var(--svc-blue, #0A25FF)",
+      duration: 0.14,
+      immediateRender: false,
+    },
+    0.32
+  );
 
-        // ✅ MOBILE: bg queda visible (fondo azul). ocultamos card si querés.
-        if (isMobile) {
-          tl.to(card, { autoAlpha: 0, duration: 0.18 }, 0.44);
-          tl.set(card, { pointerEvents: "none" }, 0.44);
-        }
+  tl.to(svc, { autoAlpha: 1, duration: 0.12 }, 0.4);
+  tl.set(svc, { pointerEvents: "auto" }, 0.42);
 
-        if (!isMobile && svcIntroCard) {
-          const measureTarget = () => svcIntroCard.getBoundingClientRect();
+  if (svcIntroCard) {
+    const measureTarget = () => svcIntroCard.getBoundingClientRect();
 
-          tl.to(
-            card,
-            {
-              left: () => Math.round(measureTarget().left),
-              top: () => Math.round(measureTarget().top),
-              width: "clamp(320px, 28vw, 400px)",
-              height: "70vh",
-              backgroundColor: "#fff",
-              color: "#000",
-              boxShadow: "0 18px 50px rgba(0,0,0,0.18)",
-              duration: 0.34,
-            },
-            0.18
-          );
+    tl.to(
+      card,
+      {
+        left: () => Math.round(measureTarget().left),
+        top: () => Math.round(measureTarget().top),
+        width: "clamp(320px, 28vw, 400px)",
+        height: "70vh",
+        backgroundColor: "#fff",
+        color: "#000",
+        boxShadow: "0 18px 50px rgba(0,0,0,0.18)",
+        duration: 0.34,
+      },
+      0.18
+    );
 
-          if (svcMask) {
-            tl.to(
-              svcMask,
-              {
-                scaleX: 1,
-                duration: 0.34,
-              },
-              0.18
-            );
-          }
-        }
+    if (svcMask) {
+      tl.to(
+        svcMask,
+        {
+          scaleX: 1,
+          duration: 0.34,
+        },
+        0.18
+      );
+    }
+  }
 
-        tl.to(
-          svcRow,
-          {
-            x: () => -getDist(),
-            duration: 0.75,
-          },
-          0.6
-        );
-      }
+  tl.to(
+    svcRow,
+    {
+      x: () => -getDist(),
+      duration: 0.75,
+    },
+    0.6
+  );
+}
     };
 
     // =========================
@@ -693,7 +711,23 @@ export default function Hero() {
         LET&apos;S TALK
       </a>
 
-      <Services inHero />
+      {isMobile && (
+  <div className="hero-scrollHint" aria-hidden="true">
+    <svg width="26" height="26" viewBox="0 0 24 24">
+      <path
+        d="M6 9l6 6 6-6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  </div>
+)}
+
+      {!isMobile && <Services inHero />}
+      
     </section>
   );
 }

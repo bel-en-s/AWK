@@ -322,7 +322,11 @@
   }
 }
 
-@media (max-width:420px){
+@media (max-width:820px){
   .ctc__services{gap:8px;}
   .ctc__svc{padding:9px 12px;font-size:14px;}
+    .ctc__letsTalk{
+padding: 0px;
+  }
 }
+

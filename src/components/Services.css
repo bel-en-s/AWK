@@ -89,3 +89,35 @@
 background-color: red;
 z-index: 100000000000000000;
 }
+
+
+@media (max-width: 920px) {
+
+  .svc {
+    overflow: visible;
+  }
+
+  .svc-track {
+    position: relative;
+    top: auto;
+
+    display: block;
+    padding: 0 20px;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x;
+          transform: translateY(10%);
+  }
+
+  .svc-row {
+    display: flex;
+    gap: 16px;
+    padding-right: 20px;
+
+    width: max-content;
+  }
+
+}

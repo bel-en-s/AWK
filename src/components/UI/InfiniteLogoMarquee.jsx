@@ -1,7 +1,6 @@
 import { useLayoutEffect, useRef } from "react";
 import "./InfiniteLogoMarquee.css";
 
-// light: SIN fondo
 const BG_MAP = { light: "transparent", dark: "#121212" };
 
 export default function InfiniteLogoMarquee({
@@ -9,14 +8,12 @@ export default function InfiniteLogoMarquee({
   alt = "Logo strip",
   height = "clamp(46px, 6vw, 76px)",
   bg = "light",
-  speed = 10,            // segundos por vuelta
+  speed = 10,
   gap = 56,
-  direction = "left",    // left | right
+  direction = "left",
   fade = false,
   pauseOnHover = false,
   className = "",
-  // ✅ extra: ajustá visibilidad en light sin tocar el PNG
-  // valores razonables para que se lea sobre fondos claros
   lightFilter = "brightness(0.15) contrast(1.15)",
 }) {
   const rootRef = useRef(null);
@@ -70,15 +67,18 @@ export default function InfiniteLogoMarquee({
       singleWidth = computeWidth(originals);
       if (!singleWidth) return;
 
-      const target = viewport.clientWidth * 2 + singleWidth;
+      const vw = viewport.clientWidth || window.innerWidth;
+      const target = vw * 2 + singleWidth;
 
       let safety = 0;
+
       while (track.scrollWidth < target && safety++ < 80) {
         originals.forEach((s) => {
           const cl = s.cloneNode(true);
           cl.setAttribute("data-clone", "true");
           track.appendChild(cl);
         });
+        track.getBoundingClientRect();
       }
 
       x = 0;
@@ -113,6 +113,7 @@ export default function InfiniteLogoMarquee({
       if (!pauseOnHover) return;
       paused = true;
     };
+
     const onLeave = () => {
       if (!pauseOnHover) return;
       paused = false;
@@ -125,16 +126,29 @@ export default function InfiniteLogoMarquee({
     }
 
     const img = track.querySelector("img");
-    const start = () => requestAnimationFrame(() => requestAnimationFrame(build));
 
-    if (img && !img.complete) img.addEventListener("load", start, { once: true });
-    else start();
+    const start = () =>
+      requestAnimationFrame(() => requestAnimationFrame(build));
+
+    if (img) {
+      if (img.decode) {
+        img.decode().then(start).catch(start);
+      } else if (!img.complete) {
+        img.addEventListener("load", start, { once: true });
+      } else {
+        start();
+      }
+    } else {
+      start();
+    }
 
     let to = 0;
+
     const onResize = () => {
       clearTimeout(to);
       to = window.setTimeout(() => build(), 150);
     };
+
     window.addEventListener("resize", onResize);
 
     return () => {

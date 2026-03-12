@@ -308,19 +308,26 @@ useEffect(() => {
         introTl.add(buildScrollOut, ">");
       };
 
-      if (window.__AWK_LOADED__ === true) {
-        requestAnimationFrame(() =>
-          requestAnimationFrame(runIntroOnce)
-        );
-      } else {
-        const onLoaded = () => {
-          window.removeEventListener("awk:loaded", onLoaded);
-          requestAnimationFrame(() =>
-            requestAnimationFrame(runIntroOnce)
-          );
-        };
-        window.addEventListener("awk:loaded", onLoaded, { once: true });
-      }
+if (isMobile) {
+  // en mobile ejecuta siempre el intro
+  requestAnimationFrame(() =>
+    requestAnimationFrame(runIntroOnce)
+  );
+} else {
+  if (window.__AWK_LOADED__ === true) {
+    requestAnimationFrame(() =>
+      requestAnimationFrame(runIntroOnce)
+    );
+  } else {
+    const onLoaded = () => {
+      window.removeEventListener("awk:loaded", onLoaded);
+      requestAnimationFrame(() =>
+        requestAnimationFrame(runIntroOnce)
+      );
+    };
+    window.addEventListener("awk:loaded", onLoaded, { once: true });
+  }
+}
     };
 
     setupTitleIntroAndST();

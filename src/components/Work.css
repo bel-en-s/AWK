@@ -184,3 +184,8 @@
     height: clamp(100px, 20vh, 220px);
   }
 }
+
+.workLoopTrack {
+  will-change: transform;
+  transform: translateZ(0);
+}

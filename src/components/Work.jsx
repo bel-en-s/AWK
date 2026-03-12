@@ -273,7 +273,13 @@ export default function Work({ projects = PROJECTS }) {
       }
 
       raf = requestAnimationFrame(tick);
-      requestAnimationFrame(() => pickClosestToCenter());
+      requestAnimationFrame(() => {
+        pickClosestToCenter();
+
+        if (activeIndexRef.current === -1) {
+          setActive(1);
+        }
+      });
     };
 
     start();

@@ -70,11 +70,15 @@ export default function ClientCTA() {
         });
 
         const enter = () => {
+          console.log("mouseenter pill:", el.textContent);
+
           if (prefersReduced) return;
 
           gsap.to(el, {
             rotateZ: baseRot,
-            scale: 1.03,
+            rotateY: dir * 8,
+            rotateX: -4,
+            scale: 1.05,
             y: -1,
             duration: 0.32,
             ease: "expo.out",
@@ -82,6 +86,7 @@ export default function ClientCTA() {
           });
 
           wiggle?.kill();
+
           wiggle = gsap.to(el, {
             rotateZ: baseRot + dir * 2,
             duration: 0.85,
@@ -93,6 +98,8 @@ export default function ClientCTA() {
         };
 
         const leave = () => {
+          console.log("mouseleave pill:", el.textContent);
+
           if (prefersReduced) return;
 
           wiggle?.kill();
@@ -133,7 +140,7 @@ export default function ClientCTA() {
   }, []);
 
   return (
-    <footer ref={footerRef} className="awk-footer">
+    <section ref={footerRef} className="awk-footer">
       <div className="awk-footer__inner">
         <div className="awk-footer__top">
 
@@ -160,6 +167,6 @@ export default function ClientCTA() {
 
         </div>
       </div>
-    </footer>
+    </section>
   );
 }

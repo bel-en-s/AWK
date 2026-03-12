@@ -35,6 +35,8 @@ function fontsReady() {
     return Promise.resolve();
   }
 }
+const base = import.meta.env.BASE_URL || "/"; 
+
 
 export default function Hero() {
   const heroRef = useRef(null);
@@ -714,7 +716,7 @@ if (isMobile) {
   </p>
 </div>
 
-      <a ref={talkRef} className="hero-talk" href="#contact" aria-label="Let's talk">
+      <a ref={talkRef} className="hero-talk" aria-label="Let's talk" href={`${base}contact/`}>
         LET&apos;S TALK
       </a>
 

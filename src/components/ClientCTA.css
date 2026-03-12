@@ -1,24 +1,8 @@
-.awk-pill{
-  border:0;
-  cursor:pointer;
-  padding:14px 32px;
-  border-radius:999px;
-  background:#0A25FF;
-  color:#fff;
-  font-family:var(--font-dm);
-  font-size:clamp(18px,2.5vw,36px);
-  white-space:nowrap;
-  box-shadow:0 10px 26px rgba(0,0,0,.35);
-
-  display:inline-block; /* IMPORTANTE */
-  transform:translateZ(0); /* activa GPU */
-  transform-origin:center;
-}
-
 .awk-footer{
-  padding: 200px 0;
+  padding:200px 0;
   width:100%;
-  background-color: #111;
+  background:#111;
+  z-index: 100000000000000;
 }
 
 .awk-footer__inner{
@@ -33,12 +17,14 @@
   align-items:center;
   justify-content:center;
   flex-wrap:wrap;
+  perspective:800px;
 }
 
 .awk-ctaGroup{
   display:inline-flex;
   align-items:center;
   gap:12px;
+  text-decoration:none;
 }
 
 .awk-ctaLabel{
@@ -75,29 +61,14 @@
   font-size:clamp(18px,2.5vw,36px);
   white-space:nowrap;
   box-shadow:0 10px 26px rgba(0,0,0,.35);
+
+  display:inline-block;
+  transform-origin:center;
+  will-change:transform;
 }
-
-
-
 
 .awk-pill:link,
 .awk-pill:visited{
   text-decoration:none;
   color:#fff;
-}
-.awk-ctaLabel{
-  text-decoration:none;
-}
-.awk-ctaGroup{
-  display:inline-flex;
-  align-items:center;
-  gap:12px;
-  text-decoration:none;
-}
-
-.awk-ctaGroup:link,
-.awk-ctaGroup:visited,
-.awk-ctaGroup:hover,
-.awk-ctaGroup:active{
-  text-decoration:none;
 }

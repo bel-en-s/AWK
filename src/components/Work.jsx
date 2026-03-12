@@ -6,65 +6,23 @@ const withBase = (p) =>
   `${import.meta.env.BASE_URL}${String(p || "").replace(/^\/+/, "")}`;
 
 const PROJECTS = [
-  {
-    title: "EDDING",
-    image: "images/portfolio/PORTADAS work_EDDING-06.png",
-    link: "https://www.behance.net/gallery/193917203/Edding-144-La-linea-que-mas-importa",
-  },
-  {
-    title: "MOTION CLINIC",
-    image: "images/portfolio/PORTADAS work_MOTION CLINIC.png",
-    link: "https://www.behance.net/gallery/240536097/Motion-Clinic-Creative-Code",
-  },
-  {
-    title: "HUSQVARNA",
-    image: "images/portfolio/PORTADAS work_HUSQVARNA.png",
-    link: "https://www.behance.net/gallery/190744185/Husqvarna-One-of-a-Kind",
-  },
-  {
-    title: "CRAFT",
-    image: "images/portfolio/PORTADAS work_CRAFT.png",
-    link: "https://www.behance.net/sebastianlinck",
-  },
-  {
-    title: "UNICEF",
-    image: "images/portfolio/PORTADAS work_UNICEF.png",
-    link: "https://www.behance.net/gallery/213046593/UNICEF-Alimentos-Imposibles-IA",
-  },
-  {
-    title: "MOTOGUZZI",
-    image: "images/portfolio/PORTADAS work_MOTO GUZZI.png",
-    link: "https://www.behance.net/gallery/193933655/MotoGuzzi-Catering",
-  },
-  {
-    title: "LA SATURNALIA",
-    image: "images/portfolio/PORTADAS work_LA SATURNALIA.png",
-    link: "https://www.behance.net/sebastianlinck",
-  },
-  {
-    title: "MISTER TRAPO",
-    image: "images/portfolio/PORTADAS work_MISTER TRAPO.png",
-    link: "https://www.behance.net/gallery/193912869/Mr-Trapo-Paso-A-Paso",
-  },
-  {
-    title: "SOLVAY",
-    image: "images/portfolio/PORTADAS work_SOVAY.png",
-    link: "https://www.behance.net/gallery/241741629/Solvay",
-  },
-  {
-    title: "THE HIVE",
-    image: "images/portfolio/PORTADAS work_THE HIVE.png",
-    link: "https://www.behance.net/sebastianlinck",
-  },
+  { title: "EDDING", image: "images/portfolio/PORTADAS work_EDDING-06.png", link: "https://www.behance.net/gallery/193917203/Edding-144-La-linea-que-mas-importa" },
+  { title: "MOTION CLINIC", image: "images/portfolio/PORTADAS work_MOTION CLINIC.png", link: "https://www.behance.net/gallery/240536097/Motion-Clinic-Creative-Code" },
+  { title: "HUSQVARNA", image: "images/portfolio/PORTADAS work_HUSQVARNA.png", link: "https://www.behance.net/gallery/190744185/Husqvarna-One-of-a-Kind" },
+  { title: "CRAFT", image: "images/portfolio/PORTADAS work_CRAFT.png", link: "https://www.behance.net/sebastianlinck" },
+  { title: "UNICEF", image: "images/portfolio/PORTADAS work_UNICEF.png", link: "https://www.behance.net/gallery/213046593/UNICEF-Alimentos-Imposibles-IA" },
+  { title: "MOTOGUZZI", image: "images/portfolio/PORTADAS work_MOTO GUZZI.png", link: "https://www.behance.net/gallery/193933655/MotoGuzzi-Catering" },
+  { title: "LA SATURNALIA", image: "images/portfolio/PORTADAS work_LA SATURNALIA.png", link: "https://www.behance.net/sebastianlinck" },
+  { title: "MISTER TRAPO", image: "images/portfolio/PORTADAS work_MISTER TRAPO.png", link: "https://www.behance.net/gallery/193912869/Mr-Trapo-Paso-A-Paso" },
+  { title: "SOLVAY", image: "images/portfolio/PORTADAS work_SOVAY.png", link: "https://www.behance.net/gallery/241741629/Solvay" },
+  { title: "THE HIVE", image: "images/portfolio/PORTADAS work_THE HIVE.png", link: "https://www.behance.net/sebastianlinck" },
 ];
 
 export default function Work({ projects = PROJECTS }) {
   const viewportRef = useRef(null);
   const trackRef = useRef(null);
-
   const previewRef = useRef(null);
   const previewImgRef = useRef(null);
-
   const itemRefs = useRef([]);
   const activeIndexRef = useRef(-1);
 
@@ -74,9 +32,8 @@ export default function Work({ projects = PROJECTS }) {
   }, [projects]);
 
   useLayoutEffect(() => {
-    const NAV_THEME = "is-nav-blue";
-    document.documentElement.classList.add(NAV_THEME);
-    return () => document.documentElement.classList.remove(NAV_THEME);
+    document.documentElement.classList.add("is-nav-blue");
+    return () => document.documentElement.classList.remove("is-nav-blue");
   }, []);
 
   useLayoutEffect(() => {
@@ -87,24 +44,17 @@ export default function Work({ projects = PROJECTS }) {
 
     if (!viewport || !track || !preview || !previewImg) return;
 
-    const prefersReduced =
-      window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    const prefersReduced = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
 
     let raf = 0;
-
     let current = 0;
     let target = 0;
-
     let totalH = 1;
     let stepPx = 90;
-
     let snapTween = null;
-
     let idx = 0;
-
     let wheelAcc = 0;
     let wheelCooldown = 0;
-
     let touching = false;
     let lastY = 0;
     let touchAcc = 0;
@@ -124,6 +74,7 @@ export default function Work({ projects = PROJECTS }) {
         const d = Math.abs((rb.top + rb.height / 2) - (ra.top + ra.height / 2));
         if (d > 10) stepPx = d;
       }
+      console.log("stepPx", stepPx); // debug
     };
 
     const pxToIndex = (px) => -px / stepPx;
@@ -140,7 +91,6 @@ export default function Work({ projects = PROJECTS }) {
         itemRefs.current.forEach((el, k) => {
           if (!el) return;
           const isActive = k === i;
-
           gsap.to(el, {
             duration: 0.28,
             ease: "power2.out",
@@ -148,6 +98,7 @@ export default function Work({ projects = PROJECTS }) {
             opacity: isActive ? 0.98 : 0.55,
             filter: isActive ? "blur(0px)" : "blur(2px)",
             scale: isActive ? 1 : 0.995,
+            onStart: () => { el.style.transform = "translateZ(0)"; }, // force repaint
           });
         });
       }
@@ -163,7 +114,6 @@ export default function Work({ projects = PROJECTS }) {
       }
 
       gsap.killTweensOf(previewImg);
-
       gsap.to(previewImg, {
         autoAlpha: 0,
         scale: 1.02,
@@ -173,16 +123,9 @@ export default function Work({ projects = PROJECTS }) {
         onComplete: () => {
           previewImg.src = nextSrc;
           preview.classList.add("is-ready");
-
           const onLoad = () => {
             previewImg.removeEventListener("load", onLoad);
-            gsap.to(previewImg, {
-              autoAlpha: 1,
-              scale: 1,
-              duration: 0.42,
-              ease: "power2.out",
-              overwrite: "auto",
-            });
+            gsap.to(previewImg, { autoAlpha: 1, scale: 1, duration: 0.42, ease: "power2.out", overwrite: "auto" });
           };
           previewImg.addEventListener("load", onLoad, { once: true });
         },
@@ -190,12 +133,9 @@ export default function Work({ projects = PROJECTS }) {
     };
 
     const pickClosestToCenter = () => {
-      const centerY =
-        viewport.getBoundingClientRect().top + viewport.clientHeight / 2;
-
+      const centerY = viewport.getBoundingClientRect().top + viewport.clientHeight / 2;
       let best = -1;
       let bestDist = Infinity;
-
       const els = itemRefs.current;
       for (let i = 0; i < els.length; i++) {
         const el = els[i];
@@ -203,18 +143,15 @@ export default function Work({ projects = PROJECTS }) {
         const r = el.getBoundingClientRect();
         const mid = r.top + r.height / 2;
         const d = Math.abs(mid - centerY);
-        if (d < bestDist) {
-          bestDist = d;
-          best = i;
-        }
+        if (d < bestDist) { bestDist = d; best = i; }
       }
       if (best !== -1) setActive(best);
+      console.log("activeIndex", activeIndexRef.current); // debug
     };
 
     const goToIndex = (nextIdx, { immediate = false } = {}) => {
       idx = nextIdx;
       const snapped = indexToPx(idx);
-
       snapTween?.kill();
       snapTween = null;
 
@@ -223,42 +160,30 @@ export default function Work({ projects = PROJECTS }) {
         return;
       }
 
-      snapTween = gsap.to(
-        { v: target },
-        {
-          v: snapped,
-          duration: 0.22,
-          ease: "expo.out",
-          onUpdate() {
-            target = this.targets()[0].v;
-          },
-          onComplete() {
-            target = snapped;
-            snapTween = null;
-          },
-        }
-      );
+      snapTween = gsap.to({ v: target }, {
+        v: snapped,
+        duration: 0.22,
+        ease: "expo.out",
+        onUpdate() { target = this.targets()[0].v; },
+        onComplete() { target = snapped; snapTween = null; },
+      });
     };
 
-    const syncIndexFromTarget = () => {
-      idx = Math.round(pxToIndex(target));
-    };
+    const syncIndexFromTarget = () => { idx = Math.round(pxToIndex(target)); };
 
-    let frames = 0;
     const tick = () => {
       current = gsap.utils.interpolate(current, target, 0.14);
       setY(wrap(current));
-
-      frames++;
-      if (frames % 2 === 0) pickClosestToCenter();
-
+      pickClosestToCenter();
       raf = requestAnimationFrame(tick);
     };
 
-    const start = () => {
+    const start = async () => {
       cancelAnimationFrame(raf);
-      measure();
 
+      if (document.fonts) await document.fonts.ready; // ✅ espera fuentes
+
+      measure();
       current = 0;
       target = 0;
       idx = 0;
@@ -266,19 +191,17 @@ export default function Work({ projects = PROJECTS }) {
 
       if (!prefersReduced) {
         gsap.set(previewImg, { autoAlpha: 0, scale: 1.02 });
-        itemRefs.current.forEach((el) => {
-          if (!el) return;
-          gsap.set(el, { opacity: 0.55, filter: "blur(2px)", scale: 0.995 });
-        });
+        itemRefs.current.forEach((el) => { if (el) gsap.set(el, { opacity: 0.55, filter: "blur(2px)", scale: 0.995 }); });
       }
 
       raf = requestAnimationFrame(tick);
-      requestAnimationFrame(() => {
-        pickClosestToCenter();
 
-        if (activeIndexRef.current === -1) {
-          setActive(1);
-        }
+      // delay doble frame para mobile
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          pickClosestToCenter();
+          if (activeIndexRef.current === -1) setActive(1);
+        });
       });
     };
 
@@ -289,91 +212,48 @@ export default function Work({ projects = PROJECTS }) {
 
     const onWheel = (e) => {
       e.preventDefault();
-
       const mode = e.deltaMode || 0;
       const linePx = stepPx;
-      const deltaPx =
-        mode === 1
-          ? e.deltaY * linePx
-          : mode === 2
-          ? e.deltaY * viewport.clientHeight
-          : e.deltaY;
-
+      const deltaPx = mode === 1 ? e.deltaY * linePx : mode === 2 ? e.deltaY * viewport.clientHeight : e.deltaY;
       const now = performance.now();
       if (now < wheelCooldown) return;
-
       wheelAcc += deltaPx;
-
       if (Math.abs(wheelAcc) >= TRACKPAD_THRESHOLD) {
         const dir = wheelAcc > 0 ? 1 : -1;
-        const steps = Math.min(
-          3,
-          Math.max(1, Math.round(Math.abs(wheelAcc) / 120))
-        );
-
+        const steps = Math.min(3, Math.max(1, Math.round(Math.abs(wheelAcc) / 120)));
         goToIndex(idx + dir * steps);
-
         wheelAcc = 0;
         wheelCooldown = now + COOLDOWN_MS;
       }
     };
 
-    viewport.addEventListener("wheel", onWheel, { passive: false });
-
     const TOUCH_THRESHOLD = () => Math.max(18, stepPx * 0.33);
 
-    const onTouchStart = (e) => {
-      touching = true;
-      lastY = e.touches[0].clientY;
-      touchAcc = 0;
-
-      snapTween?.kill();
-      snapTween = null;
-    };
-
+    const onTouchStart = (e) => { touching = true; lastY = e.touches[0].clientY; touchAcc = 0; snapTween?.kill(); snapTween = null; };
     const onTouchMove = (e) => {
       if (!touching) return;
-
       const y = e.touches[0].clientY;
       const dy = y - lastY;
       lastY = y;
-
       touchAcc += dy;
-
       const th = TOUCH_THRESHOLD();
-      if (Math.abs(touchAcc) >= th) {
-        const dir = touchAcc < 0 ? 1 : -1;
-        goToIndex(idx + dir * 1);
-        touchAcc = 0;
-      }
-
+      if (Math.abs(touchAcc) >= th) { const dir = touchAcc < 0 ? 1 : -1; goToIndex(idx + dir * 1); touchAcc = 0; }
       e.preventDefault();
     };
+    const onTouchEnd = () => { touching = false; touchAcc = 0; syncIndexFromTarget(); goToIndex(idx); };
 
-    const onTouchEnd = () => {
-      touching = false;
-      touchAcc = 0;
-      syncIndexFromTarget();
-      goToIndex(idx);
-    };
-
+    viewport.addEventListener("wheel", onWheel, { passive: false });
     viewport.addEventListener("touchstart", onTouchStart, { passive: true });
     viewport.addEventListener("touchmove", onTouchMove, { passive: false });
     viewport.addEventListener("touchend", onTouchEnd, { passive: true });
 
-    const onResize = () => {
-      measure();
-      syncIndexFromTarget();
-      goToIndex(idx, { immediate: true });
-    };
-
+    const onResize = () => { measure(); syncIndexFromTarget(); goToIndex(idx, { immediate: true }); };
     window.addEventListener("resize", onResize);
 
     return () => {
       cancelAnimationFrame(raf);
       snapTween?.kill();
       gsap.killTweensOf(previewImg);
-
       viewport.removeEventListener("wheel", onWheel);
       viewport.removeEventListener("touchstart", onTouchStart);
       viewport.removeEventListener("touchmove", onTouchMove);

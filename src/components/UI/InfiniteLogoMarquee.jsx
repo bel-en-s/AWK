@@ -1,7 +1,6 @@
 import { useLayoutEffect, useRef } from "react";
 import "./InfiniteLogoMarquee.css";
 
-// light: SIN fondo
 const BG_MAP = { light: "transparent", dark: "#121212" };
 
 export default function InfiniteLogoMarquee({
@@ -9,14 +8,12 @@ export default function InfiniteLogoMarquee({
   alt = "Logo strip",
   height = "clamp(46px, 6vw, 76px)",
   bg = "light",
-  speed = 10,            // segundos por vuelta
+  speed = 40,
   gap = 56,
-  direction = "left",    // left | right
+  direction = "left",
   fade = false,
   pauseOnHover = false,
   className = "",
-  // ✅ extra: ajustá visibilidad en light sin tocar el PNG
-  // valores razonables para que se lea sobre fondos claros
   lightFilter = "brightness(0.15) contrast(1.15)",
 }) {
   const rootRef = useRef(null);
@@ -31,6 +28,7 @@ export default function InfiniteLogoMarquee({
 
     const prefersReduced =
       window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+
     if (prefersReduced) return;
 
     let rafId = 0;
@@ -47,6 +45,7 @@ export default function InfiniteLogoMarquee({
       nodes.reduce((acc, n) => {
         const r = n.getBoundingClientRect();
         const cs = getComputedStyle(n);
+
         return (
           acc +
           Math.round(
@@ -68,11 +67,13 @@ export default function InfiniteLogoMarquee({
       if (!originals.length) return;
 
       singleWidth = computeWidth(originals);
-      if (!singleWidth) return;
+
+      if (!singleWidth || singleWidth < 10) return;
 
       const target = viewport.clientWidth * 2 + singleWidth;
 
       let safety = 0;
+
       while (track.scrollWidth < target && safety++ < 80) {
         originals.forEach((s) => {
           const cl = s.cloneNode(true);
@@ -92,6 +93,7 @@ export default function InfiniteLogoMarquee({
 
     const step = (now) => {
       rafId = requestAnimationFrame(step);
+
       if (paused) return;
 
       const dt = now - last;
@@ -113,6 +115,7 @@ export default function InfiniteLogoMarquee({
       if (!pauseOnHover) return;
       paused = true;
     };
+
     const onLeave = () => {
       if (!pauseOnHover) return;
       paused = false;
@@ -124,26 +127,41 @@ export default function InfiniteLogoMarquee({
       root.addEventListener("pointerleave", onLeave);
     }
 
-    const img = track.querySelector("img");
-    const start = () => requestAnimationFrame(() => requestAnimationFrame(build));
+    const images = [...track.querySelectorAll("img")];
 
-    if (img && !img.complete) img.addEventListener("load", start, { once: true });
-    else start();
+    const start = () =>
+      requestAnimationFrame(() =>
+        requestAnimationFrame(build)
+      );
+
+    Promise.all(
+      images.map((img) =>
+        img.complete
+          ? Promise.resolve()
+          : new Promise((res) =>
+              img.addEventListener("load", res, { once: true })
+            )
+      )
+    ).then(start);
 
     let to = 0;
+
     const onResize = () => {
       clearTimeout(to);
       to = window.setTimeout(() => build(), 150);
     };
+
     window.addEventListener("resize", onResize);
 
     return () => {
       cancelAnimationFrame(rafId);
       window.removeEventListener("resize", onResize);
+
       if (pauseOnHover) {
         root.removeEventListener("pointerenter", onEnter);
         root.removeEventListener("pointerleave", onLeave);
       }
+
       cleanupClones();
     };
   }, [src, gap, speed, direction, pauseOnHover, height]);
@@ -167,6 +185,7 @@ export default function InfiniteLogoMarquee({
           <div className="ilm__item">
             <img className="ilm__img" src={src} alt="" draggable="false" />
           </div>
+
           <div className="ilm__item">
             <img className="ilm__img" src={src} alt="" draggable="false" />
           </div>

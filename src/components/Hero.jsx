@@ -320,7 +320,14 @@ if (window.__AWK_LOADED__ === true) {
     window.removeEventListener("awk:loaded", onLoaded);
     triggerIntro();
   };
+
   window.addEventListener("awk:loaded", onLoaded, { once: true });
+
+  setTimeout(() => {
+    if (!titleIntroPlayedRef.current) {
+      triggerIntro();
+    }
+  }, 600);
 }
     };
 

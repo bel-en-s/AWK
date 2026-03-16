@@ -18,7 +18,7 @@ function navType() {
   try {
     const e = performance.getEntriesByType?.("navigation")?.[0];
     return e?.type || "navigate";
-  } catch (_) {
+  } catch {
     return "navigate";
   }
 }
@@ -36,30 +36,34 @@ export default function Loader() {
     const html = document.documentElement;
     const body = document.body;
 
-    const cleanupUnlock = () => {
+    const unlockScroll = () => {
       html.classList.remove("is-scroll-locked");
       body.classList.remove("is-scroll-locked");
       body.style.overflow = "";
       body.style.touchAction = "";
     };
 
+    const emitReady = () => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          window.__AWK_LOADED__ = true;
+          try {
+            window.ScrollTrigger?.refresh?.(true);
+          } catch {}
+          window.dispatchEvent(new CustomEvent("awk:loaded"));
+        });
+      });
+    };
+
     const finish = () => {
       gsap.to(root, {
         autoAlpha: 0,
-        duration: 0.2,
+        duration: 0.25,
+        ease: "power1.out",
         onComplete: () => {
-          cleanupUnlock();
+          unlockScroll();
           setDone(true);
-
-          requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-              window.__AWK_LOADED__ = true;
-              try {
-                window.ScrollTrigger?.refresh?.(true);
-              } catch (_) {}
-              window.dispatchEvent(new CustomEvent("awk:loaded"));
-            });
-          });
+          emitReady();
         },
       });
     };
@@ -90,19 +94,29 @@ export default function Loader() {
     body.style.overflow = "hidden";
     body.style.touchAction = "none";
 
-    const handleEnd = () => {
-      finish();
+    const handleEnd = () => finish();
+    const handleError = () => finish();
+
+    const handleLoaded = () => {
+      video.play().catch(() => finish());
     };
 
     video.addEventListener("ended", handleEnd);
+    video.addEventListener("error", handleError);
+    video.addEventListener("loadeddata", handleLoaded);
 
-    video.play().catch(() => {
+    video.load();
+
+    const safetyTimeout = setTimeout(() => {
       finish();
-    });
+    }, 4500);
 
     return () => {
+      clearTimeout(safetyTimeout);
       video.removeEventListener("ended", handleEnd);
-      cleanupUnlock();
+      video.removeEventListener("error", handleError);
+      video.removeEventListener("loadeddata", handleLoaded);
+      unlockScroll();
     };
   }, []);
 

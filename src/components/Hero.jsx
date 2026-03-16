@@ -247,6 +247,7 @@ useEffect(() => {
     // BLOCK 4 — title intro + scroll-out
     // =========================
     const setupTitleIntroAndST = () => {
+
       if (!title || prefersReduced) return;
 
       const letters = Array.from(title.querySelectorAll(".hero-title-letter"));
@@ -323,13 +324,19 @@ if (window.__AWK_LOADED__ === true) {
 
   window.addEventListener("awk:loaded", onLoaded, { once: true });
 
+  // fallback por si el evento no llega (mobile)
   setTimeout(() => {
     if (!titleIntroPlayedRef.current) {
       triggerIntro();
     }
   }, 600);
 }
-    };
+    
+setTimeout(() => {
+  if (!titleIntroPlayedRef.current) {
+    triggerIntro();
+  }
+}, 400);};
 
     setupTitleIntroAndST();
 
@@ -428,8 +435,8 @@ if (window.__AWK_LOADED__ === true) {
     isMobile
       ? `+=${Math.round(stableVH * 0.6)}`
       : `+=${Math.round(stableVH * 1.35 + getDist())}`,
-          scrub: isMobile ? 0.35 : 0.9,
-          pin: true,
+          pin: !isMobile,
+scrub: isMobile ? false : 0.9,
           pinSpacing: true,
           anticipatePin: 1,
           invalidateOnRefresh: true,

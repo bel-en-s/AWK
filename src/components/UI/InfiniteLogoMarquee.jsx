@@ -67,7 +67,9 @@ export default function InfiniteLogoMarquee({
       singleWidth = computeWidth(originals);
       if (!singleWidth) return;
 
-      const vw = viewport.clientWidth || window.innerWidth;
+      const vw = viewport.clientWidth;
+      if (!vw) return;
+
       const target = vw * 2 + singleWidth;
 
       let safety = 0;
@@ -78,7 +80,6 @@ export default function InfiniteLogoMarquee({
           cl.setAttribute("data-clone", "true");
           track.appendChild(cl);
         });
-        track.getBoundingClientRect();
       }
 
       x = 0;
@@ -127,17 +128,14 @@ export default function InfiniteLogoMarquee({
 
     const img = track.querySelector("img");
 
-    const start = () =>
-      requestAnimationFrame(() => requestAnimationFrame(build));
+    const start = () => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(build);
+      });
+    };
 
-    if (img) {
-      if (img.decode) {
-        img.decode().then(start).catch(start);
-      } else if (!img.complete) {
-        img.addEventListener("load", start, { once: true });
-      } else {
-        start();
-      }
+    if (img && !img.complete) {
+      img.addEventListener("load", start, { once: true });
     } else {
       start();
     }
